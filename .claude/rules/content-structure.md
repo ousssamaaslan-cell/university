@@ -1,0 +1,5 @@
+# Content Structure
+
+`docs/content-model.md` defines the `data/resources.json` catalogue. Publish L2 only, with exactly the confirmed S3/S4 semesters and confirmed modules. Keep `level` on every semester, module, and resource record so the model can extend later; do not show or generate other levels now.
+
+Use stable lowercase hyphenated IDs. A resource's `module`, `semester`, and `level` must match a real module and semester. Keep IDs unique, `order` deterministic, and every label/title as a confirmed `{ "fr": "...", "ar": "..." }` pair. Search and filters must operate on published records only. Never use illustrative records or unconfirmed module names as real content. When removing a module, remove or reassign its resources deliberately; do not leave orphan records. S3 has seven supplied modules pending official spelling and translation; S4 has no declared modules yet.

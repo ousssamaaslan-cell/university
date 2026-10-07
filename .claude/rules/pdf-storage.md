@@ -1,0 +1,5 @@
+# PDF Naming And Storage
+
+Store PDFs under `pdfs/<semester>/<module-id>/`, with semester `S3` or `S4` and module ID exactly matching `data/resources.json`. Use lowercase ASCII hyphenated filenames such as `2024-2025-exam-normal-topic.pdf` or `2024-2025-tutorial-topic.pdf`; keep the `.pdf` extension lowercase. Avoid spaces, accents, `#`, `?`, and case-only filename differences so static hosts and URLs behave consistently.
+
+Each published resource must have a relative `pdfPath` that points to an existing, nonempty PDF in the matching folder. Keep the path free of a leading slash for GitHub Pages project-path compatibility. Verify that the file opens in a browser and downloads. Never expose a local machine path, Drive URL, or placeholder file as a published PDF. On rename or deletion, update the catalogue in the same change and recheck all affected links.

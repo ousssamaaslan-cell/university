@@ -1,0 +1,557 @@
+{
+  "schema_version": 1,
+  "retrieved_utc": "2026-10-03",
+  "policy": "Upstream provenance is pinned to immutable commits. Current local paths and hashes include archived marketing skills and documented project-specific corrections marked modified.",
+  "repositories": [
+    {
+      "repository": "anthropics/skills",
+      "url": "https://github.com/anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "license": "Apache-2.0",
+      "skills": [
+        "frontend-design",
+        "webapp-testing"
+      ],
+      "license_evidence": "Bundled upstream license files"
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "url": "https://github.com/coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "license": "MIT",
+      "skills": [
+        "copywriting",
+        "copy-editing",
+        "cro",
+        "product-marketing"
+      ],
+      "license_evidence": "Bundled upstream license files"
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "url": "https://github.com/addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "license": "MIT",
+      "skills": [
+        "accessibility",
+        "best-practices",
+        "core-web-vitals",
+        "performance",
+        "seo",
+        "web-quality-audit"
+      ],
+      "license_evidence": "Bundled upstream license files"
+    },
+    {
+      "repository": "vercel-labs/agent-skills",
+      "url": "https://github.com/vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "license": "MIT",
+      "skills": [
+        "web-design-guidelines"
+      ],
+      "license_evidence": "README.md declares MIT; repository has no standalone LICENSE file"
+    }
+  ],
+  "files": [
+    {
+      "repository": "anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "upstream_path": "THIRD_PARTY_NOTICES.md",
+      "local_path": "licenses/anthropics--skills-THIRD_PARTY_NOTICES.md",
+      "source_url": "https://raw.githubusercontent.com/anthropics/skills/8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4/THIRD_PARTY_NOTICES.md",
+      "git_blob_sha1": "ffef92c48b351a3ed036556ed32dda934e8cf41a",
+      "sha256": "a8ff7a84dee9dfb42ab448de281784387ceafdf63881b7c070ee2de7f6ed865c",
+      "size_bytes": 46162,
+      "modified": false
+    },
+    {
+      "repository": "anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "upstream_path": "skills/frontend-design/LICENSE.txt",
+      "local_path": ".claude/skills/frontend-design/LICENSE.txt",
+      "source_url": "https://raw.githubusercontent.com/anthropics/skills/8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4/skills/frontend-design/LICENSE.txt",
+      "git_blob_sha1": "f433b1a53f5b830a205fd2df78e2b34974656c7b",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "size_bytes": 10174,
+      "modified": false
+    },
+    {
+      "repository": "anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "upstream_path": "skills/frontend-design/SKILL.md",
+      "local_path": ".claude/skills/frontend-design/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/anthropics/skills/8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4/skills/frontend-design/SKILL.md",
+      "git_blob_sha1": "a5333457c414d20d625f307df945842c0952ecc3",
+      "sha256": "d91970639e9f5c37682ac7ab60094d35f1c7c1f38d731bd56396563aee10c1d3",
+      "size_bytes": 9390,
+      "modified": false
+    },
+    {
+      "repository": "anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "upstream_path": "skills/webapp-testing/LICENSE.txt",
+      "local_path": ".claude/skills/webapp-testing/LICENSE.txt",
+      "source_url": "https://raw.githubusercontent.com/anthropics/skills/8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4/skills/webapp-testing/LICENSE.txt",
+      "git_blob_sha1": "4f881c52d1f72f4cfb720e339e2d35c3058d01a9",
+      "sha256": "bc6b3af2f331cbc7fb0da1344efb2cbe5877a31498b4d70dbc7000f3405a1362",
+      "size_bytes": 11345,
+      "modified": false
+    },
+    {
+      "repository": "anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "upstream_path": "skills/webapp-testing/SKILL.md",
+      "local_path": ".claude/skills/webapp-testing/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/anthropics/skills/8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4/skills/webapp-testing/SKILL.md",
+      "git_blob_sha1": "4726215301db64a0cc4d41fc3219c61f37a30f4a",
+      "sha256": "2d3bd90673c030c56e5820c63cc0f361262b64e1cb3e8233b29beb7ea8f14950",
+      "size_bytes": 4043,
+      "modified": true,
+      "modification_note": "University project: correct Claude frontmatter or root-relative helper paths and static-site examples."
+    },
+    {
+      "repository": "anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "upstream_path": "skills/webapp-testing/examples/console_logging.py",
+      "local_path": ".claude/skills/webapp-testing/examples/console_logging.py",
+      "source_url": "https://raw.githubusercontent.com/anthropics/skills/8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4/skills/webapp-testing/examples/console_logging.py",
+      "git_blob_sha1": "9329b5e232ed53d944bfe95e750070117d31b9ab",
+      "sha256": "ea46877289acb82da7e7ce59d0bc37c8977cd57e2a006d0c88d7a1c625bf95da",
+      "size_bytes": 1027,
+      "modified": false
+    },
+    {
+      "repository": "anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "upstream_path": "skills/webapp-testing/examples/element_discovery.py",
+      "local_path": ".claude/skills/webapp-testing/examples/element_discovery.py",
+      "source_url": "https://raw.githubusercontent.com/anthropics/skills/8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4/skills/webapp-testing/examples/element_discovery.py",
+      "git_blob_sha1": "917ba72f52421a1b324f93ae8e38af72010a87b9",
+      "sha256": "d63c89604a22f8845d724e95dda45db49b1bf57c25ce0a83afbb7b8da3d402f0",
+      "size_bytes": 1463,
+      "modified": false
+    },
+    {
+      "repository": "anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "upstream_path": "skills/webapp-testing/examples/static_html_automation.py",
+      "local_path": ".claude/skills/webapp-testing/examples/static_html_automation.py",
+      "source_url": "https://raw.githubusercontent.com/anthropics/skills/8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4/skills/webapp-testing/examples/static_html_automation.py",
+      "git_blob_sha1": "90bbedcc08cdb345c74fb938ebad02c0baf56603",
+      "sha256": "9d533aafb875ee3ab8b8ebf8f5b9003ac8d999da3d09b285cce252e623140064",
+      "size_bytes": 953,
+      "modified": false
+    },
+    {
+      "repository": "anthropics/skills",
+      "commit": "8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4",
+      "upstream_path": "skills/webapp-testing/scripts/with_server.py",
+      "local_path": ".claude/skills/webapp-testing/scripts/with_server.py",
+      "source_url": "https://raw.githubusercontent.com/anthropics/skills/8a1541c4a3ffa5a20a5a91de0dcf3f0bab1d1ef4/skills/webapp-testing/scripts/with_server.py",
+      "git_blob_sha1": "431f2eba16b268b7f3e2ae4daae9db41c0289b6d",
+      "sha256": "4fe905aa48d7198ab24f253b8c5d289d7b19e1b5858df40bd25d7cc65bcf585a",
+      "size_bytes": 3565,
+      "modified": true,
+      "modification_note": "University project: correct Claude frontmatter or root-relative helper paths and static-site examples."
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "LICENSE",
+      "local_path": "licenses/coreyhaines31--marketingskills-LICENSE",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/LICENSE",
+      "git_blob_sha1": "7c48dd638a9ebed49a8ef0c0c4eea90105381cdf",
+      "sha256": "b70d71e24e40fce5da8f4b6f9cd862096a048e433db7f3c8cac5e348e6d34591",
+      "size_bytes": 1069,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copy-editing/SKILL.md",
+      "local_path": ".claude/_unused/skills/copy-editing/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copy-editing/SKILL.md",
+      "git_blob_sha1": "d43bb7e93b402a6df79d3cec03f95a2e3ff45d89",
+      "sha256": "1c86fafd6667132bef4902578aee741fc6adc97953c0d9830b29e2e1ef52f8e3",
+      "size_bytes": 17856,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copy-editing/evals/evals.json",
+      "local_path": ".claude/_unused/skills/copy-editing/evals/evals.json",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copy-editing/evals/evals.json",
+      "git_blob_sha1": "8b1adc394050b28c48c5871d9cfd2025c02e803f",
+      "sha256": "ebd1577d16a6c79a4c4fe230b758d68320c2c532ac653f039177c4ee91d9ddfa",
+      "size_bytes": 10564,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copy-editing/references/checklist.md",
+      "local_path": ".claude/_unused/skills/copy-editing/references/checklist.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copy-editing/references/checklist.md",
+      "git_blob_sha1": "8710c8ae76b75856fc3852ead3f8146386d9e75b",
+      "sha256": "b7779e6a33a752076825ea4304ed56b57a24eacd00d65be873297ca9365323a2",
+      "size_bytes": 2462,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copy-editing/references/content-refresh.md",
+      "local_path": ".claude/_unused/skills/copy-editing/references/content-refresh.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copy-editing/references/content-refresh.md",
+      "git_blob_sha1": "70e97ff248980495ef8cc87d22119b93e6199eeb",
+      "sha256": "8a3a2d301bb2b8b2a780f5bef43093ab42295041b2fea2a9caeca2421ef3c79b",
+      "size_bytes": 2298,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copy-editing/references/plain-english-alternatives.md",
+      "local_path": ".claude/_unused/skills/copy-editing/references/plain-english-alternatives.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copy-editing/references/plain-english-alternatives.md",
+      "git_blob_sha1": "2fc323557dabdee6ee9f0a52e2a4c24f473fc775",
+      "sha256": "df4f820d4c63ae8a517c64a243c101658352cd07d002355bf3c97de0a00f3775",
+      "size_bytes": 8258,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copywriting/SKILL.md",
+      "local_path": ".claude/_unused/skills/copywriting/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copywriting/SKILL.md",
+      "git_blob_sha1": "9e5c593c5b4df747c1b037295b8801defc1660b4",
+      "sha256": "78c0a09b78a41995ba055d6549bbd7db3fe958673d039b9121e7a2e32bb4bb06",
+      "size_bytes": 10940,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copywriting/evals/evals.json",
+      "local_path": ".claude/_unused/skills/copywriting/evals/evals.json",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copywriting/evals/evals.json",
+      "git_blob_sha1": "bc64a84ce267aa69b715c963983da54e84fb5c69",
+      "sha256": "c365b3208b3e07b97520bce9acca496fc5f939e3e1d70fec54bf1e8f9f92b0d7",
+      "size_bytes": 11550,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copywriting/references/ai-tells.md",
+      "local_path": ".claude/_unused/skills/copywriting/references/ai-tells.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copywriting/references/ai-tells.md",
+      "git_blob_sha1": "a14e0dbbee6062f057aa9aa9b8e98be8dfd8e882",
+      "sha256": "048a436d35d011313a4dd49dd1c6a6fb9f05203a2e40b8970ff88e7a2c548591",
+      "size_bytes": 15617,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copywriting/references/copy-frameworks.md",
+      "local_path": ".claude/_unused/skills/copywriting/references/copy-frameworks.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copywriting/references/copy-frameworks.md",
+      "git_blob_sha1": "194aefed131c4e2e508b76ae9fdfc9cdcd37a6ba",
+      "sha256": "352122944bf9e891ceb0e003adce41591d111e9d97057700626249919dfe430d",
+      "size_bytes": 14352,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/copywriting/references/natural-transitions.md",
+      "local_path": ".claude/_unused/skills/copywriting/references/natural-transitions.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/copywriting/references/natural-transitions.md",
+      "git_blob_sha1": "5fba31a5d3bf0f35a9cc62605af5ceaa454a6186",
+      "sha256": "9bd61b0de5be2c4de4ce130c68236b4f290b12737823827a458bb2b4c8584683",
+      "size_bytes": 5561,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/cro/SKILL.md",
+      "local_path": ".claude/_unused/skills/cro/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/cro/SKILL.md",
+      "git_blob_sha1": "74a2394f838e0f07a5a5f06eee99047b8a5adcd6",
+      "sha256": "199016bec3b44bc6a7507b111b6028f6550cc852cd54c7d0df789f15d6f814c4",
+      "size_bytes": 6101,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/cro/evals/evals.json",
+      "local_path": ".claude/_unused/skills/cro/evals/evals.json",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/cro/evals/evals.json",
+      "git_blob_sha1": "a7393125c1cc757e111cd0d2e29ff7f5a071de31",
+      "sha256": "62f3003602836e2b49d797ca582e7703629a6b07b131eb77b51b2bb39fe65775",
+      "size_bytes": 7656,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/cro/references/experiments.md",
+      "local_path": ".claude/_unused/skills/cro/references/experiments.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/cro/references/experiments.md",
+      "git_blob_sha1": "abc31c716ec966c9c6c9a12ca3e8b076ce3ea320",
+      "sha256": "bbcc356c0af36cfaa4556bf9e929deac30c65cafb37f909d7c51d4777fe254ca",
+      "size_bytes": 7850,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/cro/references/form.md",
+      "local_path": ".claude/_unused/skills/cro/references/form.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/cro/references/form.md",
+      "git_blob_sha1": "470aeb11108c4a6ed34758b471889090034ae73d",
+      "sha256": "e3115b0fdfb3968915b8e3acdc32a6e5f1d2c6a335ebbed25bee9b601ec573d7",
+      "size_bytes": 10312,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/product-marketing/SKILL.md",
+      "local_path": ".claude/_unused/skills/product-marketing/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/product-marketing/SKILL.md",
+      "git_blob_sha1": "622eab19e823a131fe8b9d500aa53143604fad8a",
+      "sha256": "6dfd6bd485f62448385844cb9eceefcee0977c843d7a1c9e6077590d4e19d1ec",
+      "size_bytes": 9433,
+      "modified": false
+    },
+    {
+      "repository": "coreyhaines31/marketingskills",
+      "commit": "dda3841f0b294e01e93b1541486beefbfab0915e",
+      "upstream_path": "skills/product-marketing/evals/evals.json",
+      "local_path": ".claude/_unused/skills/product-marketing/evals/evals.json",
+      "source_url": "https://raw.githubusercontent.com/coreyhaines31/marketingskills/dda3841f0b294e01e93b1541486beefbfab0915e/skills/product-marketing/evals/evals.json",
+      "git_blob_sha1": "a2739e5fe6fb881c130b2e8fbf96090c5e215117",
+      "sha256": "0c6599b88f50ec1be91096a36ba6c5a15cf8312151394e3469e5ddb991b19afb",
+      "size_bytes": 7214,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "LICENSE",
+      "local_path": "licenses/addyosmani--web-quality-skills-LICENSE",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/LICENSE",
+      "git_blob_sha1": "90715bb429f374dcc4e05c35535b049d3c077313",
+      "sha256": "c122223ac43e86421958e18623979942c21b642951e2e3736dcb63eff13587c3",
+      "size_bytes": 1068,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/accessibility/SKILL.md",
+      "local_path": ".claude/skills/accessibility/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/accessibility/SKILL.md",
+      "git_blob_sha1": "22a244430f890fe44cbd7a50590d5cbf8528c77b",
+      "sha256": "267fb2a0707d6142f2871f22688203a42ba21291a2aa200fb740936e41362b5d",
+      "size_bytes": 14358,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/accessibility/references/A11Y-PATTERNS.md",
+      "local_path": ".claude/skills/accessibility/references/A11Y-PATTERNS.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/accessibility/references/A11Y-PATTERNS.md",
+      "git_blob_sha1": "6d500efb3eb2c714565e8a39be86feecfcda9ad5",
+      "sha256": "f10e238dd4dd3c4f51134c2056bc02d3dd4f8fb6ccc9145c2c1ba7aab4d58140",
+      "size_bytes": 6036,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/accessibility/references/WCAG.md",
+      "local_path": ".claude/skills/accessibility/references/WCAG.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/accessibility/references/WCAG.md",
+      "git_blob_sha1": "a0bd65fa7494eda0147c6d7bf82bd57e7f5e72ce",
+      "sha256": "16683e025e3833d931c9d880645d98a448827f97e10189b6c8f12c832e7a2361",
+      "size_bytes": 9079,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/best-practices/SKILL.md",
+      "local_path": ".claude/skills/best-practices/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/best-practices/SKILL.md",
+      "git_blob_sha1": "54e6c16cd981be84f25804ff7c1bffa4bc5cefa4",
+      "sha256": "9d1f10a08cd7a94176ce160ec860dbd3ecfadad75d46546001883f1f907c5c3e",
+      "size_bytes": 12719,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/best-practices/references/SECURITY.md",
+      "local_path": ".claude/skills/best-practices/references/SECURITY.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/best-practices/references/SECURITY.md",
+      "git_blob_sha1": "52a19484fa2f91240af209fc482e7e30d49bee04",
+      "sha256": "af021e5db37e921c79b8807d63e1cfc02dcf63614d2806cfba04ba44a1366178",
+      "size_bytes": 6705,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/core-web-vitals/SKILL.md",
+      "local_path": ".claude/skills/core-web-vitals/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/core-web-vitals/SKILL.md",
+      "git_blob_sha1": "60343a52d1832f89eb0ebf6722f4d150fe806777",
+      "sha256": "731aa78c0347e8b3e191b75962175bee058ce73817278e610ac0fe546e685914",
+      "size_bytes": 9776,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/core-web-vitals/references/CLS.md",
+      "local_path": ".claude/skills/core-web-vitals/references/CLS.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/core-web-vitals/references/CLS.md",
+      "git_blob_sha1": "dff8ce27b20642ff01014dcef1228340dd6ec58d",
+      "sha256": "c4fa0cd6311720b413018471a6ac9240e87db52af3b6e306ffb6684491f15898",
+      "size_bytes": 4011,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/core-web-vitals/references/INP.md",
+      "local_path": ".claude/skills/core-web-vitals/references/INP.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/core-web-vitals/references/INP.md",
+      "git_blob_sha1": "29a72e18a4d47b06270ddfffec1175c9b71a67b9",
+      "sha256": "7d40cf6053e9bb8a8a77e02da7c6b25aa8e6c1c092b48d8f9c8f30e9b25cf3a7",
+      "size_bytes": 4445,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/core-web-vitals/references/LCP.md",
+      "local_path": ".claude/skills/core-web-vitals/references/LCP.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/core-web-vitals/references/LCP.md",
+      "git_blob_sha1": "c6e88376b030281cf051d0e6b634a400b4574e47",
+      "sha256": "522054d44b7a55409cbde511e8d365f7fa52399dd1e72b8d6b44a92ecddca81f",
+      "size_bytes": 5078,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/performance/SKILL.md",
+      "local_path": ".claude/skills/performance/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/performance/SKILL.md",
+      "git_blob_sha1": "913a36c6ad869d530053f20fd05698804cb24e3e",
+      "sha256": "b0c220185d88c61f7770eb127d8facf86c86d2dd1fd82b86e15a4965a0137265",
+      "size_bytes": 13811,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/performance/references/MEASUREMENT.md",
+      "local_path": ".claude/skills/performance/references/MEASUREMENT.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/performance/references/MEASUREMENT.md",
+      "git_blob_sha1": "1b15702d186016b9f0cf8e77cdff2c2d836e2313",
+      "sha256": "128f6f20c6c8fb55fcccd8b259cf680811022cf262dc55b03e9d623bcb555a99",
+      "size_bytes": 7371,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/performance/references/RUM.md",
+      "local_path": ".claude/skills/performance/references/RUM.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/performance/references/RUM.md",
+      "git_blob_sha1": "909f5d2c98ed506020b1860d69b1d2aa5674799c",
+      "sha256": "a2bdf660ecb23098afbadfb83254d39cef10c0da82938225f61271bad3f81b19",
+      "size_bytes": 3135,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/seo/SKILL.md",
+      "local_path": ".claude/skills/seo/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/seo/SKILL.md",
+      "git_blob_sha1": "015c2f589896bcb0b08b5b77e058ca3bedcfe9b7",
+      "sha256": "57cd16566c2c706186b643644dec2884da89c42f296843364c65a40a4d566ae6",
+      "size_bytes": 13977,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/seo/references/STRUCTURED-DATA.md",
+      "local_path": ".claude/skills/seo/references/STRUCTURED-DATA.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/seo/references/STRUCTURED-DATA.md",
+      "git_blob_sha1": "acc8ab7eb6beacf82604d7a2595ecad535094f1b",
+      "sha256": "3e03876f41d223c89dfdbc0a0fe3668454e5d8819aad5379f4541fbf0bd67e17",
+      "size_bytes": 3339,
+      "modified": false
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/web-quality-audit/SKILL.md",
+      "local_path": ".claude/skills/web-quality-audit/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/web-quality-audit/SKILL.md",
+      "git_blob_sha1": "581ec7c5e8e05e6ac93d99d872906595581efc42",
+      "sha256": "b8bb7096ac55a753411b0a323bd8a9790f07a33d7185ea8b714404925ea9aba6",
+      "size_bytes": 10510,
+      "modified": true,
+      "modification_note": "University project: correct Claude frontmatter or root-relative helper paths and static-site examples."
+    },
+    {
+      "repository": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
+      "upstream_path": "skills/web-quality-audit/scripts/analyze.sh",
+      "local_path": ".claude/skills/web-quality-audit/scripts/analyze.sh",
+      "source_url": "https://raw.githubusercontent.com/addyosmani/web-quality-skills/afa8da942115f2961fdbfa80807ea0b232ff6c00/skills/web-quality-audit/scripts/analyze.sh",
+      "git_blob_sha1": "62b066467d30ed5fa52fc36130a05699e09dd2bb",
+      "sha256": "b1b28663af412f746baf5008618e3ae798e322b10ff5ab7ae1830826a6d8e4e2",
+      "size_bytes": 3864,
+      "modified": false
+    },
+    {
+      "repository": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "upstream_path": "README.md",
+      "local_path": "licenses/vercel-labs--agent-skills-README.md",
+      "source_url": "https://raw.githubusercontent.com/vercel-labs/agent-skills/063bee94c3f4df8453406c830b0a7df0f2860278/README.md",
+      "git_blob_sha1": "04a1a5a46a22cfd430e2877b7c145e34fc2653ab",
+      "sha256": "7c02f64b08fc6c4eef03c01d64f3e2ed478193ccfcbd14edba379abe23304651",
+      "size_bytes": 7838,
+      "modified": false
+    },
+    {
+      "repository": "vercel-labs/agent-skills",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "upstream_path": "skills/web-design-guidelines/SKILL.md",
+      "local_path": ".claude/skills/web-design-guidelines/SKILL.md",
+      "source_url": "https://raw.githubusercontent.com/vercel-labs/agent-skills/063bee94c3f4df8453406c830b0a7df0f2860278/skills/web-design-guidelines/SKILL.md",
+      "git_blob_sha1": "ceae92ab319216a68274168fba9b63b998b65997",
+      "sha256": "2d5b9e19c10bdf553082e8140ce656bc83d13c475761a81781eba065d2311c93",
+      "size_bytes": 1229,
+      "modified": true,
+      "modification_note": "University project: correct Claude frontmatter or root-relative helper paths and static-site examples."
+    }
+  ]
+}
