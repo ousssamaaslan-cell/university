@@ -44,7 +44,7 @@ With real documents the page will have no sample notice and no "Exemple" mark. R
 - **Browser.** Chrome through Playwright at 320, 375, 640, 768 and 1280px, in French and Arabic: home, module (each tab, an empty module, an unknown module, filters with and without a match), search (results, no result, nothing typed) and 404. Result: no horizontal overflow, no script error, every link, button, select and field at least 44px tall, tabs on one row.
 - **Documents.** The title opens the PDF (HTTP 200, `application/pdf`), "Télécharger" saves the file, the keyboard reaches both in that order, and rows keep their height when the file sizes arrive.
 - **States.** A missing PDF (simulated), a failed catalogue load (simulated), dark mode, the visited colour after opening a document.
-- **Impeccable detector.** 0 findings in the source files. 0 findings on eight rendered pages at 1280 by 800. At 390 by 844: 4 findings of one rule, all on the sample notice; after a small change to the notice, 0 findings on the three pages scanned again.
+- **Impeccable detector.** Before the polish pass: 0 findings in the source files, 0 on eight rendered pages at 1280 by 800, and at 390 by 844 four findings of one rule, all on the sample notice. After a small change to the notice, the detector was run again on the final commit: 0 findings in the source files, 0 on the eight pages at 1280 by 800, and 0 on the eight pages at 390 by 844.
 - **`node scripts/doctor.cjs`.** OK, 53 sample records.
 
 Not checked:
@@ -76,10 +76,10 @@ Say so if you prefer otherwise.
 - A document opens in the same tab. The browser's back button returns to the list.
 - All Arabic text is still a draft awaiting the maintainer's review, including the new footer and report texts and the two labels changed in step 7.
 
-## Local server for checking on a phone
+## Test servers
 
-The old server on `127.0.0.1:8000` was not running any more. A new one was started on 2026-10-08 with `python -m http.server 8000 --bind 0.0.0.0`, in a minimized window. It answered on `http://10.186.59.206:8000/`, the computer's address on the "Redmi 9" hotspot at that time. Whether the phone can reach it depends on Windows Firewall, which was not changed. `README.md` gives the command and what the firewall must allow.
+The check on a real phone was skipped at the maintainer's request. No server started for these fixes is left running: nothing listens on port 8000 or 8001, and Windows Firewall was not changed. `README.md` says how to preview the site locally and, if wanted later, on a phone.
 
 ## Next
 
-The maintainer checks the site on the phone. On "continue": push, then Phase 4 (quality pass and `docs/qa-report.md`).
+Waiting for the maintainer. On "continue": push, then Phase 4 (quality pass and `docs/qa-report.md`). Phase 4 has not been started.
