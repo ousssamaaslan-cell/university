@@ -85,6 +85,15 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 - **Sample and missing files.** A sample record carries an "Exemple" tag. A document whose PDF is not on the server shows "Fichier indisponible" at the end of its row instead of the two actions.
 - **Empty states.** An empty tab says which type has nothing yet. A module with no documents at all shows one message and no tabs. Filters with no match explain how to widen them.
 
+### Decided after the design critique, not built yet
+
+Maintainer decisions, 2026-10-07, from the critique saved in `.impeccable/critique/`. Where they differ from the sections above, these win once built; update those sections in the same change.
+
+- **Phone first screen comes first.** A document must appear on the first phone screen of a module page. Shrink the header, breadcrumb, tabs, and filters to get there.
+- **Rows.** The document title becomes the "Voir" link. One "Télécharger" button remains. Facts move to one quiet line of text, with "Avec corrigé" as the only badge. Viewing and downloading both stay available.
+- **Scope.** Fix the phone first screen, the rows, the footer, and the four small defects listed in the critique. The restyle of the module code and outlines (the critique's P3) is left for later.
+- **Footer.** It says the site is student-run and unofficial. See `docs/project-brief.md`.
+
 ### Search
 
 - **Header field.** On every page, after the language switch: its own row on a phone, the end of the first row from 60rem. It is a plain form with a "Rechercher" button, so Enter works and the result address can be shared.

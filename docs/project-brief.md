@@ -3,6 +3,7 @@
 ## Confirmed scope
 
 - Audience: Licence 2 (L2) Informatique students at **Université Mohammed Seddik Benyahia – Jijel**. The maintainer confirmed this name and styling on 2026-10-07.
+- Status: the site is run by students and is not an official university site (maintainer decision, 2026-10-07). The footer must say so. It must not claim to speak for the university or the department.
 - Goal: help students find, view, and download the right course, TD, TP, or exam quickly.
 - Scope: L2 only. Show semesters S3 and S4, their confirmed modules, and resources grouped as Cours, TD, TP, and Examens, in that order. Keep `level` in the data model for future expansion; do not create other levels now.
 - Language: French and Arabic, both complete: every interface label, module name, and resource title. French is the default. A visible language switch is on every page, and Arabic views use RTL layout. Claude drafts the Arabic text; see "Arabic text awaiting review".
@@ -87,6 +88,7 @@ Maintainer decision, 2026-10-07: real PDFs are added only after the site is fini
 - S4 modules have not been supplied.
 - Real PDFs replace the sample data after the site is finished.
 - GitHub Pages has not been enabled, and no public URL is confirmed.
+- A contact for reporting a wrong or missing file has not been supplied. Until it is, the site shows no "Signaler une erreur" link.
 - No university logo, colours, or fonts were supplied, and no style reference site. The style stays neutral; `docs/design-system.md` records the values chosen.
 
 **[ARABIC DRAFTS, S4 MODULES, REAL PDFS, AND PUBLIC URL — TO CONFIRM]**
