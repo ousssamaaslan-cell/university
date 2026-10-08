@@ -73,9 +73,10 @@ const strings = {
     'sample.tag': 'Exemple',
     'file.missing': 'Fichier indisponible',
     'file.type': 'PDF',
-    'action.view': 'Voir',
     'action.download': 'Télécharger',
-    // Read by screen readers after "Voir" or "Télécharger", so each link says which document it opens.
+    // Read by screen readers only. After a document title: what the link does.
+    'action.open': ', ouvrir le PDF',
+    // After "Télécharger": which document the button saves.
     'action.target': ' : {name} (PDF)',
 
     'search.label': 'Rechercher un module ou un document',
@@ -175,8 +176,8 @@ const strings = {
     'sample.tag': 'تجريبي',
     'file.missing': 'الملف غير متوفر',
     'file.type': 'PDF',
-    'action.view': 'عرض',
     'action.download': 'تحميل',
+    'action.open': '، فتح ملف PDF',
     'action.target': ': {name} (PDF)',
 
     'search.label': 'ابحث عن مقياس أو وثيقة',
