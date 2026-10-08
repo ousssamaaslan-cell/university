@@ -35,8 +35,23 @@ temp/
 # Test and QA output
 test-results/
 playwright-report/
+.playwright-mcp/
 screenshots/
 artifacts/
+
+# impeccable-ignore-start
+# Impeccable design tool. Kept in Git: config.json, design.json, surfaces/*.md and critique/*.md.
+# Everything else in .impeccable/ stays on this computer: screenshots, caches, live/ and config.local.json.
+.impeccable/*
+!.impeccable/config.json
+!.impeccable/design.json
+!.impeccable/surfaces/
+.impeccable/surfaces/*
+!.impeccable/surfaces/*.md
+!.impeccable/critique/
+.impeccable/critique/*
+!.impeccable/critique/*.md
+# impeccable-ignore-end
 
 # Claude Code personal files
 .claude/settings.local.json
