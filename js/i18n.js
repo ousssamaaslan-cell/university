@@ -72,7 +72,7 @@ const strings = {
     'kind.controle': 'Contrôle',
     'sample.tag': 'Exemple',
     'file.missing': 'Fichier indisponible',
-    'file.size': 'PDF, {size}',
+    'file.type': 'PDF',
     'action.view': 'Voir',
     'action.download': 'Télécharger',
     // Read by screen readers after "Voir" or "Télécharger", so each link says which document it opens.
@@ -174,7 +174,7 @@ const strings = {
     'kind.controle': 'مراقبة مستمرة',
     'sample.tag': 'تجريبي',
     'file.missing': 'الملف غير متوفر',
-    'file.size': 'PDF، {size}',
+    'file.type': 'PDF',
     'action.view': 'عرض',
     'action.download': 'تحميل',
     'action.target': ': {name} (PDF)',

@@ -122,10 +122,11 @@ function results(catalogue, index, query) {
 
   const {modules, documents} = find(index, query);
   if (modules.length === 0 && documents.length === 0) {
+    // The line under the heading says there is no result; what follows is only what to try next.
     return {
       summary: t('search.none.title', {query}),
       content: [
-        emptyState({title: t('search.none.title', {query}), text: t('search.none.text')}),
+        el('p', {class: 'status'}, t('search.none.text')),
         el('p', {}, actionLink({href: pageUrl('index.html'), label: t('search.none.action')}))
       ]
     };

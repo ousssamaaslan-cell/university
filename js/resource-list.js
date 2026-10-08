@@ -37,6 +37,14 @@ function tags(resource, mixed) {
   return items;
 }
 
+// The file type and size: "PDF, 14 ko". The tag is in the row from the start and keeps a fixed
+// minimum width (css/styles.css), so the row does not change height when the server answers with the size.
+// "PDF" and the size are isolated from each other: in Arabic the number must stay beside its unit.
+function sizeTag() {
+  const size = el('span', {});
+  return {size, node: tag([el('bdi', {}, t('file.type')), size], 'size')};
+}
+
 // "Voir" opens the PDF in the browser's own viewer. "Télécharger" is the same address with the
 // download attribute, which tells the browser to save the file instead. No PDF is loaded until a click.
 function actionLinks(resource, name) {
@@ -50,7 +58,8 @@ function actionLinks(resource, name) {
 function resourceItem(resource, mixed) {
   const mark = markerText(resource, mixed);
   const title = localized(resource.title);
-  const tagList = el('ul', {class: 'tags', role: 'list'}, tags(resource, mixed));
+  const fileSize = sizeTag();
+  const tagList = el('ul', {class: 'tags', role: 'list'}, tags(resource, mixed), fileSize.node);
   const actions = el('div', {class: 'resource__actions'}, actionLinks(resource, mark ? `${mark}, ${title}` : title));
 
   const item = el('li', {class: mark ? 'resource resource--marked' : 'resource', 'data-resource': resource.id},
@@ -66,8 +75,9 @@ function resourceItem(resource, mixed) {
       console.warn(`Missing PDF: ${resource.pdfPath} (resource ${resource.id})`);
       item.classList.add('resource--missing');
       actions.replaceChildren(el('p', {class: 'resource__missing'}, t('file.missing')));
+      fileSize.node.remove();
     } else if (size) {
-      tagList.append(tag(t('file.size', {size: formatFileSize(size)})));
+      fileSize.size.replaceChildren(t('list.separator'), el('bdi', {}, formatFileSize(size)));
     }
   });
 

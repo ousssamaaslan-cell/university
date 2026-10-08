@@ -32,12 +32,13 @@ function setParams(changes) {
   updateLanguageLinks();
 }
 
-// A labelled <select>. `options` is a list of [value, text].
-function selectField(id, label, options, current) {
+// A labelled <select> for one filter, 'year' or 'session'. `options` is a list of [value, text].
+function selectField(name, options) {
+  const id = `filter-${name}`;
   const select = el('select', {id},
-    options.map(([value, text]) => el('option', {value, selected: value === current}, text))
+    [['', t('filter.all')], ...options].map(([value, text]) => el('option', {value, selected: value === filters[name]}, text))
   );
-  return {select, field: el('div', {class: 'field'}, el('label', {for: id}, label), select)};
+  return {name, select, field: el('div', {class: 'field'}, el('label', {for: id}, t(`filter.${name}`)), select)};
 }
 
 // Exams are listed newest first, under one heading per academic year.
@@ -52,13 +53,21 @@ function examsByYear(exams) {
 }
 
 function examPanel(panel, exams) {
+  // Each filter offers only what this module's exams really have, and is shown only when
+  // there is a choice to make: at least two years, or both sessions.
   const years = [...new Set(exams.map(exam => exam.academicYear))];
-  if (!years.includes(filters.year)) filters.year = '';
+  const sessions = SESSIONS.filter(value => exams.some(exam => exam.session === value));
+  const options = {
+    year: years.length > 1 ? years.map(value => [value, value]) : [],
+    session: sessions.length > 1 ? sessions.map(value => [value, t(`filter.session.${value}`)]) : []
+  };
+  // A value from the address that is not on offer is dropped, and the address corrected.
+  for (const name of Object.keys(filters)) {
+    if (!options[name].some(([value]) => value === filters[name])) filters[name] = '';
+  }
+  setParams(filters);
 
-  const year = selectField('filter-year', t('filter.year'),
-    [['', t('filter.all')], ...years.map(value => [value, value])], filters.year);
-  const session = selectField('filter-session', t('filter.session'),
-    [['', t('filter.all')], ...SESSIONS.map(value => [value, t(`filter.session.${value}`)])], filters.session);
+  const fields = Object.keys(filters).filter(name => options[name].length > 0).map(name => selectField(name, options[name]));
   const reset = el('button', {class: 'button', type: 'button'}, t('filter.reset'));
   // Announces the number of exams shown each time a filter changes.
   const status = el('p', {class: 'filters__status', role: 'status'});
@@ -71,8 +80,9 @@ function examPanel(panel, exams) {
     );
     const filtered = Boolean(filters.year || filters.session);
     reset.hidden = !filtered;
-    // With no filter set, the Examens tab already shows this number, so it is only read aloud.
-    status.classList.toggle('visually-hidden', !filtered);
+    // With no filter set, the Examens tab already shows this number. With no match, the message
+    // below says so. In both cases the count is only read aloud, not printed a second time.
+    status.classList.toggle('visually-hidden', !filtered || shown.length === 0);
     status.textContent = tCount('count.exams', shown.length);
     results.replaceChildren(...(shown.length > 0
       ? examsByYear(shown)
@@ -81,30 +91,27 @@ function examPanel(panel, exams) {
   }
 
   function change() {
-    filters.year = year.select.value;
-    filters.session = session.select.value;
-    setParams({year: filters.year, session: filters.session});
+    for (const {name, select} of fields) filters[name] = select.value;
+    setParams(filters);
     draw();
   }
 
-  year.select.addEventListener('change', change);
-  session.select.addEventListener('change', change);
+  for (const {select} of fields) select.addEventListener('change', change);
   reset.addEventListener('click', () => {
-    year.select.value = '';
-    session.select.value = '';
+    for (const {select} of fields) select.value = '';
     change();
     // The reset button has just been hidden; keep keyboard focus inside the filters.
-    year.select.focus();
+    fields[0].select.focus();
   });
 
-  panel.replaceChildren(
-    el('fieldset', {class: 'filters'},
+  panel.replaceChildren(...[
+    fields.length > 0 && el('fieldset', {class: 'filters'},
       el('legend', {class: 'visually-hidden'}, t('filter.legend')),
-      el('div', {class: 'filters__row'}, year.field, session.field, reset)
+      el('div', {class: 'filters__row'}, fields.map(({field}) => field), reset)
     ),
     status,
     results
-  );
+  ].filter(Boolean));
   draw();
 }
 

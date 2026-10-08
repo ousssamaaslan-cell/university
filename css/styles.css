@@ -730,6 +730,16 @@ a.row:hover .row__title {
   color: var(--color-notice-text);
 }
 
+/* The file size is filled in after the page is drawn. Its tag is wide enough for the longest
+   size from the start, so filling it in never moves the row. */
+.tag--size {
+  min-inline-size: 7.25em;
+}
+
+:lang(ar) .tag--size {
+  min-inline-size: 9.5em;
+}
+
 .resource__missing {
   padding-inline: var(--space-2);
   border: 1px solid var(--color-error-border);

@@ -84,18 +84,19 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 - **Title.** The module code and the module name share one heading. The code stays on the first line and the name runs on after it. Nothing sits under the title: the semester is in the breadcrumb and each tab shows its own count.
 - **Tabs.** Cours, TD, TP, Examens in one row at every width: on a phone each tab is as wide as its label needs, from 40rem they are four equal columns. Each shows its document count. The Arabic tabs keep "TD" and "TP", which students say aloud and which fit. The open tab is marked by a fill, a heavier edge, and a bar. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction.
 - **Resource rows.** The chapter or sheet number ("Chapitre 2", "TD 3") sits above the title on a phone and in its own column from 36rem. Facts about the document are tags under the title, each in words: exam kind, session, year, "Avec corrigé" or "Sans corrigé". Only "Avec corrigé" is filled green, so it is the one a student spots first.
-- **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, side by side even on a phone. The label above each says what it filters, so the choices are short ("Toutes", "Normale", "Rattrapage"). While a filter is set, the number of exams shown appears with the reset button; with no filter the tab already shows that number, so it is only announced to screen readers.
-- **Actions.** "Voir" and "Télécharger" are two outlined buttons of equal weight, under the tags on a phone and at the end of the row from 36rem. Each also names its document for screen readers. The file size appears as one more tag ("PDF, 1,4 Mo").
+- **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, side by side even on a phone. The label above each says what it filters, so the choices are short ("Toutes", "Normale", "Rattrapage"). Each filter lists only the years or sessions the module's exams really have, and a filter with nothing to choose between is not shown. While a filter is set, the number of exams shown appears with the reset button; with no filter the tab already shows that number, so it is only announced to screen readers.
+- **Actions.** "Voir" and "Télécharger" are two outlined buttons of equal weight, under the tags on a phone and at the end of the row from 36rem. Each also names its document for screen readers. The file size appears as one more tag ("PDF, 1,4 Mo"). The tag is in the row from the start, at a width that fits the longest size, so the row does not move when the size arrives. In Arabic, "PDF" and the size are isolated from each other so the number stays beside its unit.
 - **Sample and missing files.** A sample record carries an "Exemple" tag. A document whose PDF is not on the server shows "Fichier indisponible" at the end of its row instead of the two actions.
-- **Empty states.** An empty tab says which type has nothing yet. A module with no documents at all shows one message and no tabs. Filters with no match explain how to widen them.
+- **Empty states.** An empty tab says which type has nothing yet. A module with no documents at all shows one message and no tabs. Filters with no match explain how to widen them. Each state says its message once.
 
 ### Decided after the design critique, not built yet
 
-Maintainer decisions, 2026-10-07, from the critique saved in `.impeccable/critique/`. Where they differ from the sections above, these win once built; update those sections in the same change.
+Maintainer decisions, 2026-10-07, from the design critique. Where they differ from the sections above, these win once built; update those sections in the same change.
 
-- **Rows.** The document title becomes the "Voir" link. One "Télécharger" button remains. Facts move to one quiet line of text, with "Avec corrigé" as the only badge. Viewing and downloading both stay available.
-- **Scope.** Fix the phone first screen, the rows, the footer, and the four small defects listed in the critique. The restyle of the module code and outlines (the critique's P3) is left for later.
-- **Footer.** It says the site is student-run and unofficial. See `docs/project-brief.md`.
+- **Rows.** The document title becomes the link that opens the PDF. One "Télécharger" button remains. Facts move to one quiet line of text, with "Avec corrigé" as the only badge. Viewing and downloading both stay available.
+- **Footer.** It says the site is student-run and unofficial, gives the date of the last update, and links to "Signaler une erreur". The same link sits beside "Fichier indisponible". See `docs/project-brief.md`.
+- **Shortcuts.** Each module row on the home page gets a direct "Examens" link. A document title that was already opened looks visited.
+- **Outlines and the module code.** The maintainer added the critique's third priority to the scope: outlines only for things that can be tapped, tags as plain text, a stronger module code, and muted tabs when a type has no document.
 
 ### Search
 
