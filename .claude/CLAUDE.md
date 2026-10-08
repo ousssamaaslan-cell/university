@@ -1,12 +1,12 @@
 # L2 study resource library — Claude Code instructions
 
-This is an academic PDF resource library for Licence 2 students. It is **not** a marketing landing page. Read `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` before planning or building. The field is Informatique, the supplied university name is Mohammed seddik benyahia, the languages are French and Arabic, and the future host is GitHub Pages. All seven supplied modules belong to S3; show S4 as an empty semester until its modules are provided. Confirm official module spellings, translations, and university name styling before publishing real content. Keep unknown facts explicit; never invent modules, PDFs, translations, branding, or university claims.
+This is an academic PDF resource library for Licence 2 students. It is **not** a marketing landing page. Read `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` before planning or building. The field is Informatique, the supplied university name is Mohammed seddik benyahia, the languages are French and Arabic, and the future host is GitHub Pages. All seven supplied modules belong to S3; show S4 as an empty semester until its modules are provided. Confirm official module spellings, translations, and university name styling before publishing real content. Keep unknown facts explicit; never invent modules, PDFs, translations, branding, or university claims. The only exception is the build-phase `sample-` data described in `docs/project-brief.md`, which stays visibly marked and is removed before publication.
 
 ## Scope and stack
 
 - Build L2 only: Semester S3 or S4 → Module → Exams, Tutorials, Exercises. Retain `level: "L2"` in records for future extension without adding routes for other levels.
 - Use plain HTML, CSS, and browser JavaScript. No framework, site build step, npm dependency, server rendering, or student login.
-- The later site will use `index.html`, `module.html?id=<module-id>`, `data/resources.json`, `css/`, `js/`, `assets/`, and PDFs under `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`. None of the pages or site scripts exists at setup time.
+- The later site will use `index.html`, `module.html?id=<module-id>`, `404.html`, `data/resources.json`, `css/`, `js/`, `assets/`, and PDFs under `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`. None of the pages or site scripts exists at setup time.
 - Student pages must work on static hosting, including a GitHub Pages project subpath. Use relative URLs, stable module IDs, and no assumed domain root.
 - One maintainer edits the catalogue and PDFs and republishes. Use `/add-resource` for the exact content workflow. No admin dashboard, API, database, Google Drive, or in-browser upload is part of this static setup. Treat those as a separate architecture decision if later requested.
 

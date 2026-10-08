@@ -112,3 +112,4 @@ These names and paths are examples, **not confirmed university content**. Do not
 - `hasSolution` means the linked PDF includes a solution. If a solution is a separate PDF, add a separate resource record or extend the model deliberately before publishing it.
 - Sort semesters, modules, and resources by `order`, then title as a stable tie-breaker.
 - Keep unverified or missing PDFs out of `resources.json`; do not publish broken View or Download links.
+- Build-phase sample data is the one exception to the real-content rules above. Records whose `id` and PDF filename start with `sample-` may point to generated placeholder PDFs, as described in `docs/project-brief.md`. They follow the same schema, relationship, and path rules, and are removed before the site is announced to students.
