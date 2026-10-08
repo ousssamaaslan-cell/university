@@ -44,6 +44,16 @@ export function errorState({title, text, action}) {
   );
 }
 
+// Shown when the catalogue cannot be loaded. Its link loads the page again. The address leaves out
+// any #fragment: a link to the same address with the same fragment would only jump within the page.
+export function loadErrorState() {
+  return errorState({
+    title: t('error.title'),
+    text: t('error.text'),
+    action: {href: location.pathname + location.search, label: t('error.action')}
+  });
+}
+
 // A link that stands on its own line, with a tap target tall enough for a thumb.
 export function actionLink({href, label}) {
   return el('a', {class: 'action-link', href}, label);
@@ -59,7 +69,8 @@ export function reportLink({file = null, name = null} = {}) {
   const address = () => {
     const body = [
       t('report.body.prompt'), '', '',
-      t('report.body.page', {url: location.href}),
+      // Cut very long addresses: mail apps refuse a prepared message that is too long.
+      t('report.body.page', {url: location.href.slice(0, 500)}),
       file && t('report.body.file', {path: file})
     ].filter(line => typeof line === 'string').join('\r\n');
     return `mailto:${REPORT_EMAIL}?subject=${encodeURIComponent(t('report.subject'))}&body=${encodeURIComponent(body)}`;

@@ -50,6 +50,8 @@
   --radius-md: 8px;
   /* The width every module code takes, so codes and the names after them line up down a list. */
   --code-column: 4.5rem;
+  /* The column of "Chapitre 10" or "TD 3" before a document title, from a tablet up. */
+  --marker-column: 6.5rem;
   --page-max: 56rem;
   --gutter: clamp(1rem, 4vw, 2rem);
   --measure: 65ch;
@@ -96,6 +98,9 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* On a computer, keeps the scrollbar's place from the start, so the page does not move
+     sideways when the list arrives and the page becomes long enough to scroll. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -320,7 +325,7 @@ main:focus {
   background: var(--color-surface);
 }
 
-/* The current language is marked by weight, fill and an underline, not by colour alone. */
+/* The current language is marked by a fill and an underline, not by colour alone. */
 .lang-switch a[aria-current="true"] {
   border-block-end-color: var(--color-link);
   border-end-start-radius: 0;
@@ -533,6 +538,11 @@ main {
   background: var(--color-surface);
 }
 
+/* Drawn inside the link, so the ring does not run over the document count beside or below it. */
+.module__link:focus-visible {
+  outline-offset: -3px;
+}
+
 .module__link:hover .module__title {
   color: var(--color-link-hover);
   text-decoration: underline;
@@ -563,9 +573,11 @@ main {
 }
 
 @media (min-width: 40rem) {
+  /* The gap keeps a long name, and the link's hover fill, clear of the count. */
   .module {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
+    column-gap: var(--space-4);
   }
 
   .module__link {
@@ -651,10 +663,19 @@ main {
   margin-block-start: var(--space-4);
 }
 
-/* On the narrowest screens the tabs give up side padding, so the four still share one row. */
+/* On the narrowest screens the tabs give up side padding, so the four still share one row,
+   and the search field gains room for its example text. */
 @media (max-width: 21.25rem) {
   .tab {
     padding-inline: var(--space-1);
+  }
+
+  .site-search input {
+    padding-inline: var(--space-2);
+  }
+
+  .site-search .button {
+    padding-inline: var(--space-3);
   }
 }
 
@@ -748,13 +769,30 @@ main {
 .button:active,
 .tab:active,
 .module__link:active,
+.module__shortcut:active,
 a.resource__link:active,
 .lang-switch a:active {
   background: var(--color-accent-surface);
 }
 
+/* Under the filters: the number of exams shown, and the reset button at the end of the same line. */
+.filters__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-3);
+}
+
+/* The space above belongs to the two parts, so the line takes no room while both are hidden. */
+.filters__summary > * {
+  margin-block-start: var(--space-3);
+}
+
+.filters__summary .button {
+  margin-inline-start: auto;
+}
+
 .filters__status {
-  margin-block-end: var(--space-2);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
@@ -808,9 +846,11 @@ a.resource__link:active,
   outline-offset: -3px;
 }
 
+/* "Chapitre 10" stays in one piece. */
 .resource__marker {
   font-variant-numeric: lining-nums tabular-nums;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .resource__title {
@@ -945,14 +985,23 @@ a.resource__link:visited .resource__title {
   /* The number gets its own column, and the title and the facts line up after it. */
   .resource--marked .resource__link {
     display: grid;
-    grid-template-columns: 6rem minmax(0, 1fr);
+    grid-template-columns: var(--marker-column) minmax(0, 1fr);
     align-items: baseline;
     column-gap: var(--space-4);
   }
 
   .resource--marked .facts,
   .resource--marked .resource__missing {
-    margin-inline-start: calc(6rem + var(--space-4));
+    margin-inline-start: calc(var(--marker-column) + var(--space-4));
+  }
+
+  /* In search results a module's name starts on the same line as the titles listed under it. */
+  .result-group .module__link {
+    grid-template-columns: var(--marker-column) minmax(0, 1fr);
+  }
+
+  .result-group .module-code {
+    justify-self: start;
   }
 }
 
@@ -1023,6 +1072,29 @@ a.resource__link:visited .resource__title {
   padding: var(--space-4) var(--gutter);
 }
 
+/* For a browser too old to run the page scripts. js/lang.js marks it; every page carries the message. */
+.old-browser-note {
+  display: none;
+}
+
+[data-old-browser] .old-browser-note {
+  display: block;
+}
+
+/* ---------- High-contrast mode ---------- */
+
+/* Windows high contrast removes fills and shadows and draws every border, so the open tab and
+   the current language need a mark of their own there. */
+@media (forced-colors: active) {
+  .tab[aria-selected="true"] {
+    border-block-end: 4px solid Highlight;
+  }
+
+  .lang-switch a:not([aria-current]) {
+    border-block-end-color: Canvas;
+  }
+}
+
 /* ---------- Site footer ---------- */
 
 .site-footer {
@@ -1030,6 +1102,12 @@ a.resource__link:visited .resource__title {
   background: var(--color-surface);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+}
+
+/* js/layout.js fills the footer when the page content is drawn. Until then it is not drawn at
+   all: an empty footer in view would jump down the page as the list arrives. */
+.site-footer:empty {
+  display: none;
 }
 
 /* The report link ends the footer; its own padding makes the space under it. */

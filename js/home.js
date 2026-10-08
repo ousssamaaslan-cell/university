@@ -2,8 +2,8 @@
 import {el} from './dom.js';
 import {t, tCount, localized} from './i18n.js';
 import {loadCatalogue, semestersOf, modulesOf, semesterAnchor} from './catalogue.js';
-import {renderLayout, renderCatalogueFacts} from './layout.js';
-import {moduleRow, loadingState, errorState, emptyState} from './components.js';
+import {renderLayout, renderCatalogueFacts, renderFooter, setDescription} from './layout.js';
+import {moduleRow, loadingState, loadErrorState, emptyState} from './components.js';
 
 const main = document.getElementById('main');
 
@@ -30,6 +30,7 @@ function semesterSection(catalogue, semester) {
 
 async function start() {
   document.title = t('home.docTitle');
+  setDescription(t('home.description'));
   renderLayout({breadcrumb: []});
 
   const content = el('div', {class: 'page-width'}, pageHeader(), loadingState());
@@ -39,16 +40,16 @@ async function start() {
     const catalogue = await loadCatalogue();
     renderCatalogueFacts(catalogue);
     content.replaceChildren(pageHeader(), ...semestersOf(catalogue).map(semester => semesterSection(catalogue, semester)));
-
-    // The sections did not exist when the browser first looked for #s3 or #s4, so go there now.
-    if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
   } catch (error) {
     console.error(error);
-    content.replaceChildren(
-      pageHeader(),
-      errorState({title: t('error.title'), text: t('error.text'), action: {href: location.href, label: t('error.action')}})
-    );
+    renderFooter();
+    content.replaceChildren(pageHeader(), loadErrorState());
+    return;
   }
+
+  // The sections did not exist when the browser first looked for #s3 or #s4, so go there now.
+  // This stays outside the try block: an odd fragment must not be reported as a failed load.
+  if (location.hash.length > 1) document.getElementById(location.hash.slice(1))?.scrollIntoView();
 }
 
 start();

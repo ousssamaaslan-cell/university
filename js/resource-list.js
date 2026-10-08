@@ -47,7 +47,7 @@ function sizeFact() {
   return {size, node: fact([el('bdi', {}, t('file.type')), size], 'size')};
 }
 
-function resourceItem(resource, mixed) {
+function resourceItem(resource, mixed, context) {
   const mark = markerText(resource, mixed);
   const title = localized(resource.title);
   // TD and TP keep their Latin abbreviation in Arabic, so the marker is isolated from right-to-left text.
@@ -57,11 +57,12 @@ function resourceItem(resource, mixed) {
   // link too: a bigger target to tap, and a link that names its document in full.
   const link = el('a', {class: 'resource__link', href: resource.pdfPath, type: 'application/pdf'},
     heading(),
-    el('span', {class: 'visually-hidden'}, t('action.open'))
+    el('span', {class: 'visually-hidden'}, context && `${t('list.separator')}${context}`, t('action.open'))
   );
   // The same address with the download attribute, which tells the browser to save the file instead.
   // No PDF is loaded until a click.
-  const documentName = mark ? `${mark}${t('list.separator')}${title}` : title;
+  // What screen readers hear after "Télécharger" or "Signaler une erreur": "ASD3, TD 3, Piles".
+  const documentName = [context, mark, title].filter(Boolean).join(t('list.separator'));
   const download = el('a', {class: 'button resource__download', href: resource.pdfPath, download: true},
     t('action.download'),
     el('span', {class: 'visually-hidden'}, t('action.target', {name: documentName}))
@@ -95,6 +96,8 @@ function resourceItem(resource, mixed) {
 }
 
 // `mixed` is for lists that hold several types and years at once, such as search results.
-export function resourceList(resources, {mixed = false} = {}) {
-  return el('ul', {class: 'resource-list', role: 'list'}, resources.map(resource => resourceItem(resource, mixed)));
+// `context` names what the list belongs to (a module's code) when the page shows several lists;
+// it is added to the names screen readers hear, never to what is displayed.
+export function resourceList(resources, {mixed = false, context = null} = {}) {
+  return el('ul', {class: 'resource-list', role: 'list'}, resources.map(resource => resourceItem(resource, mixed, context)));
 }

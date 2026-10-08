@@ -28,7 +28,7 @@ export async function loadCatalogue() {
 const byOrder = (a, b) => a.order - b.order;
 
 export function semestersOf(catalogue) {
-  return [...catalogue.semesters].sort(byOrder);
+  return [...catalogue.semesters].sort((a, b) => byOrder(a, b) || a.label.fr.localeCompare(b.label.fr, 'fr'));
 }
 
 export function modulesOf(catalogue, semesterId) {

@@ -19,12 +19,13 @@
         var path = location.pathname;
         var root = document.querySelector('meta[name="site-root"]').content;
         if (!root) {
-          if (/\/404(\.html)?$/.test(path)) {
+          if (/\.github\.io$/.test(location.hostname) && path.split('/').length > 2) {
+            // A GitHub Pages project site lives at /<repository>/. This comes first, so that an
+            // unknown address that happens to end in "/404" is not mistaken for this file.
+            root = '/' + path.split('/')[1] + '/';
+          } else if (/\/404(\.html)?$/.test(path)) {
             // Opened directly, as during local preview: the site starts in this folder.
             root = path.replace(/[^/]*$/, '');
-          } else if (/\.github\.io$/.test(location.hostname)) {
-            // A GitHub Pages project site lives at /<repository>/.
-            root = '/' + path.split('/')[1] + '/';
           } else {
             root = '/';
           }
@@ -39,9 +40,13 @@
 
         add('base', {href: root});
         add('link', {rel: 'icon', href: 'assets/favicon.svg', type: 'image/svg+xml'});
-        add('link', {rel: 'stylesheet', href: 'css/styles.css'});
+        // "blocking" asks the browser to wait for the styles before drawing, as it does for a
+        // stylesheet written in the page, so the header never shows without them.
+        add('link', {rel: 'stylesheet', href: 'css/styles.css', blocking: 'render'});
         // The page script reads the language that js/lang.js sets, so it must load second.
-        add('script', {src: 'js/lang.js'}).onload = function () {
+        // If js/lang.js cannot be loaded, the page is still drawn, in French.
+        var language = add('script', {src: 'js/lang.js'});
+        language.onload = language.onerror = function () {
           add('script', {type: 'module', src: 'js/not-found.js'});
         };
       })();
@@ -55,6 +60,14 @@
         <p class="noscript" lang="fr">Page introuvable. Cette adresse ne correspond à aucune page du site.</p>
         <p class="noscript" lang="ar" dir="rtl">الصفحة غير موجودة. هذا العنوان لا يطابق أي صفحة في الموقع.</p>
       </noscript>
+      <!-- Shown only in a browser too old to run the page scripts: js/lang.js marks it, css/styles.css reveals this. -->
+      <p class="noscript old-browser-note" lang="fr">
+        Page introuvable. Votre navigateur est trop ancien pour afficher ce site. Mettez-le à jour, ou ouvrez le site
+        avec un navigateur récent.
+      </p>
+      <p class="noscript old-browser-note" lang="ar" dir="rtl">
+        الصفحة غير موجودة. متصفحك قديم ولا يستطيع عرض هذا الموقع. حدّثه، أو افتح الموقع بمتصفح حديث.
+      </p>
     </main>
     <footer class="site-footer" data-site-footer></footer>
   </body>

@@ -39,14 +39,19 @@ const strings = {
     'sample.title': "Données d'exemple.",
     // Short enough for one line on a phone.
     'sample.text': 'Les fichiers sont factices.',
+    // The name screen readers give to the notice.
+    'sample.label': "Données d'exemple",
 
     'home.docTitle': 'Ressources L2 Informatique | Université Mohammed Seddik Benyahia – Jijel',
+    // For search engines. The French text is also in index.html, for visitors without JavaScript.
+    'home.description': "Cours, TD, TP et examens de Licence 2 Informatique à l'Université Mohammed Seddik Benyahia – Jijel, classés par semestre et par module.",
     'home.title': 'Ressources de Licence 2 Informatique',
     'home.lede': 'Cours, TD, TP et examens, classés par semestre et par module.',
     'semester.empty.title': 'Bientôt disponible',
     'semester.empty.text': 'Les modules de ce semestre seront ajoutés ici.',
 
     'module.docTitle': '{abbr} {title} | Ressources L2 Informatique',
+    'module.description': "Cours, TD, TP et examens du module {abbr} ({title}), Licence 2 Informatique, Université Mohammed Seddik Benyahia – Jijel.",
     'module.empty.title': "Ce module n'a pas encore de document.",
     'module.empty.text': 'Les cours, TD, TP et examens apparaîtront ici dès leur ajout.',
     'module.notFound.title': 'Module introuvable',
@@ -124,6 +129,8 @@ const strings = {
     'filter.none.text': "Changez l'année ou la session, ou réinitialisez les filtres.",
 
     'loading': 'Chargement…',
+    // Page heading and title when a module page cannot load, since the module's name is not known.
+    'error.heading': 'Chargement impossible',
     'error.title': "La liste des documents n'a pas pu être chargée.",
     'error.text': 'Vérifiez votre connexion, puis rechargez la page.',
     'error.action': 'Recharger la page',
@@ -153,14 +160,17 @@ const strings = {
     'breadcrumb.home': 'الرئيسية',
     'sample.title': 'بيانات تجريبية.',
     'sample.text': 'الملفات وهمية.',
+    'sample.label': 'بيانات تجريبية',
 
     'home.docTitle': 'موارد السنة الثانية ليسانس إعلام آلي | جامعة محمد الصديق بن يحيى – جيجل',
+    'home.description': 'دروس وأعمال موجهة وأعمال تطبيقية وامتحانات السنة الثانية ليسانس إعلام آلي بجامعة محمد الصديق بن يحيى – جيجل، مرتبة حسب السداسي والمقياس.',
     'home.title': 'موارد السنة الثانية ليسانس إعلام آلي',
     'home.lede': 'دروس وأعمال موجهة وأعمال تطبيقية وامتحانات، مرتبة حسب السداسي والمقياس.',
     'semester.empty.title': 'قريبًا',
     'semester.empty.text': 'ستُضاف مقاييس هذا السداسي هنا.',
 
     'module.docTitle': '{abbr} {title} | موارد السنة الثانية ليسانس إعلام آلي',
+    'module.description': 'دروس وأعمال موجهة وأعمال تطبيقية وامتحانات مقياس {abbr} ({title})، السنة الثانية ليسانس إعلام آلي، جامعة محمد الصديق بن يحيى – جيجل.',
     'module.empty.title': 'لا توجد وثائق لهذا المقياس حاليًا.',
     'module.empty.text': 'ستظهر الدروس والأعمال الموجهة والأعمال التطبيقية والامتحانات هنا فور إضافتها.',
     'module.notFound.title': 'المقياس غير موجود',
@@ -234,6 +244,7 @@ const strings = {
     'filter.none.text': 'غيّر السنة أو الدورة، أو أعد ضبط التصفية.',
 
     'loading': 'جارٍ التحميل…',
+    'error.heading': 'تعذّر التحميل',
     'error.title': 'تعذّر تحميل قائمة الوثائق.',
     'error.text': 'تحقق من اتصالك بالإنترنت ثم أعد تحميل الصفحة.',
     'error.action': 'أعد تحميل الصفحة',
@@ -274,9 +285,11 @@ function fill(template, values) {
 // French puts a space before ? ! : ; and » and after « and "n°". On the page that space must not
 // break, or a narrow screen leaves the mark alone at the start of a line. The texts above and the
 // catalogue are typed with ordinary spaces; this turns those spaces into no-break spaces.
+// In both languages the dash in "Benyahia – Jijel" keeps its two neighbours on its line.
 function typeset(text) {
-  if (lang !== 'fr') return text;
-  return text.replace(/ ([?!:;»])/g, ' $1').replace(/(«|n°) /g, '$1 ');
+  const joined = text.replace(/ – /g, ' – ');
+  if (lang !== 'fr') return joined;
+  return joined.replace(/ ([?!:;»])/g, ' $1').replace(/(«|n°) /g, '$1 ');
 }
 
 // Returns the label for a key, with {name} placeholders filled from values.
@@ -285,8 +298,9 @@ export function t(key, values = {}) {
 }
 
 // The same label in every language. Search uses it, because a reader may type in either language.
+// A label missing from one language falls back to the default one, as in t().
 export function everyLanguage(key, values = {}) {
-  return languages.map(language => fill(strings[language.code][key], values));
+  return languages.map(language => fill(strings[language.code][key] ?? strings[DEFAULT_LANG][key] ?? key, values));
 }
 
 // "14 ko" or "1,4 Mo". Digits stay Western in Arabic, as elsewhere on the site.

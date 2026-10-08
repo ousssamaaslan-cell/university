@@ -64,7 +64,7 @@ Semesters and modules sort by `order`, then title.
 
 ## JSON Schema
 
-The schema describes the catalogue format. It does not verify that a module ID is referenced correctly or that a PDF exists; `node scripts/doctor.cjs` checks those. Keep the S4 semester record even while it has no modules.
+The schema describes the catalogue format. It does not verify that a module ID is referenced correctly or that a PDF exists; `node scripts/doctor.cjs` checks those. The doctor also fails when a file under `pdfs/` is used by no record (a PDF left behind after its record was removed would still be published), when a PDF is not named after its resource ID, when a resource ID does not start with its module ID, and when the catalogue has a top-level key other than the three arrays. Keep the S4 semester record even while it has no modules.
 
 ```json
 {

@@ -1,13 +1,14 @@
 // Search page: search.html?q=<words>
 //
 // Every word typed must appear somewhere in a module or a document: the module's abbreviation
-// or name, the type, the chapter or sheet number, the title, the year, the session...
+// or name, the type, the title, the year, the session... A sheet or chapter number typed after
+// its word ("td 3", "chapitre 2") must be the document's own number.
 // Both languages are searched whatever the page language, and accents are ignored.
 import {el} from './dom.js';
 import {t, tCount, localized, pageUrl, everyLanguage} from './i18n.js';
 import {RESOURCE_TYPES, loadCatalogue, semestersOf, modulesOf, sortedResources} from './catalogue.js';
-import {renderLayout, renderCatalogueFacts, homeCrumb, updateLanguageLinks} from './layout.js';
-import {moduleCode, moduleRow, loadingState, errorState, emptyState, actionLink} from './components.js';
+import {renderLayout, renderCatalogueFacts, renderFooter, homeCrumb, updateLanguageLinks} from './layout.js';
+import {moduleCode, moduleRow, loadingState, loadErrorState, emptyState, actionLink} from './components.js';
 import {resourceList} from './resource-list.js';
 
 const MIN_LENGTH = 2;
@@ -23,6 +24,9 @@ function normalize(text) {
     .toLowerCase()
     .normalize('NFD')
     .replace(/\p{M}/gu, '') // accents, and Arabic vowel marks and hamza on a carrier letter
+    .replace(/\p{Cf}/gu, '') // invisible direction marks, which come along when text is pasted from a chat
+    .replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x0660)) // Arabic-Indic digits -> 0-9
+    .replace(/[۰-۹]/g, digit => String(digit.charCodeAt(0) - 0x06f0)) // Persian digits -> 0-9
     .replace(/ـ/g, '') // tatweel, the stretching stroke
     .replace(/ٱ/g, 'ا') // alef wasla -> alef
     .replace(/ى/g, 'ي') // alef maqsura -> ya
@@ -73,16 +77,29 @@ function buildIndex(catalogue) {
   };
 }
 
+// "td 3", "tp2", "chapitre 4", "الفصل 4": a sheet or a chapter asked for by its number.
+// That number must then be the document's own. Left to the rule below, "3" would also match
+// the 3 of "ASD3", and "asd3 td 3" would list every TD of the module.
+const NUMBERED = /(?:^|\s)(td|tp|chapitre|الفصل)\s*(\d{1,2})(?=\s|$)/g;
+
 function find(index, query) {
   const wanted = normalize(query).trim();
-  const words = wanted.split(/\s+/);
-  const matches = entry => words.every(word => entry.text.includes(word));
+  const numbered = [...wanted.matchAll(NUMBERED)].map(([, word, number]) => ({type: word === 'td' || word === 'tp' ? word : 'cours', number: Number(number)}));
+  // Every other word must appear somewhere in the module's or the document's text.
+  const words = wanted.replace(NUMBERED, ' ').split(/\s+/).filter(Boolean);
+  if (words.length === 0 && numbered.length === 0) return {modules: [], documents: []};
+
+  const hasWords = entry => words.every(word => entry.text.includes(word));
+  const hasNumber = ({resource}) => numbered.every(({type, number}) =>
+    resource.type === type && (type === 'cours' ? resource.chapter : resource.number) === number
+  );
   const isExactAbbreviation = module => normalize(module.abbr) === wanted;
   return {
     // A module whose abbreviation is exactly what was typed comes first.
-    modules: index.modules.filter(matches).map(entry => entry.module)
+    // A numbered sheet or chapter is a document, so such a query lists no module.
+    modules: numbered.length > 0 ? [] : index.modules.filter(hasWords).map(entry => entry.module)
       .sort((a, b) => Number(isExactAbbreviation(b)) - Number(isExactAbbreviation(a))),
-    documents: index.documents.filter(matches)
+    documents: index.documents.filter(entry => hasWords(entry) && hasNumber(entry))
   };
 }
 
@@ -113,7 +130,9 @@ function documentResults(documents, listedModules) {
             el('span', {class: 'module__title'}, localized(module.title))
           )
         ),
-        resourceList(shown.filter(entry => entry.module === module).map(entry => entry.resource), {mixed: true})
+        // Two modules often hold an exam with the same title; `context` adds the module's code to
+        // what screen readers hear, so the links can be told apart.
+        resourceList(shown.filter(entry => entry.module === module).map(entry => entry.resource), {mixed: true, context: module.abbr})
       )
     )
   );
@@ -124,15 +143,19 @@ function results(catalogue, index, query) {
   if (!query) {
     return {summary: '', content: [emptyState({title: t('search.prompt.title'), text: t('search.prompt.text')})]};
   }
-  if (query.length < MIN_LENGTH) {
+  // Counted on what is really searched for: marks that carry no letter do not count.
+  if (normalize(query).trim().length < MIN_LENGTH) {
     return {summary: '', content: [emptyState({title: t('search.short.title'), text: t('search.prompt.text')})]};
   }
 
+  // The typed words are shown back inside a sentence. These two invisible characters keep them in
+  // the order they were typed: without them an Arabic line would show "2024-2025" as "2025-2024".
+  const typed = `⁨${query}⁩`;
   const {modules, documents} = find(index, query);
   if (modules.length === 0 && documents.length === 0) {
     // The line under the heading says there is no result; what follows is only what to try next.
     return {
-      summary: t('search.none.title', {query}),
+      summary: t('search.none.title', {query: typed}),
       content: [
         el('p', {class: 'status'}, t('search.none.text')),
         el('p', {}, actionLink({href: pageUrl('index.html'), label: t('search.none.action')}))
@@ -145,7 +168,7 @@ function results(catalogue, index, query) {
     documents.length > 0 && tCount('count.documents', documents.length)
   ].filter(Boolean).join(t('list.separator'));
   return {
-    summary: t('search.status', {summary: counts, query}),
+    summary: t('search.status', {summary: counts, query: typed}),
     content: [
       modules.length > 0 && moduleResults(catalogue, modules),
       documents.length > 0 && documentResults(documents, modules)
@@ -168,6 +191,9 @@ async function start() {
   );
 
   const field = document.getElementById('site-search');
+  // With something to search for, a blank character holds the height of the outcome line while
+  // the catalogue loads, so the results are not pushed down when the line is filled.
+  if (field.value.trim()) status.textContent = ' ';
 
   try {
     const catalogue = await loadCatalogue();
@@ -188,8 +214,13 @@ async function start() {
       const url = new URL(location.href);
       if (field.value.trim()) url.searchParams.set('q', field.value.trim());
       else url.searchParams.delete('q');
-      history.replaceState(null, '', url);
-      updateLanguageLinks();
+      // Safari refuses this call when it is made very often; the results are drawn all the same.
+      try {
+        history.replaceState(null, '', url);
+        updateLanguageLinks();
+      } catch (error) {
+        // The address stays one step behind until the next search.
+      }
       show();
     };
     let timer;
@@ -208,9 +239,8 @@ async function start() {
     if (!field.value) field.focus();
   } catch (error) {
     console.error(error);
-    output.replaceChildren(
-      errorState({title: t('error.title'), text: t('error.text'), action: {href: location.href, label: t('error.action')}})
-    );
+    renderFooter();
+    output.replaceChildren(loadErrorState());
   }
 }
 

@@ -7,9 +7,9 @@ import {isSample} from './catalogue.js';
 import {reportLink} from './components.js';
 
 // Call once per page. `breadcrumb` is the trail to show first (see renderBreadcrumb).
+// The footer is drawn later, by renderFooter or renderCatalogueFacts.
 export function renderLayout({breadcrumb}) {
   const header = document.querySelector('[data-site-header]');
-  const footer = document.querySelector('[data-site-footer]');
 
   const main = document.getElementById('main');
   const skipLink = el('a', {class: 'skip-link', href: '#main'}, t('skip'));
@@ -32,18 +32,26 @@ export function renderLayout({breadcrumb}) {
     )
   );
 
-  footer.replaceChildren(
+  renderBreadcrumb(breadcrumb);
+}
+
+// Draws the footer. Call it when the page content is drawn or has failed to load, not before:
+// while the page is still almost empty the footer would sit in view, then jump down the page
+// when the list arrives. With a catalogue, the footer also gives the date of the last update.
+export function renderFooter(catalogue = null) {
+  // The date comes from the server (js/catalogue.js). When the server gives none, the line stays hidden.
+  const updated = catalogue?.lastModified ?? null;
+  document.querySelector('[data-site-footer]').replaceChildren(
     el('div', {class: 'site-footer__inner page-width'},
       el('p', {class: 'site-footer__name'}, t('site.name')),
       // Who runs the site: students, not the university (docs/project-brief.md).
       el('p', {}, t('footer.status')),
-      // Empty until renderCatalogueFacts knows the date.
-      el('p', {'data-last-update': true, hidden: true}),
+      el('p', {'data-last-update': true, hidden: !updated},
+        updated && [t('footer.updated'), ' ', el('time', {datetime: updated.toISOString()}, formatDate(updated))]
+      ),
       el('p', {class: 'site-footer__report'}, t('report.prompt'), ' ', reportLink())
     )
   );
-
-  renderBreadcrumb(breadcrumb);
 }
 
 function languageSwitch() {
@@ -74,7 +82,9 @@ function searchForm() {
       name: 'q',
       value: new URLSearchParams(location.search).get('q') ?? '',
       placeholder: t('search.placeholder'),
-      enterkeyhint: 'search'
+      enterkeyhint: 'search',
+      // Long enough for any real search, short enough for an address every host accepts.
+      maxlength: '100'
     }),
     // Keeps the results in the reader's language.
     lang !== DEFAULT_LANG && el('input', {type: 'hidden', name: 'lang', value: lang}),
@@ -111,30 +121,35 @@ export function homeCrumb() {
   return {label: t('breadcrumb.home'), href: pageUrl('index.html')};
 }
 
-// Call once the catalogue has loaded. It draws what the catalogue tells every page:
-// the sample-data notice and, in the footer, the date of the last update.
+// Call once the catalogue has loaded, just before drawing the page content. It draws what the
+// catalogue tells every page: the sample-data notice, and the footer with the date of the last update.
 export function renderCatalogueFacts(catalogue) {
   renderSampleNotice(catalogue);
-  renderLastUpdate(catalogue);
+  renderFooter(catalogue);
 }
 
 // While the catalogue holds build-phase sample records, say so on every page.
+// It is a labelled <aside>, so screen readers find it among the page's regions.
 function renderSampleNotice(catalogue) {
   if (!catalogue.resources.some(isSample) || document.querySelector('[data-sample-notice]')) return;
   document.querySelector('[data-site-header]').after(
-    el('div', {class: 'notice', role: 'note', 'data-sample-notice': true},
+    el('aside', {class: 'notice', 'aria-label': t('sample.label'), 'data-sample-notice': true},
       el('div', {class: 'page-width'}, el('p', {}, el('strong', {}, t('sample.title')), ' ', t('sample.text')))
     )
   );
 }
 
-// The date comes from the server (js/catalogue.js). When the server gives none, the line stays hidden.
-function renderLastUpdate(catalogue) {
-  if (!catalogue.lastModified) return;
-  const line = document.querySelector('[data-last-update]');
-  line.replaceChildren(
-    t('footer.updated'), ' ',
-    el('time', {datetime: catalogue.lastModified.toISOString()}, formatDate(catalogue.lastModified))
-  );
-  line.hidden = false;
+// The page's description for search engines, in the page language.
+export function setDescription(text) {
+  let meta = document.querySelector('meta[name="description"]');
+  if (!meta) {
+    meta = el('meta', {name: 'description'});
+    document.head.append(meta);
+  }
+  meta.content = text;
+}
+
+// Asks search engines not to list this view: an unknown module, for example.
+export function setNoIndex() {
+  if (!document.querySelector('meta[name="robots"]')) document.head.append(el('meta', {name: 'robots', content: 'noindex'}));
 }

@@ -13,8 +13,8 @@
 - Stack: plain HTML, CSS, and JavaScript. No site framework, build step, or npm dependencies.
 - Public access: students browse without accounts or login.
 - Content files: `data/resources.json` and PDFs in `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`. See `docs/content-model.md`.
-- Pages: `index.html` lists S3/S4 and modules; `module.html?id=<module-id>` lists one module's resources under Cours, TD, TP, and Examens tabs; `search.html?q=<words>` shows search results; `404.html` handles unknown addresses on the static host. One script injects the shared header and footer. Every page below the home page has a breadcrumb that leads back up to the home page and the semester.
-- Search: a field in the header of every page opens `search.html?q=<words>`. It matches a module's full name and its abbreviation, and a document's type, number, title, year, and session, in both languages whatever the page language. Every word typed must match; accents and Arabic letter variants are ignored. Matching modules are listed first, then documents grouped by module.
+- Pages: `index.html` lists S3/S4 and modules; `module.html?id=<module-id>` lists one module's resources under Cours, TD, TP, and Examens tabs; `search.html?q=<words>` shows search results; `404.html` handles unknown addresses on the static host. One script injects the shared header and footer. Every page below the home page has a breadcrumb that leads back up to the home page and the semester. The home page and each module page set their own title and description in the page language; the results page, the 404 page, and an unknown module are marked `noindex`.
+- Search: a field in the header of every page opens `search.html?q=<words>`. It matches a module's full name and its abbreviation, and a document's type, number, title, year, and session, in both languages whatever the page language. Every word typed must match; accents and Arabic letter variants are ignored. A sheet or chapter number typed after its word ("td 3", "chapitre 2") must be the document's own number. Matching modules are listed first, then documents grouped by module.
 - Filters: the Examens tab filters by academic year and session (normal or rattrapage). Cours, TD, and TP have no session filter.
 - Shareable views: the module page keeps the open tab and the exam filters in its address (`type=`, `year=`, `session=`), so a link opens the same view.
 - PDF behavior: in each document row the title is a link that opens the PDF in the browser's own viewer, and a "Télécharger" button saves it (maintainer decision after the design critique, 2026-10-07; there is no separate "Voir" button). Both are plain links to the same file, so nothing is loaded before a click. Missing PDFs must not appear as working links: the page asks the server whether each listed PDF exists, without downloading it, shows the file size when it does, and when it does not, shows the title as plain text with "Fichier indisponible" in place of the button.
@@ -61,7 +61,8 @@ Maintainer decision, 2026-10-07: Claude drafts all Arabic text, and the maintain
 - University name: جامعة محمد الصديق بن يحيى – جيجل
 - Module names: the "Arabic name (draft)" column above, stored in `data/resources.json`.
 - Semester labels: السداسي الثالث and السداسي الرابع, stored in `data/resources.json`.
-- Every interface label, including the type labels, session and exam-kind names, breadcrumbs, and empty and error messages: the `ar` block of `js/i18n.js`.
+- Every interface label, including the type labels, session and exam-kind names, breadcrumbs, empty and error messages, the footer, the report email, and the page descriptions: the `ar` block of `js/i18n.js`.
+- The two short Arabic messages written in each of the four HTML files, for a visitor without JavaScript and for a browser too old to run the site.
 - Sample resource titles: drafted only so RTL and mixed-direction text can be tested. They are deleted with the sample data.
 
 When the maintainer has reviewed a group, remove it from this list.

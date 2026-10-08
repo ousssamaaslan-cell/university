@@ -2,7 +2,7 @@
 
 A public resource library for Licence 2 Informatique students at Université Mohammed Seddik Benyahia – Jijel. Students pick a semester and a module, then view or download its Cours, TD, TP, and Examens as PDFs.
 
-**The site is under construction.** Built so far: the home page with both semesters, module pages with Cours, TD, TP, and Examens tabs, the year and session filters on Examens, search across modules and documents, a title that opens each PDF and a "Télécharger" button that saves it, empty and missing-file states, and the 404 page. Still to do: the quality pass and deployment to GitHub Pages. The catalogue holds sample records and placeholder PDFs only; see "Sample data" below.
+**The site is under construction.** Built so far: the home page with both semesters, module pages with Cours, TD, TP, and Examens tabs, the year and session filters on Examens, search across modules and documents, a title that opens each PDF and a "Télécharger" button that saves it, empty and missing-file states, and the 404 page. The quality pass is done; `docs/qa-report.md` records what was tested, found, and fixed. Still to do: deployment to GitHub Pages. The catalogue holds sample records and placeholder PDFs only; see "Sample data" below.
 
 ## What is confirmed
 
@@ -44,7 +44,7 @@ Until the real PDFs are added, every resource in `data/resources.json` has an `i
 
 ## Checks
 
-`node scripts/doctor.cjs` validates the setup, the catalogue records, the fields each resource type needs, and that every PDF path exists. It reports how many sample records remain. It installs nothing. There is no `npm install`, `npm run build`, lint, or type-check command for the site.
+`node scripts/doctor.cjs` validates the setup, the catalogue records, the fields each resource type needs, and that every PDF path exists. It also fails when a file under `pdfs/` belongs to no record, when a PDF is not named after its resource ID, and when a label in `js/i18n.js` exists in one language only. It reports how many sample records remain. It installs nothing. There is no `npm install`, `npm run build`, lint, or type-check command for the site.
 
 ## Claude Code workflow
 

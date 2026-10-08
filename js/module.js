@@ -7,8 +7,8 @@
 import {el} from './dom.js';
 import {t, tCount, localized, pageUrl} from './i18n.js';
 import {RESOURCE_TYPES, SESSIONS, loadCatalogue, findModule, findSemester, resourcesOf, sortedResources, semesterAnchor} from './catalogue.js';
-import {renderLayout, renderBreadcrumb, renderCatalogueFacts, homeCrumb, updateLanguageLinks} from './layout.js';
-import {moduleCode, loadingState, errorState, emptyState, actionLink} from './components.js';
+import {renderLayout, renderBreadcrumb, renderCatalogueFacts, renderFooter, setDescription, setNoIndex, homeCrumb, updateLanguageLinks} from './layout.js';
+import {moduleCode, loadingState, loadErrorState, emptyState, actionLink} from './components.js';
 import {createTabs} from './tabs.js';
 import {resourceList} from './resource-list.js';
 
@@ -28,7 +28,13 @@ function setParams(changes) {
     if (value) url.searchParams.set(name, value);
     else url.searchParams.delete(name);
   }
-  history.replaceState(null, '', url);
+  // Safari refuses this call when it is made very often (an arrow key held down on the tabs).
+  // The view is drawn all the same; only the address stays one step behind.
+  try {
+    history.replaceState(null, '', url);
+  } catch (error) {
+    return;
+  }
   updateLanguageLinks();
 }
 
@@ -104,15 +110,18 @@ function examPanel(panel, exams) {
     fields[0].select.focus();
   });
 
+  // Drawn before it is attached: the tab has just said how many exams there are, so the count
+  // is not announced a second time on arrival. Later changes of a filter are announced.
+  draw();
   panel.replaceChildren(...[
     fields.length > 0 && el('fieldset', {class: 'filters'},
       el('legend', {class: 'visually-hidden'}, t('filter.legend')),
-      el('div', {class: 'filters__row'}, fields.map(({field}) => field), reset)
+      el('div', {class: 'filters__row'}, fields.map(({field}) => field)),
+      // The count and the reset button share one line, so a filtered list starts as high as it can.
+      el('div', {class: 'filters__summary'}, status, reset)
     ),
-    status,
     results
   ].filter(Boolean));
-  draw();
 }
 
 function modulePage(catalogue, module) {
@@ -120,6 +129,7 @@ function modulePage(catalogue, module) {
   const total = resourcesOf(catalogue, module.id).length;
 
   document.title = t('module.docTitle', {abbr: module.abbr, title: localized(module.title)});
+  setDescription(t('module.description', {abbr: module.abbr, title: localized(module.title)}));
   renderBreadcrumb([
     homeCrumb(),
     {label: localized(semester.label), href: pageUrl('index.html', {}, semesterAnchor(semester.id))}
@@ -141,6 +151,10 @@ function modulePage(catalogue, module) {
     if (resources.length === 0) panel.replaceChildren(emptyState({title: t(`empty.${type}`), text: t('empty.text')}));
     else if (type === 'examen') examPanel(panel, resources);
     else panel.replaceChildren(resourceList(resources));
+    // An empty panel holds nothing to focus, so the panel itself is the Tab stop after the tabs.
+    // A panel with documents is not one: Tab goes straight to its first control.
+    if (resources.length === 0) panel.tabIndex = 0;
+    else panel.removeAttribute('tabindex');
   }
 
   // Open the tab named in the address, otherwise the first one that has documents.
@@ -153,7 +167,8 @@ function modulePage(catalogue, module) {
       id: type,
       label: t(`type.${type}`),
       count: byType[type].length,
-      countLabel: tCount('count.documents', byType[type].length)
+      // Read by screen readers after the label: "Cours, 5 documents".
+      countLabel: t('list.separator') + tCount('count.documents', byType[type].length)
     })),
     selected: first,
     onSelect(type, panel) {
@@ -163,6 +178,9 @@ function modulePage(catalogue, module) {
     }
   });
   drawPanel(first, tabs.panel);
+  // Tidy the address on arrival: an unknown type is dropped, and so are exam filters when
+  // another tab is open. A shared link and the language switch then carry only what is shown.
+  setParams({type: RESOURCE_TYPES.includes(requested) ? requested : '', ...(first === 'examen' ? {} : {year: '', session: ''})});
 
   return [header, tabs.tablist, tabs.panel];
 }
@@ -170,6 +188,7 @@ function modulePage(catalogue, module) {
 // Shown when ?id= is missing or matches no module.
 function moduleNotFound() {
   document.title = `${t('module.notFound.title')} | ${t('site.name')}`;
+  setNoIndex();
   return [
     el('header', {class: 'page-header'},
       el('h1', {}, t('module.notFound.title')),
@@ -188,13 +207,18 @@ async function start() {
   try {
     const catalogue = await loadCatalogue();
     renderCatalogueFacts(catalogue);
-    const moduleId = params.get('id');
+    // Module IDs are lower case; a link typed as "ASD3" still finds its module.
+    const moduleId = params.get('id')?.trim().toLowerCase();
     const module = moduleId ? findModule(catalogue, moduleId) : null;
     content.replaceChildren(...(module ? modulePage(catalogue, module) : moduleNotFound()));
   } catch (error) {
     console.error(error);
+    // The module's name is not known, so the page gets a plain title and heading of its own.
+    document.title = `${t('error.heading')} | ${t('site.name')}`;
+    renderFooter();
     content.replaceChildren(
-      errorState({title: t('error.title'), text: t('error.text'), action: {href: location.href, label: t('error.action')}})
+      el('header', {class: 'page-header'}, el('h1', {}, t('error.heading'))),
+      loadErrorState()
     );
   }
 }

@@ -6,16 +6,17 @@ import {el} from './dom.js';
 
 // `tabs` is a list of {id, label, count, countLabel}. `onSelect(id, panel)` runs when the reader picks a tab.
 // The caller draws the first panel itself, so opening the page does not count as a choice.
+// The caller also decides whether the panel is a Tab stop (it should be one only when it holds nothing to focus).
 export function createTabs({label, tabs, selected, onSelect}) {
-  const panel = el('div', {class: 'tab-panel', role: 'tabpanel', id: 'tab-panel', tabindex: '0'});
+  const panel = el('div', {class: 'tab-panel', role: 'tabpanel', id: 'tab-panel'});
 
   const buttons = tabs.map(tab =>
     // A tab with nothing in it yet is drawn muted (css/styles.css); it still opens and says so.
     el('button', {class: tab.count === 0 ? 'tab tab--empty' : 'tab', type: 'button', role: 'tab', id: `tab-${tab.id}`, 'aria-controls': 'tab-panel', 'data-tab': tab.id},
       el('span', {class: 'tab__label'}, tab.label),
-      // Sighted readers see the bare number; screen readers hear it with its unit ("5 documents").
+      // Sighted readers see the bare number; screen readers hear it with its unit (", 5 documents").
       el('span', {class: 'tab__count', 'aria-hidden': 'true'}, String(tab.count)),
-      el('span', {class: 'visually-hidden'}, `, ${tab.countLabel}`)
+      el('span', {class: 'visually-hidden'}, tab.countLabel)
     )
   );
   const tablist = el('div', {class: 'tabs', role: 'tablist', 'aria-label': label}, buttons);
@@ -41,6 +42,8 @@ export function createTabs({label, tabs, selected, onSelect}) {
   });
 
   tablist.addEventListener('keydown', event => {
+    // Leave shortcuts alone: Alt+Left is the browser's Back, for example.
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     const index = buttons.indexOf(document.activeElement);
     if (index === -1) return;
     const isRtl = document.documentElement.dir === 'rtl';

@@ -98,6 +98,7 @@ function checkCatalogue() {
   if (!data) return {semesters: 0, modules: 0, resources: 0, samples: 0, status: 'invalid'};
   for (const key of ['semesters', 'modules', 'resources']) if (!Array.isArray(data[key])) fail(`data/resources.json: ${key} must be an array`);
   if (errors.some(error => error.includes('data/resources.json:') && error.includes('must be an array'))) return {status: 'invalid'};
+  for (const key of Object.keys(data)) if (!['semesters', 'modules', 'resources'].includes(key)) fail(`data/resources.json: unknown top-level key "${key}"`);
   const semIds = new Set(), moduleIds = new Set(), resourceIds = new Set(), pdfPaths = new Set();
   // Build-phase sample records (docs/project-brief.md) are counted so they are not forgotten before publication.
   let samples = 0;
@@ -162,6 +163,9 @@ function checkCatalogue() {
     const sampleId = typeof item.id === 'string' && item.id.startsWith('sample-');
     if (sampleId !== path.basename(item.pdfPath).startsWith('sample-')) fail(`Sample ID and PDF filename must both start with sample-: ${label}`);
     if (sampleId) samples++;
+    // docs/content-model.md: an ID starts with its module's ID, and the PDF is named after the ID.
+    if (typeof item.id === 'string' && !item.id.replace(/^sample-/, '').startsWith(`${item.module}-`)) fail(`Resource ID must start with its module ID (${item.module}-): ${label}`);
+    if (path.basename(item.pdfPath) !== `${item.id}.pdf`) fail(`PDF must be named after its resource ID (${item.id}.pdf): ${item.pdfPath}`);
     const target = path.resolve(root, item.pdfPath);
     const pdfRoot = path.join(root, 'pdfs');
     if (!isInside(pdfRoot, target)) { fail(`PDF path escapes pdfs/: ${label}`); continue; }
@@ -177,10 +181,33 @@ function checkCatalogue() {
       }
     } catch { fail(`Missing PDF: ${item.pdfPath}`); }
   }
+  // A PDF that no record uses would still be published with the site. This catches a file left
+  // behind when its record is removed, including the placeholder PDFs of the sample data.
+  const walk = folder => fs.readdirSync(folder, {withFileTypes: true}).flatMap(entry =>
+    entry.isDirectory() ? walk(path.join(folder, entry.name)) : [path.join(folder, entry.name)]
+  );
+  if (exists('pdfs')) for (const file of walk(path.join(root, 'pdfs'))) {
+    const relative = path.relative(root, file).split(path.sep).join('/');
+    if (path.basename(file) !== '.gitkeep' && !pdfPaths.has(relative)) fail(`File under pdfs/ that no catalogue record uses: ${relative}`);
+  }
   return {semesters: data.semesters.length, modules: data.modules.length, resources: data.resources.length, samples, status: 'checked'};
 }
 
+// js/i18n.js asks for the same keys in French and in Arabic. A key missing from one language
+// shows the other language's text, or the bare key, to students.
+function checkLabels() {
+  if (!exists('js/i18n.js')) return;
+  const text = fs.readFileSync(path.join(root, 'js/i18n.js'), 'utf8');
+  const start = text.search(/^ {2}fr: \{$/m), middle = text.search(/^ {2}ar: \{$/m), end = text.search(/^const pluralRules/m);
+  if (start === -1 || middle === -1 || end === -1) { fail('js/i18n.js: could not find the fr and ar blocks to compare their keys'); return; }
+  const keysOf = block => new Set([...block.matchAll(/^ {4}'([^']+)':/gm)].map(match => match[1]));
+  const fr = keysOf(text.slice(start, middle)), ar = keysOf(text.slice(middle, end));
+  for (const key of fr) if (!ar.has(key)) fail(`js/i18n.js: label "${key}" has no Arabic text`);
+  for (const key of ar) if (!fr.has(key)) fail(`js/i18n.js: label "${key}" has no French text`);
+}
+
 const catalogue = checkCatalogue();
+checkLabels();
 const result = {ok: errors.length === 0, active_skills: skills.length, agents: agents.length, verified_vendor_files: verifiedVendorFiles, catalogue, errors};
 if (require.main === module) {
   console.log(JSON.stringify(result, null, 2));
