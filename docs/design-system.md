@@ -35,6 +35,7 @@ The site follows the reader's system setting for light or dark. Every pair below
 | `--color-text-muted` | `#55606e` | `#aab3bf` | Secondary text, counts, metadata |
 | `--color-link` | `#1b4f9c` | `#9cc2ff` | Links, focus ring, current tab or filter |
 | `--color-link-hover` | `#123a75` | `#c3daff` | Hovered and pressed links |
+| `--color-link-visited` | `#70359c` | `#cdb0ff` | Title of a document the reader has already opened |
 | `--color-border` | `#d3d9e0` | `#313a46` | Rules between rows, decorative edges |
 | `--color-border-strong` | `#737d89` | `#7d8896` | Borders of inputs, buttons, and the module code |
 | `--color-accent-surface` | `#e7eef9` | `#1f2f47` | Background of the current or selected item |
@@ -73,7 +74,8 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 ## Components and states
 
 - Site header with language switch; site footer; breadcrumb; sample-data notice.
-- Module code; module row (code, full name, document count); semester section with its empty state.
+- Module code; module row; semester section with its empty state.
+- **Module row.** The code and the full name are one link to the module page. After them come the number of documents and an "Examens" link that opens the module page directly on its exams. A module with no exam has no such link, so nobody taps through to an empty tab. On a phone the count and the link share the line under the name; from 40rem the row is one line and the counts line up. The same row lists modules in search results.
 - Resource list and item; type label; chapter or sheet number; year, session, exam-kind, and correction facts; the title link that opens the PDF and the "Télécharger" button.
 - Tabs for Cours, TD, TP, Examens; year and session filters on Examens; search.
 - Empty, loading, and error states. Say what is missing and what the student can do next.
@@ -84,7 +86,7 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 
 - **Title.** The module code and the module name share one heading. The code stays on the first line and the name runs on after it. Nothing sits under the title: the semester is in the breadcrumb and each tab shows its own count.
 - **Tabs.** Cours, TD, TP, Examens in one row at every width: on a phone each tab is as wide as its label needs, from 40rem they are four equal columns. Each shows its document count. The Arabic tabs keep "TD" and "TP", which students say aloud and which fit. The open tab is marked by a fill, a heavier edge, and a bar. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction.
-- **Resource rows.** One row per PDF. The chapter or sheet number ("Chapitre 2", "TD 3") and the title are one link that opens the PDF in the browser's own viewer. On a phone the number runs on before the title; from 36rem it has its own column. Under the title, the facts about the document make one quiet line of plain text with a dot between two facts: exam kind, session, year, "Sans corrigé", then the file type and size. "Avec corrigé" is the only fact drawn as a badge, filled green, so it is the one a student spots first. A line of facts never starts or ends with a dot.
+- **Resource rows.** One row per PDF. The chapter or sheet number ("Chapitre 2", "TD 3") and the title are one link that opens the PDF in the browser's own viewer. On a phone the number runs on before the title; from 36rem it has its own column. Under the title, the facts about the document make one quiet line of plain text with a dot between two facts: exam kind, session, year, "Sans corrigé", then the file type and size. "Avec corrigé" is the only fact drawn as a badge, filled green, so it is the one a student spots first. A line of facts never starts or ends with a dot. The title of a document the reader has already opened in this browser turns from blue to purple (`--color-link-visited`).
 - **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, side by side even on a phone. The label above each says what it filters, so the choices are short ("Toutes", "Normale", "Rattrapage"). Each filter lists only the years or sessions the module's exams really have, and a filter with nothing to choose between is not shown. While a filter is set, the number of exams shown appears with the reset button; with no filter the tab already shows that number, so it is only announced to screen readers.
 - **Actions.** Two per document. The title opens the PDF, and one outlined "Télécharger" button saves it. On a phone the button shares the second line with the facts; from 36rem it sits at the end of the row. Screen readers hear what each one does and which document it acts on. The file size is the last fact ("PDF, 1,4 Mo"). Its place is in the row from the start, at a width that fits the longest size, so the row does not move when the size arrives. In Arabic, "PDF" and the size are isolated from each other so the number stays beside its unit.
 - **Sample and missing files.** A sample record carries the fact "Exemple". A document whose PDF is not on the server keeps its title, which is then plain text and not a link, and shows "Fichier indisponible" in place of the facts and the button. "Signaler une erreur" sits beside that message; its email also names the missing file.
@@ -94,7 +96,6 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 
 Maintainer decisions, 2026-10-07, from the design critique. Where they differ from the sections above, these win once built; update those sections in the same change.
 
-- **Shortcuts.** Each module row on the home page gets a direct "Examens" link. A document title that was already opened looks visited.
 - **Outlines and the module code.** The maintainer added the critique's third priority to the scope: outlines only for things that can be tapped, tags as plain text, a stronger module code, and muted tabs when a type has no document.
 
 ### Search

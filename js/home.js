@@ -1,7 +1,7 @@
 // Home page: every semester with its modules.
 import {el} from './dom.js';
 import {t, tCount, localized} from './i18n.js';
-import {loadCatalogue, semestersOf, modulesOf, resourcesOf, semesterAnchor} from './catalogue.js';
+import {loadCatalogue, semestersOf, modulesOf, semesterAnchor} from './catalogue.js';
 import {renderLayout, renderCatalogueFacts} from './layout.js';
 import {moduleRow, loadingState, errorState, emptyState} from './components.js';
 
@@ -23,7 +23,7 @@ function semesterSection(catalogue, semester) {
       modules.length > 0 && el('p', {class: 'section__count'}, tCount('count.modules', modules.length))
     ),
     modules.length > 0
-      ? el('ul', {class: 'row-list', role: 'list'}, modules.map(module => moduleRow(module, resourcesOf(catalogue, module.id).length)))
+      ? el('ul', {class: 'row-list', role: 'list'}, modules.map(module => moduleRow(catalogue, module)))
       : emptyState({title: t('semester.empty.title'), text: t('semester.empty.text')})
   );
 }

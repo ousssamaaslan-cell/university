@@ -24,8 +24,9 @@ const strings = {
     'footer.updated': 'Dernière mise à jour :',
     'report.prompt': 'Un fichier manquant ou incorrect ?',
     'report.label': 'Signaler une erreur',
-    // Read by screen readers only. After "Signaler une erreur": which document.
-    'report.target': ' : {name}',
+    // Read by screen readers only. After a link that several rows repeat ("Signaler une erreur",
+    // "Examens"): which document or module this one belongs to.
+    'link.target': ' : {name}',
     // The email that "Signaler une erreur" prepares.
     'report.subject': 'Erreur sur le site Ressources L2 Informatique',
     'report.body.prompt': "Décrivez l'erreur :",
@@ -141,7 +142,7 @@ const strings = {
     'footer.updated': 'آخر تحديث:',
     'report.prompt': 'ملف ناقص أو خاطئ؟',
     'report.label': 'الإبلاغ عن خطأ',
-    'report.target': ': {name}',
+    'link.target': ': {name}',
     'report.subject': 'خطأ في موقع موارد السنة الثانية ليسانس إعلام آلي',
     'report.body.prompt': 'صف الخطأ:',
     'report.body.page': 'الصفحة: {url}',

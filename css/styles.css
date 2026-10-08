@@ -15,6 +15,7 @@
   --color-text-muted: #55606e;
   --color-link: #1b4f9c;
   --color-link-hover: #123a75;
+  --color-link-visited: #70359c;
   --color-border: #d3d9e0;
   --color-border-strong: #737d89;
   --color-accent-surface: #e7eef9;
@@ -62,6 +63,7 @@
     --color-text-muted: #aab3bf;
     --color-link: #9cc2ff;
     --color-link-hover: #c3daff;
+    --color-link-visited: #cdb0ff;
     --color-border: #313a46;
     --color-border-strong: #7d8896;
     --color-accent-surface: #1f2f47;
@@ -458,7 +460,7 @@ main {
   vertical-align: 0.22em;
 }
 
-/* ---------- Row lists ---------- */
+/* ---------- Module rows ---------- */
 
 .row-list {
   border-block-start: 1px solid var(--color-border);
@@ -468,58 +470,97 @@ main {
   border-block-end: 1px solid var(--color-border);
 }
 
-.row {
+/* One module. On a phone: the code and the name, then under the name the number of documents
+   with the Examens shortcut at the end of the line. From a tablet up: one line. */
+.module {
+  --module-code-column: 4.5rem;
+
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0 var(--space-4);
-  min-block-size: 3.5rem;
-  padding-block: var(--space-3);
+  grid-template-columns: minmax(0, 1fr);
 }
 
-.row__title {
+/* The code and the name: one link to the module page. */
+.module__link {
+  display: grid;
+  grid-template-columns: minmax(var(--module-code-column), auto) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-4);
+  /* Lets the hover fill reach a little past the text without moving it. */
+  margin-inline: calc(var(--space-2) * -1);
+  padding: var(--space-3) var(--space-2) var(--space-2);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.module__title {
+  color: var(--color-link);
   font-size: var(--text-md);
   font-weight: 600;
   line-height: 1.35;
 }
 
-.row__meta {
-  grid-column: 2;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-}
-
-a.row {
-  /* Lets the hover fill reach a little past the text without moving it. */
-  margin-inline: calc(var(--space-2) * -1);
-  padding-inline: var(--space-2);
-  color: var(--color-text);
-  text-decoration: none;
-}
-
-a.row .row__title {
-  color: var(--color-link);
-}
-
-a.row:hover {
+.module__link:hover {
   background: var(--color-surface);
 }
 
-a.row:hover .row__title {
+.module__link:hover .module__title {
   color: var(--color-link-hover);
   text-decoration: underline;
   text-decoration-thickness: 0.08em;
   text-underline-offset: 0.2em;
 }
 
+.module__meta {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  column-gap: var(--space-4);
+  /* Starts under the name, and sits close to it. */
+  margin-block-start: calc(var(--space-1) * -1);
+  margin-inline-start: calc(var(--module-code-column) + var(--space-4));
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.module__count {
+  padding-block-end: var(--space-3);
+}
+
+/* "Examens": opens the module page on its exams. Tall enough to tap. */
+.module__shortcut {
+  min-block-size: var(--tap);
+  font-weight: 600;
+}
+
 @media (min-width: 40rem) {
-  .row {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+  .module {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
   }
 
-  .row__meta {
-    grid-column: 3;
+  .module__link {
+    min-block-size: 3.5rem;
+    padding-block-end: var(--space-3);
+  }
+
+  /* The shortcut column has one width in every row, so the counts line up even where a module has no exams. */
+  .module__meta {
+    display: grid;
+    grid-template-columns: auto 6rem;
+    align-items: center;
+    margin: 0;
     text-align: end;
+  }
+
+  .module__count {
+    padding: 0;
+  }
+
+  .module__shortcut {
+    display: flex;
+    grid-column: 2;
+    align-items: center;
+    justify-content: end;
   }
 }
 
@@ -729,6 +770,12 @@ a.resource__link:hover .resource__title {
   text-decoration: underline;
   text-decoration-thickness: 0.08em;
   text-underline-offset: 0.2em;
+}
+
+/* A document the reader has already opened in this browser. Comes after the hover rule, so the
+   title keeps this colour under the pointer. */
+a.resource__link:visited .resource__title {
+  color: var(--color-link-visited);
 }
 
 .resource__download {

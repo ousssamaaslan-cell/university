@@ -5,7 +5,7 @@
 // Both languages are searched whatever the page language, and accents are ignored.
 import {el} from './dom.js';
 import {t, tCount, localized, pageUrl, everyLanguage} from './i18n.js';
-import {RESOURCE_TYPES, loadCatalogue, semestersOf, modulesOf, resourcesOf, sortedResources} from './catalogue.js';
+import {RESOURCE_TYPES, loadCatalogue, semestersOf, modulesOf, sortedResources} from './catalogue.js';
 import {renderLayout, renderCatalogueFacts, homeCrumb, updateLanguageLinks} from './layout.js';
 import {moduleCode, moduleRow, loadingState, errorState, emptyState, actionLink} from './components.js';
 import {resourceList} from './resource-list.js';
@@ -89,7 +89,7 @@ function find(index, query) {
 function moduleResults(catalogue, modules) {
   return el('section', {class: 'section', 'aria-labelledby': 'results-modules'},
     el('div', {class: 'section__head'}, el('h2', {id: 'results-modules'}, t('search.modules'))),
-    el('ul', {class: 'row-list', role: 'list'}, modules.map(module => moduleRow(module, resourcesOf(catalogue, module.id).length)))
+    el('ul', {class: 'row-list', role: 'list'}, modules.map(module => moduleRow(catalogue, module)))
   );
 }
 
