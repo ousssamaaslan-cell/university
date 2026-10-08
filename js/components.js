@@ -1,6 +1,6 @@
 // Small pieces of interface shared by several pages.
 import {el} from './dom.js';
-import {t, localized} from './i18n.js';
+import {t, tCount, localized, pageUrl} from './i18n.js';
 
 // The module abbreviation (ASD3, AO...), shown next to the module name everywhere.
 // <bdi> keeps it left-to-right inside Arabic text.
@@ -11,6 +11,17 @@ export function moduleCode(module, {large = false} = {}) {
 // Abbreviation and name as plain inline text, for breadcrumbs and titles.
 export function moduleLabel(module) {
   return [el('bdi', {}, module.abbr), ' ', localized(module.title)];
+}
+
+// One line of a module list: abbreviation, name and number of documents, linking to the module page.
+export function moduleRow(module, documentCount) {
+  return el('li', {},
+    el('a', {class: 'row', href: pageUrl('module.html', {id: module.id})},
+      moduleCode(module),
+      el('span', {class: 'row__title'}, localized(module.title)),
+      el('span', {class: 'row__meta'}, tCount('count.documents', documentCount))
+    )
+  );
 }
 
 export function loadingState() {

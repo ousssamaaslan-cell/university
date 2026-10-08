@@ -228,6 +228,8 @@ main:focus {
 .site-brand {
   display: grid;
   min-inline-size: 0;
+  /* Pushes the language switch and the search field to the far end of the row. */
+  margin-inline-end: auto;
   color: var(--color-text);
   text-decoration: none;
 }
@@ -280,6 +282,39 @@ main:focus {
   border-end-end-radius: 0;
   background: var(--color-accent-surface);
   color: var(--color-text);
+}
+
+/* The search field has its own row on a phone and joins the first row on a wide screen. */
+.site-search {
+  display: flex;
+  flex: 1 1 100%;
+  gap: var(--space-2);
+  /* Lets the form, and the field inside it, shrink to fit a narrow phone. */
+  min-inline-size: 0;
+}
+
+.site-search input {
+  flex: 1 1 auto;
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--tap);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.site-search input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+@media (min-width: 60rem) {
+  .site-search {
+    flex: 0 1 21rem;
+  }
 }
 
 /* ---------- Notice ---------- */
@@ -578,9 +613,14 @@ a.row:hover .row__title {
   font: inherit;
 }
 
+/* Used by real buttons and by links that act on a document (Voir, Télécharger). */
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-block-size: var(--tap);
   padding-inline: var(--space-4);
+  text-decoration: none;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   background: var(--color-bg);
@@ -677,12 +717,37 @@ a.row:hover .row__title {
   line-height: 1.6;
 }
 
-.resource__actions:empty {
-  display: none;
+/* Voir and Télécharger, or the missing-file message. Under the tags on a phone, at the end of the row from a tablet up. */
+.resource__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-self: start;
+  margin-block-start: var(--space-2);
 }
 
-.resource__actions {
-  justify-self: start;
+/* ---------- Search results ---------- */
+
+.search__note {
+  margin-block-end: var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.result-group + .result-group {
+  margin-block-start: var(--space-6);
+}
+
+.result-group__title {
+  margin-block-end: var(--space-2);
+  font-size: var(--text-md);
+}
+
+.result-group__title a {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding-block: var(--space-2);
 }
 
 @media (min-width: 36rem) {
@@ -697,7 +762,10 @@ a.row:hover .row__title {
   }
 
   .resource__actions {
+    align-self: center;
     justify-self: end;
+    flex-wrap: nowrap;
+    margin-block-start: 0;
   }
 }
 

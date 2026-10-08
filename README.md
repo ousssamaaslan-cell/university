@@ -2,7 +2,7 @@
 
 A public resource library for Licence 2 Informatique students at Université Mohammed Seddik Benyahia – Jijel. Students pick a semester and a module, then view or download its Cours, TD, TP, and Examens as PDFs.
 
-**The site is under construction.** Built so far: the home page with both semesters, module pages with Cours, TD, TP, and Examens tabs, the year and session filters on Examens, empty and missing-file states, and the 404 page. Not built yet: search, and the View and Download actions for PDFs. The catalogue holds sample records and placeholder PDFs only; see "Sample data" below.
+**The site is under construction.** Built so far: the home page with both semesters, module pages with Cours, TD, TP, and Examens tabs, the year and session filters on Examens, search across modules and documents, "Voir" and "Télécharger" for each PDF, empty and missing-file states, and the 404 page. Still to do: the quality pass and deployment to GitHub Pages. The catalogue holds sample records and placeholder PDFs only; see "Sample data" below.
 
 ## What is confirmed
 
@@ -10,7 +10,7 @@ A public resource library for Licence 2 Informatique students at Université Moh
 - Seven S3 modules: ASD3, AO, SI, MN, POO1, PS1, GP. S4 is shown empty until its modules are supplied.
 - French by default and Arabic with RTL, with a language switch on every page. The Arabic text is a draft awaiting the maintainer's review.
 - Plain HTML, CSS, and browser JavaScript, with no framework, site build step, or npm dependencies.
-- Files: `index.html`, `module.html?id=<module-id>`, `404.html`, and `data/resources.json`; PDFs under `pdfs/<semester>/<module-id>/`.
+- Files: `index.html`, `module.html?id=<module-id>`, `search.html?q=<words>`, `404.html`, and `data/resources.json`; PDFs under `pdfs/<semester>/<module-id>/`.
 - One maintainer adds or removes catalogue entries and local PDFs, then republishes the static site. There is no admin dashboard, backend, or Google Drive integration.
 - GitHub Pages is the selected future host. The repository is connected to the GitHub remote `origin`; Pages is not enabled yet. The site uses relative paths so it works at a project subpath.
 

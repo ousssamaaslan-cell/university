@@ -1,9 +1,9 @@
 // Home page: every semester with its modules.
 import {el} from './dom.js';
-import {t, tCount, localized, pageUrl} from './i18n.js';
+import {t, tCount, localized} from './i18n.js';
 import {loadCatalogue, semestersOf, modulesOf, resourcesOf, semesterAnchor} from './catalogue.js';
 import {renderLayout, renderSampleNotice} from './layout.js';
-import {moduleCode, loadingState, errorState, emptyState} from './components.js';
+import {moduleRow, loadingState, errorState, emptyState} from './components.js';
 
 const main = document.getElementById('main');
 
@@ -11,16 +11,6 @@ function pageHeader() {
   return el('header', {class: 'page-header'},
     el('h1', {}, t('home.title')),
     el('p', {class: 'lede'}, t('home.lede'))
-  );
-}
-
-function moduleRow(catalogue, module) {
-  return el('li', {},
-    el('a', {class: 'row', href: pageUrl('module.html', {id: module.id})},
-      moduleCode(module),
-      el('span', {class: 'row__title'}, localized(module.title)),
-      el('span', {class: 'row__meta'}, tCount('count.documents', resourcesOf(catalogue, module.id).length))
-    )
   );
 }
 
@@ -33,7 +23,7 @@ function semesterSection(catalogue, semester) {
       modules.length > 0 && el('p', {class: 'section__count'}, tCount('count.modules', modules.length))
     ),
     modules.length > 0
-      ? el('ul', {class: 'row-list', role: 'list'}, modules.map(module => moduleRow(catalogue, module)))
+      ? el('ul', {class: 'row-list', role: 'list'}, modules.map(module => moduleRow(module, resourcesOf(catalogue, module.id).length)))
       : emptyState({title: t('semester.empty.title'), text: t('semester.empty.text')})
   );
 }

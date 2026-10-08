@@ -68,6 +68,30 @@ const strings = {
     'kind.controle': 'Contrôle',
     'sample.tag': 'Exemple',
     'file.missing': 'Fichier indisponible',
+    'file.size': 'PDF, {size}',
+    'action.view': 'Voir',
+    'action.download': 'Télécharger',
+    // Read by screen readers after "Voir" or "Télécharger", so each link says which document it opens.
+    'action.target': ' : {name} (PDF)',
+
+    'search.label': 'Rechercher un module ou un document',
+    'search.placeholder': 'Ex. : ASD3, examen',
+    'search.submit': 'Rechercher',
+    'search.docTitle': 'Recherche | Ressources L2 Informatique',
+    'search.docTitle.query': '« {query} » | Recherche | Ressources L2 Informatique',
+    'search.title': 'Recherche',
+    'search.prompt.title': 'Que cherchez-vous ?',
+    'search.prompt.text': "Tapez l'abréviation ou le nom d'un module (ASD3, Architecture…), ou un mot du titre d'un document.",
+    'search.short.title': 'Tapez au moins 2 caractères.',
+    'search.status': '{summary} pour « {query} »',
+    'search.none.title': 'Aucun résultat pour « {query} ».',
+    'search.none.text': "Vérifiez l'orthographe, essayez l'abréviation du module (ASD3, POO1…) ou un mot plus court.",
+    'search.none.action': 'Voir tous les modules',
+    'search.modules': 'Modules',
+    'search.documents': 'Documents',
+    'search.capped': 'Seuls les {shown} premiers documents sont affichés. Ajoutez un mot pour préciser la recherche.',
+    'marker.examen': 'Examen',
+    'list.separator': ', ',
 
     'filter.legend': 'Filtrer les examens',
     'filter.year': 'Année universitaire',
@@ -141,6 +165,29 @@ const strings = {
     'kind.controle': 'مراقبة مستمرة',
     'sample.tag': 'تجريبي',
     'file.missing': 'الملف غير متوفر',
+    'file.size': 'PDF، {size}',
+    'action.view': 'عرض',
+    'action.download': 'تحميل',
+    'action.target': ': {name} (PDF)',
+
+    'search.label': 'ابحث عن مقياس أو وثيقة',
+    'search.placeholder': 'مثال: ASD3، امتحان',
+    'search.submit': 'بحث',
+    'search.docTitle': 'البحث | موارد السنة الثانية ليسانس إعلام آلي',
+    'search.docTitle.query': '«{query}» | البحث | موارد السنة الثانية ليسانس إعلام آلي',
+    'search.title': 'البحث',
+    'search.prompt.title': 'عمّ تبحث؟',
+    'search.prompt.text': 'اكتب اختصار المقياس أو اسمه (ASD3، بنية الحواسيب…)، أو كلمة من عنوان الوثيقة.',
+    'search.short.title': 'اكتب حرفين على الأقل.',
+    'search.status': '{summary} لـ «{query}»',
+    'search.none.title': 'لا توجد نتائج لـ «{query}».',
+    'search.none.text': 'تحقق من الكتابة، أو جرّب اختصار المقياس (ASD3، POO1…)، أو كلمة أقصر.',
+    'search.none.action': 'عرض كل المقاييس',
+    'search.modules': 'المقاييس',
+    'search.documents': 'الوثائق',
+    'search.capped': 'تُعرض أول {shown} وثيقة فقط. أضف كلمة لتدقيق البحث.',
+    'marker.examen': 'امتحان',
+    'list.separator': '، ',
 
     'filter.legend': 'تصفية الامتحانات',
     'filter.year': 'السنة الجامعية',
@@ -185,10 +232,29 @@ const strings = {
 
 const pluralRules = new Intl.PluralRules(lang);
 
+function fill(template, values) {
+  return template.replace(/\{(\w+)\}/g, (placeholder, name) => values[name] ?? placeholder);
+}
+
 // Returns the label for a key, with {name} placeholders filled from values.
 export function t(key, values = {}) {
-  const template = strings[lang][key] ?? strings[DEFAULT_LANG][key] ?? key;
-  return template.replace(/\{(\w+)\}/g, (placeholder, name) => values[name] ?? placeholder);
+  return fill(strings[lang][key] ?? strings[DEFAULT_LANG][key] ?? key, values);
+}
+
+// The same label in every language. Search uses it, because a reader may type in either language.
+export function everyLanguage(key, values = {}) {
+  return languages.map(language => fill(strings[language.code][key], values));
+}
+
+// "14 ko" or "1,4 Mo". Digits stay Western in Arabic, as elsewhere on the site.
+export function formatFileSize(bytes) {
+  const inMegabytes = bytes >= 1000 * 1000;
+  return new Intl.NumberFormat(lang === 'ar' ? 'ar-DZ' : 'fr-DZ', {
+    style: 'unit',
+    unit: inMegabytes ? 'megabyte' : 'kilobyte',
+    unitDisplay: 'short',
+    maximumFractionDigits: inMegabytes ? 1 : 0
+  }).format(inMegabytes ? bytes / (1000 * 1000) : Math.max(1, bytes / 1000));
 }
 
 // Returns a counted label such as "3 documents", in the right plural form for the language.

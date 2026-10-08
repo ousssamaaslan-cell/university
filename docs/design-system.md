@@ -81,8 +81,16 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 - **Tabs.** Four equal buttons for Cours, TD, TP, Examens: two by two on a phone, four across from 40rem. Each shows its document count. The open tab is marked by a fill, a heavier edge, and a bar. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction.
 - **Resource rows.** The chapter or sheet number ("Chapitre 2", "TD 3") sits above the title on a phone and in its own column from 36rem. Facts about the document are tags under the title, each in words: exam kind, session, year, "Avec corrigé" or "Sans corrigé". Only "Avec corrigé" is filled green, so it is the one a student spots first.
 - **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, the number of exams shown is announced, and the reset button appears only while a filter is set.
-- **Sample and missing files.** A sample record carries an "Exemple" tag. A document whose PDF is not on the server shows "Fichier indisponible" at the end of its row instead of any action.
+- **Actions.** "Voir" and "Télécharger" are two outlined buttons of equal weight, under the tags on a phone and at the end of the row from 36rem. Each also names its document for screen readers. The file size appears as one more tag ("PDF, 1,4 Mo").
+- **Sample and missing files.** A sample record carries an "Exemple" tag. A document whose PDF is not on the server shows "Fichier indisponible" at the end of its row instead of the two actions.
 - **Empty states.** An empty tab says which type has nothing yet. A module with no documents at all shows one message and no tabs. Filters with no match explain how to widen them.
+
+### Search
+
+- **Header field.** On every page, after the language switch: its own row on a phone, the end of the first row from 60rem. It is a plain form with a "Rechercher" button, so Enter works and the result address can be shared.
+- **Results page.** A line under the heading states the outcome ("1 module, 22 documents pour « asd3 »") and is announced to screen readers. Modules come first, in the same rows as the home page. Documents follow, grouped under a link to their module, in the same rows as the module page; an exam is marked "Examen" and carries its year, since it is no longer under a year heading.
+- **While typing.** On the results page the list updates after a short pause in typing.
+- **States.** Nothing typed, fewer than two characters, no match (with ways to widen the search and a link to all modules), and a load error are four different messages. At most 30 documents are listed; beyond that the page asks for one more word.
 
 ## Language and direction
 

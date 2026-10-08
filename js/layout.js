@@ -2,7 +2,7 @@
 // breadcrumb and footer. Each page has an empty <header data-site-header> and
 // <footer data-site-footer>; this file fills them, so the markup lives in one place.
 import {el} from './dom.js';
-import {t, lang, languages, pageUrl, languageUrl} from './i18n.js';
+import {t, lang, languages, pageUrl, languageUrl, DEFAULT_LANG} from './i18n.js';
 import {isSample} from './catalogue.js';
 
 // Call once per page. `breadcrumb` is the first trail to show (see renderBreadcrumb).
@@ -26,7 +26,8 @@ export function renderLayout({breadcrumb}) {
         el('span', {class: 'site-brand__name'}, t('site.name')),
         el('span', {class: 'site-brand__org'}, t('site.university'))
       ),
-      languageSwitch()
+      languageSwitch(),
+      searchForm()
     )
   );
 
@@ -55,6 +56,25 @@ function languageSwitch() {
         )
       )
     )
+  );
+}
+
+// The search field, on every page. It is a plain form that opens search.html?q=..., so it works
+// with the Enter key and needs no script of its own. On search.html, js/search.js makes it live.
+function searchForm() {
+  return el('form', {class: 'site-search', role: 'search', action: 'search.html', method: 'get'},
+    el('label', {class: 'visually-hidden', for: 'site-search'}, t('search.label')),
+    el('input', {
+      id: 'site-search',
+      type: 'search',
+      name: 'q',
+      value: new URLSearchParams(location.search).get('q') ?? '',
+      placeholder: t('search.placeholder'),
+      enterkeyhint: 'search'
+    }),
+    // Keeps the results in the reader's language.
+    lang !== DEFAULT_LANG && el('input', {type: 'hidden', name: 'lang', value: lang}),
+    el('button', {class: 'button', type: 'submit'}, t('search.submit'))
   );
 }
 
