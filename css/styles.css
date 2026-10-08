@@ -797,11 +797,19 @@ a.resource__link:hover .resource__title {
   color: var(--color-text-muted);
 }
 
+/* "Fichier indisponible", then the link to report it. */
 .resource__missing {
+  display: flex;
+  flex-wrap: wrap;
   grid-column: 1 / -1;
   grid-row: 2;
-  color: var(--color-error-text);
+  align-items: baseline;
+  column-gap: var(--space-4);
   font-size: var(--text-sm);
+}
+
+.resource__missing-label {
+  color: var(--color-error-text);
   font-weight: 600;
 }
 
@@ -931,13 +939,25 @@ a.resource__link:hover .resource__title {
   font-size: var(--text-sm);
 }
 
+/* The report link ends the footer; its own padding makes the space under it. */
 .site-footer__inner {
   display: grid;
   gap: var(--space-1);
-  padding-block: var(--space-5);
+  padding-block: var(--space-5) var(--space-3);
+}
+
+.site-footer p {
+  max-inline-size: var(--measure);
 }
 
 .site-footer__name {
   color: var(--color-text);
   font-weight: 600;
+}
+
+.site-footer__report {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
 }

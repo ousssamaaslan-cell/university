@@ -17,8 +17,21 @@ const strings = {
   fr: {
     'site.name': 'Ressources L2 Informatique',
     'site.university': 'Université Mohammed Seddik Benyahia – Jijel',
-    'site.about': 'Cours, TD, TP et examens de Licence 2 Informatique.',
     'skip': 'Aller au contenu',
+
+    // The footer: who runs the site, when it last changed, and how to report a problem.
+    'footer.status': "Site tenu par des étudiants. Ce n'est pas un site officiel de l'Université Mohammed Seddik Benyahia – Jijel.",
+    'footer.updated': 'Dernière mise à jour :',
+    'report.prompt': 'Un fichier manquant ou incorrect ?',
+    'report.label': 'Signaler une erreur',
+    // Read by screen readers only. After "Signaler une erreur": which document.
+    'report.target': ' : {name}',
+    // The email that "Signaler une erreur" prepares.
+    'report.subject': 'Erreur sur le site Ressources L2 Informatique',
+    'report.body.prompt': "Décrivez l'erreur :",
+    'report.body.page': 'Page : {url}',
+    'report.body.file': 'Fichier indisponible : {path}',
+
     'lang.label': 'Langue',
     'breadcrumb.label': "Fil d'Ariane",
     'breadcrumb.home': 'Accueil',
@@ -122,8 +135,18 @@ const strings = {
   ar: {
     'site.name': 'موارد السنة الثانية ليسانس إعلام آلي',
     'site.university': 'جامعة محمد الصديق بن يحيى – جيجل',
-    'site.about': 'دروس وأعمال موجهة وأعمال تطبيقية وامتحانات السنة الثانية ليسانس إعلام آلي.',
     'skip': 'انتقل إلى المحتوى',
+
+    'footer.status': 'موقع يديره طلبة، وليس موقعًا رسميًا لجامعة محمد الصديق بن يحيى – جيجل.',
+    'footer.updated': 'آخر تحديث:',
+    'report.prompt': 'ملف ناقص أو خاطئ؟',
+    'report.label': 'الإبلاغ عن خطأ',
+    'report.target': ': {name}',
+    'report.subject': 'خطأ في موقع موارد السنة الثانية ليسانس إعلام آلي',
+    'report.body.prompt': 'صف الخطأ:',
+    'report.body.page': 'الصفحة: {url}',
+    'report.body.file': 'الملف غير متوفر: {path}',
+
     'lang.label': 'اللغة',
     'breadcrumb.label': 'مسار التصفح',
     'breadcrumb.home': 'الرئيسية',
@@ -266,6 +289,12 @@ export function formatFileSize(bytes) {
     unitDisplay: 'short',
     maximumFractionDigits: inMegabytes ? 1 : 0
   }).format(inMegabytes ? bytes / (1000 * 1000) : Math.max(1, bytes / 1000));
+}
+
+// "8 octobre 2026". Digits stay Western in Arabic, as elsewhere on the site.
+// The day is the one in Algeria, so every reader sees the same date whatever their device's clock zone.
+export function formatDate(date) {
+  return new Intl.DateTimeFormat(lang === 'ar' ? 'ar-DZ' : 'fr-DZ', {dateStyle: 'long', timeZone: 'Africa/Algiers'}).format(date);
 }
 
 // Returns a counted label such as "3 documents", in the right plural form for the language.

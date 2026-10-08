@@ -6,7 +6,7 @@
 import {el} from './dom.js';
 import {t, tCount, localized, pageUrl, everyLanguage} from './i18n.js';
 import {RESOURCE_TYPES, loadCatalogue, semestersOf, modulesOf, resourcesOf, sortedResources} from './catalogue.js';
-import {renderLayout, renderSampleNotice, homeCrumb, updateLanguageLinks} from './layout.js';
+import {renderLayout, renderCatalogueFacts, homeCrumb, updateLanguageLinks} from './layout.js';
 import {moduleCode, moduleRow, loadingState, errorState, emptyState, actionLink} from './components.js';
 import {resourceList} from './resource-list.js';
 
@@ -163,7 +163,7 @@ async function start() {
 
   try {
     const catalogue = await loadCatalogue();
-    renderSampleNotice(catalogue);
+    renderCatalogueFacts(catalogue);
     const index = buildIndex(catalogue);
 
     const show = () => {

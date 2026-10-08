@@ -5,6 +5,7 @@ import {el} from './dom.js';
 import {t, localized, formatFileSize} from './i18n.js';
 import {isSample} from './catalogue.js';
 import {checkFile} from './files.js';
+import {reportLink} from './components.js';
 
 // "Chapitre 2", "TD 3" or "TP 1". On a module page exams have no number, because they sit under a year heading.
 // In a mixed list (search results) an exam is marked with its academic year instead.
@@ -60,9 +61,10 @@ function resourceItem(resource, mixed) {
   );
   // The same address with the download attribute, which tells the browser to save the file instead.
   // No PDF is loaded until a click.
+  const documentName = mark ? `${mark}${t('list.separator')}${title}` : title;
   const download = el('a', {class: 'button resource__download', href: resource.pdfPath, download: true},
     t('action.download'),
-    el('span', {class: 'visually-hidden'}, t('action.target', {name: mark ? `${mark}, ${title}` : title}))
+    el('span', {class: 'visually-hidden'}, t('action.target', {name: documentName}))
   );
   const fileSize = sizeFact();
   const factList = el('ul', {class: 'facts', role: 'list'}, facts(resource), fileSize.node);
@@ -75,11 +77,15 @@ function resourceItem(resource, mixed) {
     if (state === 'missing') {
       // A catalogue entry whose PDF is not on the server must not look like a working document:
       // the title stops being a link, and one message replaces the button and the facts.
+      // Beside the message, a link lets the reader tell the maintainer which file is missing.
       console.warn(`Missing PDF: ${resource.pdfPath} (resource ${resource.id})`);
       item.classList.add('resource--missing');
       link.replaceWith(el('div', {class: 'resource__link'}, heading()));
       download.remove();
-      factList.replaceWith(el('p', {class: 'resource__missing'}, t('file.missing')));
+      factList.replaceWith(el('p', {class: 'resource__missing'},
+        el('span', {class: 'resource__missing-label'}, t('file.missing')),
+        reportLink({file: resource.pdfPath, name: documentName})
+      ));
     } else if (size) {
       fileSize.size.replaceChildren(t('list.separator'), el('bdi', {}, formatFileSize(size)));
     }

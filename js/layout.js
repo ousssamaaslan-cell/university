@@ -1,9 +1,10 @@
-// The parts every page shares: skip link, header, language switch, sample-data notice,
+// The parts every page shares: skip link, header, language switch, search field, sample-data notice,
 // breadcrumb and footer. Each page has an empty <header data-site-header> and
 // <footer data-site-footer>; this file fills them, so the markup lives in one place.
 import {el} from './dom.js';
-import {t, lang, languages, pageUrl, languageUrl, DEFAULT_LANG} from './i18n.js';
+import {t, lang, languages, pageUrl, languageUrl, formatDate, DEFAULT_LANG} from './i18n.js';
 import {isSample} from './catalogue.js';
+import {reportLink} from './components.js';
 
 // Call once per page. `breadcrumb` is the trail to show first (see renderBreadcrumb).
 export function renderLayout({breadcrumb}) {
@@ -34,8 +35,11 @@ export function renderLayout({breadcrumb}) {
   footer.replaceChildren(
     el('div', {class: 'site-footer__inner page-width'},
       el('p', {class: 'site-footer__name'}, t('site.name')),
-      el('p', {}, t('site.university')),
-      el('p', {}, t('site.about'))
+      // Who runs the site: students, not the university (docs/project-brief.md).
+      el('p', {}, t('footer.status')),
+      // Empty until renderCatalogueFacts knows the date.
+      el('p', {'data-last-update': true, hidden: true}),
+      el('p', {class: 'site-footer__report'}, t('report.prompt'), ' ', reportLink())
     )
   );
 
@@ -107,12 +111,30 @@ export function homeCrumb() {
   return {label: t('breadcrumb.home'), href: pageUrl('index.html')};
 }
 
+// Call once the catalogue has loaded. It draws what the catalogue tells every page:
+// the sample-data notice and, in the footer, the date of the last update.
+export function renderCatalogueFacts(catalogue) {
+  renderSampleNotice(catalogue);
+  renderLastUpdate(catalogue);
+}
+
 // While the catalogue holds build-phase sample records, say so on every page.
-export function renderSampleNotice(catalogue) {
+function renderSampleNotice(catalogue) {
   if (!catalogue.resources.some(isSample) || document.querySelector('[data-sample-notice]')) return;
   document.querySelector('[data-site-header]').after(
     el('div', {class: 'notice', role: 'note', 'data-sample-notice': true},
       el('p', {class: 'page-width'}, el('strong', {}, t('sample.title')), ' ', t('sample.text'))
     )
   );
+}
+
+// The date comes from the server (js/catalogue.js). When the server gives none, the line stays hidden.
+function renderLastUpdate(catalogue) {
+  if (!catalogue.lastModified) return;
+  const line = document.querySelector('[data-last-update]');
+  line.replaceChildren(
+    t('footer.updated'), ' ',
+    el('time', {datetime: catalogue.lastModified.toISOString()}, formatDate(catalogue.lastModified))
+  );
+  line.hidden = false;
 }

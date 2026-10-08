@@ -18,6 +18,10 @@ export async function loadCatalogue() {
   for (const key of ['semesters', 'modules', 'resources']) {
     if (!Array.isArray(catalogue[key])) throw new Error(`Catalogue has no "${key}" list`);
   }
+  // When the catalogue file last changed on the server, or null if the server does not say.
+  // The footer shows it as the date of the last update, so nobody has to type that date.
+  const modified = new Date(response.headers.get('last-modified') ?? '');
+  catalogue.lastModified = Number.isNaN(modified.getTime()) ? null : modified;
   return catalogue;
 }
 

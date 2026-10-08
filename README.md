@@ -12,6 +12,7 @@ A public resource library for Licence 2 Informatique students at Université Moh
 - Plain HTML, CSS, and browser JavaScript, with no framework, site build step, or npm dependencies.
 - Files: `index.html`, `module.html?id=<module-id>`, `search.html?q=<words>`, `404.html`, and `data/resources.json`; PDFs under `pdfs/<semester>/<module-id>/`.
 - One maintainer adds or removes catalogue entries and local PDFs, then republishes the static site. There is no admin dashboard, backend, or Google Drive integration.
+- The site is run by students and is not an official university site; the footer says so. "Signaler une erreur" opens an email to the maintainer. The address is set once, as `REPORT_EMAIL` in `js/components.js`. The footer's date of the last update comes from the server, so nobody types it.
 - GitHub Pages is the selected future host. The repository is connected to the GitHub remote `origin`; Pages is not enabled yet. The site uses relative paths so it works at a project subpath.
 
 See `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` for the full decisions.

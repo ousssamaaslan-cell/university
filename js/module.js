@@ -7,7 +7,7 @@
 import {el} from './dom.js';
 import {t, tCount, localized, pageUrl} from './i18n.js';
 import {RESOURCE_TYPES, SESSIONS, loadCatalogue, findModule, findSemester, resourcesOf, sortedResources, semesterAnchor} from './catalogue.js';
-import {renderLayout, renderBreadcrumb, renderSampleNotice, homeCrumb, updateLanguageLinks} from './layout.js';
+import {renderLayout, renderBreadcrumb, renderCatalogueFacts, homeCrumb, updateLanguageLinks} from './layout.js';
 import {moduleCode, loadingState, errorState, emptyState, actionLink} from './components.js';
 import {createTabs} from './tabs.js';
 import {resourceList} from './resource-list.js';
@@ -187,7 +187,7 @@ async function start() {
 
   try {
     const catalogue = await loadCatalogue();
-    renderSampleNotice(catalogue);
+    renderCatalogueFacts(catalogue);
     const moduleId = params.get('id');
     const module = moduleId ? findModule(catalogue, moduleId) : null;
     content.replaceChildren(...(module ? modulePage(catalogue, module) : moduleNotFound()));

@@ -2,7 +2,7 @@
 import {el} from './dom.js';
 import {t, tCount, localized} from './i18n.js';
 import {loadCatalogue, semestersOf, modulesOf, resourcesOf, semesterAnchor} from './catalogue.js';
-import {renderLayout, renderSampleNotice} from './layout.js';
+import {renderLayout, renderCatalogueFacts} from './layout.js';
 import {moduleRow, loadingState, errorState, emptyState} from './components.js';
 
 const main = document.getElementById('main');
@@ -37,7 +37,7 @@ async function start() {
 
   try {
     const catalogue = await loadCatalogue();
-    renderSampleNotice(catalogue);
+    renderCatalogueFacts(catalogue);
     content.replaceChildren(pageHeader(), ...semestersOf(catalogue).map(semester => semesterSection(catalogue, semester)));
 
     // The sections did not exist when the browser first looked for #s3 or #s4, so go there now.
