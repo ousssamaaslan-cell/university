@@ -13,7 +13,8 @@
 - Pages: `index.html` lists S3/S4 and modules; `module.html?id=<module-id>` lists one module's resources under Cours, TD, TP, and Examens tabs; `404.html` handles unknown addresses on the static host. One script injects the shared header and footer, and every page has a breadcrumb.
 - Search: matches a module's full name and its abbreviation, and resource titles, in both languages.
 - Filters: the Examens tab filters by academic year and session (normal or rattrapage). Cours, TD, and TP have no session filter.
-- PDF behavior: provide a working view link and download link for each published resource. Missing PDFs must not appear as working links.
+- Shareable views: the module page keeps the open tab and the exam filters in its address (`type=`, `year=`, `session=`), so a link opens the same view.
+- PDF behavior: provide a working view link and download link for each published resource. Missing PDFs must not appear as working links: the module page asks the server whether each listed PDF exists, without downloading it, and marks a missing one "Fichier indisponible".
 
 ## Content administration
 

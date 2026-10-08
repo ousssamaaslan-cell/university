@@ -4,6 +4,9 @@
 // The four resource types, in the order module pages show them.
 export const RESOURCE_TYPES = ['cours', 'td', 'tp', 'examen'];
 
+// Exam sessions, in the order the session filter lists them.
+export const SESSIONS = ['normal', 'rattrapage'];
+
 const CATALOGUE_URL = 'data/resources.json';
 
 // "no-cache" makes the browser check for a newer catalogue on every visit,
@@ -41,6 +44,23 @@ export function findSemester(catalogue, semesterId) {
 // All resources of a module, or only those of one type.
 export function resourcesOf(catalogue, moduleId, type = null) {
   return catalogue.resources.filter(resource => resource.module === moduleId && (type === null || resource.type === type));
+}
+
+const byTitle = (a, b) => a.title.fr.localeCompare(b.title.fr, 'fr');
+const newestYearFirst = (a, b) => (b.academicYear ?? '').localeCompare(a.academicYear ?? '');
+const bySheetNumber = (a, b) => a.number - b.number || newestYearFirst(a, b) || byOrder(a, b) || byTitle(a, b);
+
+// Display order of each type, as tabulated in docs/content-model.md.
+const displayOrder = {
+  cours: (a, b) => a.chapter - b.chapter || byOrder(a, b) || byTitle(a, b),
+  td: bySheetNumber,
+  tp: bySheetNumber,
+  examen: (a, b) => newestYearFirst(a, b) || byOrder(a, b) || byTitle(a, b)
+};
+
+// The resources of one type in a module, in the order the module page lists them.
+export function sortedResources(catalogue, moduleId, type) {
+  return resourcesOf(catalogue, moduleId, type).sort(displayOrder[type]);
 }
 
 // Build-phase sample records have an ID starting with "sample-" (docs/project-brief.md).

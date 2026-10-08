@@ -32,15 +32,51 @@ const strings = {
     'semester.empty.text': 'Les modules de ce semestre seront ajoutés ici.',
 
     'module.docTitle': '{abbr} {title} | Ressources L2 Informatique',
-    'module.types.title': 'Documents par type',
+    'module.empty.title': 'Aucun document pour ce module pour le moment.',
+    'module.empty.text': 'Les cours, TD, TP et examens apparaîtront ici dès leur ajout.',
     'module.notFound.title': 'Module introuvable',
     'module.notFound.text': "Aucun module ne correspond à cette adresse. Vérifiez le lien, ou choisissez un module depuis l'accueil.",
     'module.notFound.action': 'Voir tous les modules',
 
+    'notFound.docTitle': 'Page introuvable | Ressources L2 Informatique',
+    'notFound.title': 'Page introuvable',
+    'notFound.text': 'Cette adresse ne correspond à aucune page du site. Le lien est peut-être incomplet ou ancien.',
+    'notFound.action': 'Voir tous les modules',
+
+    'tabs.label': 'Types de documents',
     'type.cours': 'Cours',
     'type.td': 'TD',
     'type.tp': 'TP',
     'type.examen': 'Examens',
+    'empty.cours': 'Aucun cours pour le moment.',
+    'empty.td': 'Aucun TD pour le moment.',
+    'empty.tp': 'Aucun TP pour le moment.',
+    'empty.examen': 'Aucun examen pour le moment.',
+    'empty.text': 'Les documents apparaîtront ici dès leur ajout.',
+
+    // What a resource row shows: its number, then facts about it.
+    'marker.cours': 'Chapitre {n}',
+    'marker.td': 'TD {n}',
+    'marker.tp': 'TP {n}',
+    'correction.yes': 'Avec corrigé',
+    'correction.tp.yes': 'Avec corrigé ou code',
+    'correction.no': 'Sans corrigé',
+    'session.normal': 'Session normale',
+    'session.rattrapage': 'Session de rattrapage',
+    'kind.emd': 'EMD',
+    'kind.final': 'Examen final',
+    'kind.controle': 'Contrôle',
+    'sample.tag': 'Exemple',
+    'file.missing': 'Fichier indisponible',
+
+    'filter.legend': 'Filtrer les examens',
+    'filter.year': 'Année universitaire',
+    'filter.year.all': 'Toutes les années',
+    'filter.session': 'Session',
+    'filter.session.all': 'Toutes les sessions',
+    'filter.reset': 'Réinitialiser les filtres',
+    'filter.none.title': 'Aucun examen ne correspond à ces filtres.',
+    'filter.none.text': "Changez l'année ou la session, ou réinitialisez les filtres.",
 
     'loading': 'Chargement…',
     'error.title': "La liste des documents n'a pas pu être chargée.",
@@ -48,7 +84,8 @@ const strings = {
     'error.action': 'Recharger la page',
 
     'count.modules': {one: '{count} module', other: '{count} modules'},
-    'count.documents': {zero: 'Aucun document', one: '{count} document', other: '{count} documents'}
+    'count.documents': {zero: 'Aucun document', one: '{count} document', other: '{count} documents'},
+    'count.exams': {zero: 'Aucun examen', one: '{count} examen', other: '{count} examens'}
   },
 
   ar: {
@@ -69,15 +106,50 @@ const strings = {
     'semester.empty.text': 'ستُضاف مقاييس هذا السداسي هنا.',
 
     'module.docTitle': '{abbr} {title} | موارد السنة الثانية ليسانس إعلام آلي',
-    'module.types.title': 'الوثائق حسب النوع',
+    'module.empty.title': 'لا توجد وثائق لهذا المقياس حاليًا.',
+    'module.empty.text': 'ستظهر الدروس والأعمال الموجهة والأعمال التطبيقية والامتحانات هنا فور إضافتها.',
     'module.notFound.title': 'المقياس غير موجود',
     'module.notFound.text': 'لا يوجد مقياس يطابق هذا العنوان. تحقق من الرابط، أو اختر مقياسًا من الصفحة الرئيسية.',
     'module.notFound.action': 'عرض كل المقاييس',
 
+    'notFound.docTitle': 'الصفحة غير موجودة | موارد السنة الثانية ليسانس إعلام آلي',
+    'notFound.title': 'الصفحة غير موجودة',
+    'notFound.text': 'هذا العنوان لا يطابق أي صفحة في الموقع. قد يكون الرابط ناقصًا أو قديمًا.',
+    'notFound.action': 'عرض كل المقاييس',
+
+    'tabs.label': 'أنواع الوثائق',
     'type.cours': 'دروس',
     'type.td': 'أعمال موجهة (TD)',
     'type.tp': 'أعمال تطبيقية (TP)',
     'type.examen': 'امتحانات',
+    'empty.cours': 'لا توجد دروس حاليًا.',
+    'empty.td': 'لا توجد أعمال موجهة حاليًا.',
+    'empty.tp': 'لا توجد أعمال تطبيقية حاليًا.',
+    'empty.examen': 'لا توجد امتحانات حاليًا.',
+    'empty.text': 'ستظهر الوثائق هنا فور إضافتها.',
+
+    'marker.cours': 'الفصل {n}',
+    'marker.td': 'TD {n}',
+    'marker.tp': 'TP {n}',
+    'correction.yes': 'مع التصحيح',
+    'correction.tp.yes': 'مع التصحيح أو الكود',
+    'correction.no': 'بدون تصحيح',
+    'session.normal': 'الدورة العادية',
+    'session.rattrapage': 'الدورة الاستدراكية',
+    'kind.emd': 'امتحان متوسط المدة (EMD)',
+    'kind.final': 'الامتحان النهائي',
+    'kind.controle': 'مراقبة مستمرة',
+    'sample.tag': 'تجريبي',
+    'file.missing': 'الملف غير متوفر',
+
+    'filter.legend': 'تصفية الامتحانات',
+    'filter.year': 'السنة الجامعية',
+    'filter.year.all': 'كل السنوات',
+    'filter.session': 'الدورة',
+    'filter.session.all': 'كل الدورات',
+    'filter.reset': 'إعادة ضبط التصفية',
+    'filter.none.title': 'لا يوجد امتحان يطابق هذه التصفية.',
+    'filter.none.text': 'غيّر السنة أو الدورة، أو أعد ضبط التصفية.',
 
     'loading': 'جارٍ التحميل…',
     'error.title': 'تعذّر تحميل قائمة الوثائق.',
@@ -99,6 +171,14 @@ const strings = {
       few: '{count} وثائق',
       many: '{count} وثيقة',
       other: '{count} وثيقة'
+    },
+    'count.exams': {
+      zero: 'لا توجد امتحانات',
+      one: 'امتحان واحد',
+      two: 'امتحانان',
+      few: '{count} امتحانات',
+      many: '{count} امتحانًا',
+      other: '{count} امتحان'
     }
   }
 };
@@ -134,8 +214,9 @@ export function pageUrl(page, params = {}, hash = '') {
 }
 
 // Link to the page the reader is on, in another language.
+// It starts from the page's own path, so it also works on 404.html, which sets a <base>.
 export function languageUrl(code) {
   const url = new URL(location.href);
   url.searchParams.set('lang', code);
-  return url.search + url.hash;
+  return url.pathname + url.search + url.hash;
 }

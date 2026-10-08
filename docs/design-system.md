@@ -76,6 +76,14 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 - Use text labels with icons where icons help. Do not use icons as the only identifier for an action.
 - Show a visible focus indicator and clear hover/active states.
 
+### Module page
+
+- **Tabs.** Four equal buttons for Cours, TD, TP, Examens: two by two on a phone, four across from 40rem. Each shows its document count. The open tab is marked by a fill, a heavier edge, and a bar. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction.
+- **Resource rows.** The chapter or sheet number ("Chapitre 2", "TD 3") sits above the title on a phone and in its own column from 36rem. Facts about the document are tags under the title, each in words: exam kind, session, year, "Avec corrigé" or "Sans corrigé". Only "Avec corrigé" is filled green, so it is the one a student spots first.
+- **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, the number of exams shown is announced, and the reset button appears only while a filter is set.
+- **Sample and missing files.** A sample record carries an "Exemple" tag. A document whose PDF is not on the server shows "Fichier indisponible" at the end of its row instead of any action.
+- **Empty states.** An empty tab says which type has nothing yet. A module with no documents at all shows one message and no tabs. Filters with no match explain how to widen them.
+
 ## Language and direction
 
 The site is complete in French and Arabic. French is the default. The language switch is in the header on every page and names each language in its own script ("Français", "العربية"). The choice is kept in the URL (`?lang=ar`) and remembered in the browser.

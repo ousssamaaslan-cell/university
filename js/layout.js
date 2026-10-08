@@ -10,7 +10,15 @@ export function renderLayout({breadcrumb}) {
   const header = document.querySelector('[data-site-header]');
   const footer = document.querySelector('[data-site-footer]');
 
-  document.body.prepend(el('a', {class: 'skip-link', href: '#main'}, t('skip')));
+  const main = document.getElementById('main');
+  const skipLink = el('a', {class: 'skip-link', href: '#main'}, t('skip'));
+  // Move focus by script: on 404.html a <base> is set, and a plain "#main" link would leave the page.
+  skipLink.addEventListener('click', event => {
+    event.preventDefault();
+    main.focus();
+    main.scrollIntoView();
+  });
+  document.body.prepend(skipLink);
 
   header.replaceChildren(
     el('div', {class: 'site-header__inner page-width'},
@@ -48,6 +56,12 @@ function languageSwitch() {
       )
     )
   );
+}
+
+// Call after the address changes without a reload (a tab or filter was chosen),
+// so that switching language keeps the reader on the same view.
+export function updateLanguageLinks() {
+  for (const link of document.querySelectorAll('.lang-switch a')) link.href = languageUrl(link.lang);
 }
 
 // Draws the breadcrumb under the header, replacing any earlier one.

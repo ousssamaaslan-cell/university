@@ -169,6 +169,12 @@ function checkCatalogue() {
       const real = fs.realpathSync(target);
       if (!isInside(pdfRoot, real) || !fs.statSync(real).isFile() || fs.statSync(real).size === 0) fail(`Missing, empty, or unsafe PDF: ${item.pdfPath}`);
       else if (fs.readFileSync(real).subarray(0, 5).toString('latin1') !== '%PDF-') fail(`Not a PDF file: ${item.pdfPath}`);
+      // Windows ignores letter case in file names; GitHub Pages does not. Compare every folder and file name exactly.
+      let folder = root;
+      for (const name of item.pdfPath.split('/')) {
+        if (!fs.readdirSync(folder).includes(name)) { fail(`Letter case differs between the catalogue and the disk: ${item.pdfPath}`); break; }
+        folder = path.join(folder, name);
+      }
     } catch { fail(`Missing PDF: ${item.pdfPath}`); }
   }
   return {semesters: data.semesters.length, modules: data.modules.length, resources: data.resources.length, samples, status: 'checked'};

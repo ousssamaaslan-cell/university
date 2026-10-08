@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex" />
+    <title>Page introuvable | Ressources L2 Informatique</title>
+    <!--
+      Leave empty to let the script below find where the site starts.
+      Set it (for example "/" or "/my-folder/") only if this page loads without its styles on your host.
+    -->
+    <meta name="site-root" content="" />
+    <script>
+      // The host shows this file for any unknown address, at any folder depth, so links written
+      // as "css/styles.css" would point into a folder that does not exist. Work out where the
+      // site starts, tell the browser with <base>, then load the shared files from there.
+      (function () {
+        var path = location.pathname;
+        var root = document.querySelector('meta[name="site-root"]').content;
+        if (!root) {
+          if (/\/404(\.html)?$/.test(path)) {
+            // Opened directly, as during local preview: the site starts in this folder.
+            root = path.replace(/[^/]*$/, '');
+          } else if (/\.github\.io$/.test(location.hostname)) {
+            // A GitHub Pages project site lives at /<repository>/.
+            root = '/' + path.split('/')[1] + '/';
+          } else {
+            root = '/';
+          }
+        }
+
+        function add(tag, attributes) {
+          var node = document.createElement(tag);
+          for (var name in attributes) node.setAttribute(name, attributes[name]);
+          document.head.appendChild(node);
+          return node;
+        }
+
+        add('base', {href: root});
+        add('link', {rel: 'icon', href: 'assets/favicon.svg', type: 'image/svg+xml'});
+        add('link', {rel: 'stylesheet', href: 'css/styles.css'});
+        // The page script reads the language that js/lang.js sets, so it must load second.
+        add('script', {src: 'js/lang.js'}).onload = function () {
+          add('script', {type: 'module', src: 'js/not-found.js'});
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- js/layout.js fills the header and footer and adds the breadcrumb. -->
+    <header class="site-header" data-site-header></header>
+    <main id="main" tabindex="-1">
+      <noscript>
+        <p class="noscript" lang="fr">Page introuvable. Cette adresse ne correspond à aucune page du site.</p>
+        <p class="noscript" lang="ar" dir="rtl">الصفحة غير موجودة. هذا العنوان لا يطابق أي صفحة في الموقع.</p>
+      </noscript>
+    </main>
+    <footer class="site-footer" data-site-footer></footer>
+  </body>
+</html>
