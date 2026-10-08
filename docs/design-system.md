@@ -2,32 +2,87 @@
 
 ## Direction
 
-Use a calm academic style that makes the semester, module, resource type, and PDF action immediately clear. Prioritize reading and finding files over decoration. Use the university's official identity only after its name, branding, and permission to use assets are confirmed. Until then, use neutral typography and color; do not invent a logo or crest.
+Use a calm academic style that makes the semester, module, resource type, and PDF action immediately clear. Prioritize reading and finding files over decoration. No university logo, colours, or fonts were supplied, so the style is neutral; do not invent a logo or crest.
+
+The one distinctive element is the **module code**: the abbreviation students already use (ASD3, AO, POO1) set as a bold bordered mark beside the full name, like a shelf mark in a library catalogue. Everything around it stays quiet: white page, dark text, one blue used only for things a student can act on.
 
 ## Layout and navigation
 
 - Design mobile-first. Use one readable content column on narrow screens and expand only when the content benefits from it.
-- The homepage should make S3 and S4 easy to scan. Module pages should expose the module title, semester, breadcrumb back to the semester, search/filter controls, and the three resource groups.
+- The homepage should make S3 and S4 easy to scan. Module pages should expose the module code and title, semester, breadcrumb back to the semester, search/filter controls, and the four resource groups.
 - Keep navigation and PDF actions visible, clearly labeled, and reachable by keyboard. Avoid horizontal scrolling at 320 CSS pixels and test at 200% zoom.
-- Use a restrained spacing scale, consistent alignment, adequate tap targets, and a maximum reading width for text. Resource lists may use more horizontal space on large screens.
+- Align content to the start edge (left in French, right in Arabic). Do not centre body content.
+- Separate list rows with a rule, not with boxes and shadows. Use a filled surface only for notices and status messages.
+- The header holds the site name, the university name, and the language switch. Semester navigation is the home page itself plus the breadcrumb.
 
-## Typography and color
+## Tokens
 
-- Use a legible system font stack until approved university fonts are supplied. Maintain a clear heading hierarchy and readable body size and line height.
-- Define reusable semantic colors for page background, text, muted text, links, borders, focus, and status messages. Meet WCAG AA contrast for text and controls.
-- Never rely on color alone to distinguish Exams, Tutorials, Exercises, or solution availability.
+The values live as CSS custom properties at the top of `css/styles.css`. Change them there; this section records what was chosen and why. The maintainer agreed on 2026-10-07 that Claude chooses the neutral values.
 
-## Components and states for the later build
+### Color
 
-- Semester and module navigation; resource list/item; type label; year/session/solution metadata; search and filter controls; View PDF and Download PDF actions; breadcrumb; empty, loading, and error states.
+The site follows the reader's system setting for light or dark. Every pair below meets WCAG AA: at least 4.5:1 for text and 3:1 for control borders and the focus ring. The lowest measured text pair is muted text on the surface colour, 5.85:1.
+
+| Token | Light | Dark | Use |
+| --- | --- | --- | --- |
+| `--color-bg` | `#ffffff` | `#14181e` | Page background |
+| `--color-surface` | `#f3f5f8` | `#1c222b` | Footer, quiet panels |
+| `--color-text` | `#1b2430` | `#e7eaee` | Body text, headings, module code |
+| `--color-text-muted` | `#55606e` | `#aab3bf` | Secondary text, counts, metadata |
+| `--color-link` | `#1b4f9c` | `#9cc2ff` | Links, focus ring, current tab or filter |
+| `--color-link-hover` | `#123a75` | `#c3daff` | Hovered and pressed links |
+| `--color-border` | `#d3d9e0` | `#313a46` | Rules between rows, decorative edges |
+| `--color-border-strong` | `#737d89` | `#7d8896` | Borders of inputs, buttons, and the module code |
+| `--color-accent-surface` | `#e7eef9` | `#1f2f47` | Background of the current or selected item |
+| `--color-notice-bg` / `-text` / `-border` | `#fdf3d1` / `#4d3a00` / `#a37800` | `#3a2f0b` / `#f6e3a1` / `#c79a1c` | Sample-data notice, warnings |
+| `--color-ok-bg` / `-text` | `#e4f3ea` / `#17603a` | `#153223` / `#86d6a5` | "Correction available" |
+| `--color-error-bg` / `-text` / `-border` | `#fdeaea` / `#9b1c1c` / `#c53030` | `#3d1a1a` / `#ffb1b1` / `#e06b6b` | Load and file errors |
+
+Never rely on color alone to distinguish Cours, TD, TP, Examens, or correction availability. Each always has a text label.
+
+### Typography
+
+System fonts only, so nothing is downloaded and Arabic renders with the device's own Arabic face.
+
+- French: `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif`
+- Arabic: `system-ui, "Segoe UI", "Noto Sans Arabic", "Geeza Pro", Tahoma, Arial, sans-serif`
+
+| Token | Size | Use |
+| --- | --- | --- |
+| `--text-sm` | 0.875rem | Metadata, footer, breadcrumb |
+| `--text-base` | 1rem | Body |
+| `--text-md` | 1.125rem | Row titles, lead paragraph |
+| `--text-lg` | 1.375rem | Section headings (h2) |
+| `--text-xl` | 1.75rem to 2.25rem, fluid | Page heading (h1) |
+
+Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45. Headings are weight 700, the module code 700, everything else 400 or 600. Text lines stay under about 65 characters. Use sentence case; no all-capitals labels.
+
+### Spacing, shape, and size
+
+- Spacing scale: 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4 rem (`--space-1` to `--space-8`).
+- Page width: up to 64rem, with a side gutter between 1rem and 2rem.
+- Corners: 4px on controls and the module code, 8px on notices. No shadows.
+- Tap targets: at least 44 by 44 CSS pixels for links in lists, tabs, and buttons.
+- Focus: a 3px ring in `--color-link`, offset 2px, on every focusable element.
+- Motion: none on load. Transitions are limited to colour changes under 150ms and are removed under `prefers-reduced-motion`.
+
+## Components and states
+
+- Site header with language switch; site footer; breadcrumb; sample-data notice.
+- Module code; module row (code, full name, document count); semester section with its empty state.
+- Resource list and item; type label; chapter or sheet number; year, session, exam-kind, and correction metadata; View PDF and Download PDF actions.
+- Tabs for Cours, TD, TP, Examens; year and session filters on Examens; search.
+- Empty, loading, and error states. Say what is missing and what the student can do next.
 - Use text labels with icons where icons help. Do not use icons as the only identifier for an action.
-- Show a visible focus indicator and clear hover/active states. Respect `prefers-reduced-motion`; avoid nonessential animation.
+- Show a visible focus indicator and clear hover/active states.
 
 ## Language and direction
 
-The site will support French and Arabic. The exact Arabic translations and approved spelling of the university name in Arabic are still needed; do not invent them or publish mixed-language placeholders.
+The site is complete in French and Arabic. French is the default. The language switch is in the header on every page and names each language in its own script ("Français", "العربية"). The choice is kept in the URL (`?lang=ar`) and remembered in the browser.
 
-Set the appropriate `lang` for each language view and `dir="rtl"` for Arabic. Use CSS logical properties (`margin-inline`, `padding-inline`, `inset-inline`) and test breadcrumb direction, icons, search fields, numerals, filenames, and mixed French/Arabic text. Provide a consistent language switch and translated navigation, labels, metadata, empty states, and resource-type names. Preserve a sensible direction for each language.
+The Arabic text is drafted by Claude and awaits the maintainer's review; `docs/project-brief.md` lists what is pending.
+
+Set `lang` and `dir="rtl"` on the document for Arabic. Use CSS logical properties (`margin-inline`, `padding-inline`, `inset-inline`) so one stylesheet serves both directions. Module abbreviations, file names, and academic years stay in Latin letters and Western digits in the Arabic view and are isolated so they do not reorder the surrounding text. Test breadcrumb direction, icons, search fields, numerals, filenames, and mixed French/Arabic text.
 
 ## Assets
 

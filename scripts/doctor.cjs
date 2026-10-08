@@ -106,14 +106,35 @@ function checkCatalogue() {
   const text = value => typeof value === 'string' && value.trim().length > 0;
   const localized = value => value && typeof value === 'object' && !Array.isArray(value) &&
     Object.keys(value).length === 2 && text(value.fr) && text(value.ar);
+  const extraKeys = (item, allowed) => Object.keys(item || {}).filter(key => !allowed.includes(key));
+  // Type-specific resource fields, as tabulated in docs/content-model.md.
+  const baseFields = ['id', 'level', 'semester', 'module', 'type', 'title', 'pdfPath', 'order'];
+  const typeFields = {
+    cours: {required: ['chapter'], optional: ['academicYear']},
+    td: {required: ['number', 'hasCorrection'], optional: ['academicYear']},
+    tp: {required: ['number', 'hasCorrection'], optional: ['academicYear']},
+    examen: {required: ['academicYear', 'session', 'examKind', 'hasCorrection'], optional: []}
+  };
+  const fieldChecks = {
+    chapter: value => Number.isInteger(value) && value >= 0,
+    number: value => Number.isInteger(value) && value >= 1,
+    hasCorrection: value => typeof value === 'boolean',
+    academicYear: value => {
+      const year = typeof value === 'string' && value.match(/^([0-9]{4})-([0-9]{4})$/);
+      return Boolean(year) && Number(year[2]) === Number(year[1]) + 1;
+    },
+    session: value => ['normal', 'rattrapage'].includes(value),
+    examKind: value => ['emd', 'final', 'rattrapage', 'controle'].includes(value)
+  };
   for (const item of data.semesters) {
-    if (!item || !['S3', 'S4'].includes(item.id) || item.level !== 'L2' || !localized(item.label) || !ordered(item.order)) fail('Invalid semester record');
+    if (!item || !['S3', 'S4'].includes(item.id) || item.level !== 'L2' || !localized(item.label) || !ordered(item.order) || extraKeys(item, ['id', 'level', 'label', 'order']).length) fail('Invalid semester record');
     if (semIds.has(item?.id)) fail(`Duplicate semester: ${item.id}`);
     semIds.add(item?.id);
   }
   for (const id of ['S3', 'S4']) if (!semIds.has(id)) fail(`Missing semester: ${id}`);
   for (const item of data.modules) {
-    if (!item || !slug(item.id) || item.level !== 'L2' || !semIds.has(item.semester) || !localized(item.title) || !ordered(item.order)) fail(`Invalid module: ${item?.id || '<unknown>'}`);
+    if (!item || !slug(item.id) || item.level !== 'L2' || !semIds.has(item.semester) || !localized(item.title) || !ordered(item.order) || extraKeys(item, ['id', 'level', 'semester', 'abbr', 'title', 'order']).length) fail(`Invalid module: ${item?.id || '<unknown>'}`);
+    if (typeof item?.abbr !== 'string' || !/^[A-Z][A-Z0-9]*$/.test(item.abbr) || item.abbr.toLowerCase() !== item.id) fail(`Module abbr must be capitals and match its lowercase ID: ${item?.id || '<unknown>'}`);
     if (moduleIds.has(item?.id)) fail(`Duplicate module ID: ${item.id}`);
     moduleIds.add(item?.id);
   }
@@ -121,12 +142,16 @@ function checkCatalogue() {
   for (const item of data.resources) {
     const label = item?.id || '<unknown>';
     const module = modulesById.get(item?.module);
-    if (!item || !slug(item.id) || item.level !== 'L2' || !module || module.semester !== item.semester || !localized(item.title) || !['exam', 'tutorial', 'exercise'].includes(item.type) || !ordered(item.order) || typeof item.hasSolution !== 'boolean') fail(`Invalid resource metadata: ${label}`);
+    const fields = typeFields[item?.type];
+    if (!item || !slug(item.id) || item.level !== 'L2' || !module || module.semester !== item.semester || !localized(item.title) || !fields || !ordered(item.order)) fail(`Invalid resource metadata: ${label}`);
     if (resourceIds.has(item?.id)) fail(`Duplicate resource ID: ${label}`);
     resourceIds.add(item?.id);
-    const year = typeof item?.academicYear === 'string' && item.academicYear.match(/^([0-9]{4})-([0-9]{4})$/);
-    if (!year || Number(year[2]) !== Number(year[1]) + 1) fail(`Invalid academic year: ${label}`);
-    if (item?.type === 'exam' ? !['normal', 'rattrapage'].includes(item.session) : item?.session !== null) fail(`Invalid session: ${label}`);
+    if (fields) {
+      for (const key of fields.required) if (!fieldChecks[key](item[key])) fail(`Missing or invalid ${key} for a ${item.type} resource: ${label}`);
+      for (const key of fields.optional) if (key in item && !fieldChecks[key](item[key])) fail(`Invalid ${key}: ${label}`);
+      for (const key of extraKeys(item, [...baseFields, ...fields.required, ...fields.optional])) fail(`Field ${key} does not belong to a ${item.type} resource: ${label}`);
+      if (item.examKind === 'rattrapage' && item.session !== 'rattrapage') fail(`A rattrapage exam must be in the rattrapage session: ${label}`);
+    }
     const expected = module ? `pdfs/${item.semester}/${item.module}/` : '';
     if (typeof item?.pdfPath !== 'string' || !item.pdfPath.startsWith(expected) || !/^pdfs\/(S3|S4)\/[a-z0-9-]+\/[a-z0-9-]+\.pdf$/.test(item.pdfPath)) {
       fail(`Invalid PDF path: ${label}`);
@@ -143,6 +168,7 @@ function checkCatalogue() {
     try {
       const real = fs.realpathSync(target);
       if (!isInside(pdfRoot, real) || !fs.statSync(real).isFile() || fs.statSync(real).size === 0) fail(`Missing, empty, or unsafe PDF: ${item.pdfPath}`);
+      else if (fs.readFileSync(real).subarray(0, 5).toString('latin1') !== '%PDF-') fail(`Not a PDF file: ${item.pdfPath}`);
     } catch { fail(`Missing PDF: ${item.pdfPath}`); }
   }
   return {semesters: data.semesters.length, modules: data.modules.length, resources: data.resources.length, samples, status: 'checked'};

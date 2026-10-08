@@ -1,10 +1,70 @@
 # Content model for the L2 resource library
 
-The later site build will create `data/resources.json` with one top-level object containing `semesters`, `modules`, and `resources` arrays. `data/` is intentionally empty during setup. Only L2, S3, and S4 are in scope; the `level` field lets a future project extend the model without building other levels now.
+`data/resources.json` is the single catalogue. It holds one top-level object with three arrays: `semesters`, `modules`, and `resources`. Only L2, S3, and S4 are in scope; the `level` field lets a future project extend the model without building other levels now.
+
+Adding a document means two things only: drop the PDF in `pdfs/<semester>/<module-id>/` and add one record to `resources`. The pages render from the catalogue, so no HTML is edited.
+
+## Modules
+
+| Field | Value |
+| --- | --- |
+| `id` | Lowercase abbreviation, for example `asd3`. It is the public `module.html?id=` value and the PDF folder name, so it never changes once published. |
+| `level` | Always `"L2"`. |
+| `semester` | `"S3"` or `"S4"`. |
+| `abbr` | The abbreviation students use, in capitals, for example `"ASD3"`. It is shown next to the name everywhere and is searchable. `id` is `abbr` in lowercase. |
+| `title` | `{ "fr": "...", "ar": "..." }`, the full module name. |
+| `order` | Integer position inside the semester. |
+
+## Resources
+
+There are exactly four resource types. Module pages show them in this order.
+
+| `type` | Label (fr) | What it holds |
+| --- | --- | --- |
+| `cours` | Cours | Course notes and lecture slides, usually one PDF per chapter. |
+| `td` | TD | Travaux dirigés sheets, with the correction when available. |
+| `tp` | TP | Lab work sheets, with the correction or code when available. |
+| `examen` | Examens | Past exams by academic year and session, with the correction when available. |
+
+Every resource has the same base fields:
+
+| Field | Value |
+| --- | --- |
+| `id` | Unique, stable, lowercase with hyphens. Start it with the module ID, for example `asd3-td-03`. |
+| `level` | Always `"L2"`. |
+| `semester` | Same as the module's semester. |
+| `module` | The module `id`. |
+| `type` | `cours`, `td`, `tp`, or `examen`. |
+| `title` | `{ "fr": "...", "ar": "..." }`. The topic of the chapter or sheet, or a short name for the exam. Do not repeat "TD 3" or "Chapitre 2" in it; the page adds that from the number. |
+| `pdfPath` | Relative path `pdfs/<semester>/<module-id>/<file>.pdf`, with no leading slash. |
+| `order` | Integer tie-breaker inside the same module and type. |
+
+Each type then adds its own fields. A field that does not belong to the type is left out, not set to `null`.
+
+| Field | `cours` | `td` and `tp` | `examen` | Value |
+| --- | --- | --- | --- | --- |
+| `chapter` | required | — | — | Chapter number, integer from 0. |
+| `number` | — | required | — | Sheet number, integer from 1 (TD 3, TP 2). |
+| `hasCorrection` | — | required | required | `true` only when the linked PDF contains the correction (or, for a TP, the code). |
+| `academicYear` | optional | optional | required | `YYYY-YYYY`; the second year follows the first. |
+| `session` | — | — | required | `normal` or `rattrapage`. |
+| `examKind` | — | — | required | `emd`, `final`, `rattrapage`, or `controle`. |
+
+`academicYear` is optional on Cours, TD, and TP so that two versions of the same sheet from different years can be told apart. Leave it out when there is only one version.
+
+### Display order and filters
+
+| Type | Order | Filters on the module page |
+| --- | --- | --- |
+| Cours | `chapter` ascending, then `order`, then title | None |
+| TD, TP | `number` ascending, then newest `academicYear` first, then `order`, then title | None |
+| Examens | Newest `academicYear` first, then `order`, then title | Academic year and session |
+
+Semesters and modules sort by `order`, then title.
 
 ## JSON Schema
 
-The schema below describes the catalogue format. Localized labels and titles require both French (`fr`) and Arabic (`ar`) strings so the later language switch has real content. It does not verify that a module ID is referenced correctly or that a PDF exists; `/add-resource` must check those relationships and paths before publication. Keep an S4 semester record even while it has no modules.
+The schema describes the catalogue format. It does not verify that a module ID is referenced correctly or that a PDF exists; `node scripts/doctor.cjs` checks those. Keep the S4 semester record even while it has no modules.
 
 ```json
 {
@@ -22,7 +82,8 @@ The schema below describes the catalogue format. Localized labels and titles req
         "fr": { "type": "string", "minLength": 1 },
         "ar": { "type": "string", "minLength": 1 }
       }
-    }
+    },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
   },
   "properties": {
     "semesters": {
@@ -43,12 +104,13 @@ The schema below describes the catalogue format. Localized labels and titles req
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "level", "semester", "title", "order"],
+        "required": ["id", "level", "semester", "abbr", "title", "order"],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "id": { "$ref": "#/$defs/slug" },
           "level": { "const": "L2" },
           "semester": { "enum": ["S3", "S4"] },
+          "abbr": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*$" },
           "title": { "$ref": "#/$defs/localizedText" },
           "order": { "type": "integer", "minimum": 0 }
         }
@@ -58,58 +120,113 @@ The schema below describes the catalogue format. Localized labels and titles req
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "level", "semester", "module", "title", "type", "academicYear", "session", "pdfPath", "hasSolution", "order"],
+        "required": ["id", "level", "semester", "module", "type", "title", "pdfPath", "order"],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "id": { "$ref": "#/$defs/slug" },
           "level": { "const": "L2" },
           "semester": { "enum": ["S3", "S4"] },
-          "module": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "module": { "$ref": "#/$defs/slug" },
+          "type": { "enum": ["cours", "td", "tp", "examen"] },
           "title": { "$ref": "#/$defs/localizedText" },
-          "type": { "enum": ["exam", "tutorial", "exercise"] },
-          "academicYear": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{4}$" },
-          "session": { "enum": ["normal", "rattrapage", null] },
           "pdfPath": { "type": "string", "pattern": "^pdfs/(S3|S4)/[a-z0-9-]+/[a-z0-9-]+\\.pdf$" },
-          "hasSolution": { "type": "boolean" },
-          "order": { "type": "integer", "minimum": 0 }
-        }
+          "order": { "type": "integer", "minimum": 0 },
+          "chapter": { "type": "integer", "minimum": 0 },
+          "number": { "type": "integer", "minimum": 1 },
+          "hasCorrection": { "type": "boolean" },
+          "academicYear": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{4}$" },
+          "session": { "enum": ["normal", "rattrapage"] },
+          "examKind": { "enum": ["emd", "final", "rattrapage", "controle"] }
+        },
+        "oneOf": [
+          {
+            "properties": { "type": { "const": "cours" } },
+            "required": ["chapter"],
+            "not": { "anyOf": [{ "required": ["number"] }, { "required": ["hasCorrection"] }, { "required": ["session"] }, { "required": ["examKind"] }] }
+          },
+          {
+            "properties": { "type": { "enum": ["td", "tp"] } },
+            "required": ["number", "hasCorrection"],
+            "not": { "anyOf": [{ "required": ["chapter"] }, { "required": ["session"] }, { "required": ["examKind"] }] }
+          },
+          {
+            "properties": { "type": { "const": "examen" } },
+            "required": ["academicYear", "session", "examKind", "hasCorrection"],
+            "not": { "anyOf": [{ "required": ["chapter"] }, { "required": ["number"] }] }
+          }
+        ]
       }
     }
   }
 }
 ```
 
-## Illustrative records only
+## Format examples
 
-These names and paths are examples, **not confirmed university content**. Do not copy them into the published catalogue without replacing them with real modules and existing PDFs.
+These four records show the shape of each type. The titles and files are examples of the format, **not real documents**; do not copy them into the catalogue.
 
 ```json
-{
-  "semesters": [
-    { "id": "S3", "level": "L2", "label": { "fr": "Semestre 3", "ar": "السداسي الثالث" }, "order": 1 },
-    { "id": "S4", "level": "L2", "label": { "fr": "Semestre 4", "ar": "السداسي الرابع" }, "order": 2 }
-  ],
-  "modules": [
-    { "id": "sample-module", "level": "L2", "semester": "S3", "title": { "fr": "Module exemple", "ar": "مقياس تجريبي" }, "order": 1 }
-  ],
-  "resources": [
-    { "id": "sample-exam-2024-normal", "level": "L2", "semester": "S3", "module": "sample-module", "title": { "fr": "Examen exemple", "ar": "امتحان تجريبي" }, "type": "exam", "academicYear": "2024-2025", "session": "normal", "pdfPath": "pdfs/S3/sample-module/sample-exam-2024-normal.pdf", "hasSolution": false, "order": 1 },
-    { "id": "sample-tutorial-2024", "level": "L2", "semester": "S3", "module": "sample-module", "title": { "fr": "Travaux dirigés exemple", "ar": "أعمال موجهة تجريبية" }, "type": "tutorial", "academicYear": "2024-2025", "session": null, "pdfPath": "pdfs/S3/sample-module/sample-tutorial-2024.pdf", "hasSolution": true, "order": 2 },
-    { "id": "sample-exercise-2024", "level": "L2", "semester": "S3", "module": "sample-module", "title": { "fr": "Exercice exemple", "ar": "تمرين تجريبي" }, "type": "exercise", "academicYear": "2024-2025", "session": null, "pdfPath": "pdfs/S3/sample-module/sample-exercise-2024.pdf", "hasSolution": false, "order": 3 }
-  ]
-}
+[
+  {
+    "id": "asd3-cours-ch02",
+    "level": "L2",
+    "semester": "S3",
+    "module": "asd3",
+    "type": "cours",
+    "chapter": 2,
+    "title": { "fr": "Titre du chapitre", "ar": "عنوان الفصل" },
+    "pdfPath": "pdfs/S3/asd3/asd3-cours-ch02.pdf",
+    "order": 2
+  },
+  {
+    "id": "asd3-td-03",
+    "level": "L2",
+    "semester": "S3",
+    "module": "asd3",
+    "type": "td",
+    "number": 3,
+    "title": { "fr": "Sujet de la série", "ar": "موضوع السلسلة" },
+    "hasCorrection": true,
+    "pdfPath": "pdfs/S3/asd3/asd3-td-03.pdf",
+    "order": 3
+  },
+  {
+    "id": "asd3-tp-02",
+    "level": "L2",
+    "semester": "S3",
+    "module": "asd3",
+    "type": "tp",
+    "number": 2,
+    "title": { "fr": "Sujet du TP", "ar": "موضوع العمل التطبيقي" },
+    "hasCorrection": false,
+    "pdfPath": "pdfs/S3/asd3/asd3-tp-02.pdf",
+    "order": 2
+  },
+  {
+    "id": "asd3-examen-2024-2025-emd",
+    "level": "L2",
+    "semester": "S3",
+    "module": "asd3",
+    "type": "examen",
+    "academicYear": "2024-2025",
+    "session": "normal",
+    "examKind": "emd",
+    "title": { "fr": "Examen de janvier 2025", "ar": "امتحان جانفي 2025" },
+    "hasCorrection": true,
+    "pdfPath": "pdfs/S3/asd3/asd3-examen-2024-2025-emd.pdf",
+    "order": 1
+  }
+]
 ```
 
 ## Relationship and publication rules
 
 - `id` values are stable and unique within their array. Never derive links from display titles.
-- Keep both `fr` and `ar` text for every semester label and module/resource title. Do not add a real record with guessed or placeholder translations.
+- Name each PDF after its resource `id` (`asd3-td-03` → `asd3-td-03.pdf`). The downloaded file then tells the student what it is.
+- Keep both `fr` and `ar` text for every semester label, module title, and resource title. Arabic text drafted by Claude is allowed; it is listed in `docs/project-brief.md` as awaiting the maintainer's review.
 - Every module's `semester` refers to one listed semester. Every resource's `module` refers to one listed module, and its `level` and `semester` match that module.
-- Resource `type` uses the singular machine values above; the UI may label them Exams, Tutorials, and Exercises in the confirmed language.
-- Use `session: null` when a tutorial or exercise has no exam session. Exams use `normal` or `rattrapage` when known; do not guess a session.
-- `academicYear` uses `YYYY-YYYY` for the teaching year; check that the second year follows the first.
+- An exam whose `examKind` is `rattrapage` belongs to the `rattrapage` session. Do not guess a session or an exam kind.
 - `pdfPath` is a relative, case-sensitive site path. Its semester and module directory must match the record, and the file must exist before the record is published. Do not start it with `/`, so it works under a GitHub Pages project path as well as at a domain root.
-- `hasSolution` means the linked PDF includes a solution. If a solution is a separate PDF, add a separate resource record or extend the model deliberately before publishing it.
-- Sort semesters, modules, and resources by `order`, then title as a stable tie-breaker.
+- If a correction is a separate PDF, add a separate resource record for it or extend the model deliberately before publishing it.
 - Keep unverified or missing PDFs out of `resources.json`; do not publish broken View or Download links.
 - Build-phase sample data is the one exception to the real-content rules above. Records whose `id` and PDF filename start with `sample-` may point to generated placeholder PDFs, as described in `docs/project-brief.md`. They follow the same schema, relationship, and path rules, and are removed before the site is announced to students.

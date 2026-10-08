@@ -6,6 +6,6 @@ disable-model-invocation: true
 
 # lp-brief
 
-Read `docs/project-brief.md`, `docs/content-model.md`, the existing project, and $ARGUMENTS. Record only confirmed field, university name, S3/S4 modules, language, hosting, source PDFs, and publication workflow. Keep missing facts and assumptions visible. Preserve confirmed facts already in the brief. Ask only for information that blocks the next step. Do not invent course titles, PDF files, translations, or branding.
+Read `docs/project-brief.md`, `docs/content-model.md`, the existing project, and $ARGUMENTS. Record only confirmed field, university name, S3/S4 modules, language, hosting, source PDFs, and publication workflow. Keep missing facts and assumptions visible. Preserve confirmed facts already in the brief. Ask only for information that blocks the next step. Do not invent course titles, PDF files, or branding. Arabic text drafted by Claude stays listed in the brief as awaiting the maintainer's review.
 
 Template-authored workflow; upstream source skills remain unchanged.

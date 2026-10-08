@@ -1,34 +1,49 @@
-# L2 study resources — setup
+# L2 study resources
 
-This separate `university` project is prepared for Claude Code to build a public resource library for Licence 2 Informatique students at Mohammed seddik benyahia. **No site pages, JavaScript, CSS, catalogue entries, or PDFs have been built yet.** The original `landing-page-template` folder is untouched.
+A public resource library for Licence 2 Informatique students at Université Mohammed Seddik Benyahia – Jijel. Students pick a semester and a module, then view or download its Cours, TD, TP, and Examens as PDFs.
 
-## Confirmed plan
+**The site is under construction.** No pages exist yet. The build adds the catalogue with sample records and placeholder PDFs first; see "Sample data" below.
 
-- Public student site, no student login: S3/S4 → module → Exams, Tutorials, Exercises.
-- French and Arabic with RTL for Arabic. Exact translations and official name styling need confirmation before publication.
+## What is confirmed
+
+- Public student site, no login: S3/S4 → module → Cours, TD, TP, Examens.
+- Seven S3 modules: ASD3, AO, SI, MN, POO1, PS1, GP. S4 is shown empty until its modules are supplied.
+- French by default and Arabic with RTL, with a language switch on every page. The Arabic text is a draft awaiting the maintainer's review.
 - Plain HTML, CSS, and browser JavaScript, with no framework, site build step, or npm dependencies.
-- Planned files: `index.html`, `module.html?id=<module-id>`, `404.html`, and `data/resources.json`; PDFs under `pdfs/<semester>/<module-id>/`.
-- Until the site is finished, the catalogue holds `sample-` records that point to generated placeholder PDFs. They are visibly marked and removed before the site is announced. See `docs/project-brief.md`.
-- One maintainer adds or removes catalogue entries and local PDFs, then republishes the static site. `/add-resource` documents the steps. There is no admin dashboard, backend, or Google Drive integration in this setup.
-- GitHub Pages is the selected future host. The repository is connected to the GitHub remote `origin`; Pages is not enabled yet. Use relative paths so the site works at a project subpath.
+- Files: `index.html`, `module.html?id=<module-id>`, `404.html`, and `data/resources.json`; PDFs under `pdfs/<semester>/<module-id>/`.
+- One maintainer adds or removes catalogue entries and local PDFs, then republishes the static site. There is no admin dashboard, backend, or Google Drive integration.
+- GitHub Pages is the selected future host. The repository is connected to the GitHub remote `origin`; Pages is not enabled yet. The site uses relative paths so it works at a project subpath.
 
-Seven S3 module names have been supplied; S4 has no declared modules yet. Official spellings, Arabic translations, and the initial PDFs are still needed. See `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` before building.
+See `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` for the full decisions.
+
+## Preview the site locally
+
+Once pages exist, from this folder:
+
+```
+python -m http.server 8000
+```
+
+Then open `http://localhost:8000/`. Do not open the HTML files directly with `file://`; the pages fetch the catalogue and the browser blocks that.
+
+## Sample data
+
+Until the real PDFs are added, every resource in `data/resources.json` will have an `id` starting with `sample-` and point to a generated placeholder PDF. The site shows a notice while any sample record exists.
+
+- `node scripts/make-sample-pdfs.cjs` (added with the sample data) regenerates the placeholder PDFs from the catalogue.
+- Remove every `sample-` record and placeholder PDF before the site is announced to students.
+
+## Checks
+
+`node scripts/doctor.cjs` validates the setup, the catalogue records, the fields each resource type needs, and that every PDF path exists. It reports how many sample records remain. It installs nothing. There is no `npm install`, `npm run build`, lint, or type-check command for the site.
 
 ## Claude Code workflow
 
-Open Claude Code in this folder. It reads `.claude/CLAUDE.md`, active rules, agents, hooks, and skills. Marketing and conversion material from the source template is preserved under `.claude/_unused/`, outside the active skill/rule locations. Historical command names retain `lp-` for compatibility, but their instructions now describe the resource library.
+Open Claude Code in this folder. It reads `.claude/CLAUDE.md`, active rules, agents, hooks, and skills. Marketing and conversion material from the source template is preserved under `.claude/_unused/`, outside the active skill/rule locations. Historical command names retain `lp-` for compatibility, but their instructions describe the resource library.
 
-1. Confirm the open facts in `docs/project-brief.md` and the real module/PDF inventory.
-2. Use `/lp-plan` to prepare an implementation plan; use `/lp-build` only when authorized to build the site.
-3. Use `/add-resource` for catalogue and PDF maintenance once `data/resources.json` exists.
-4. Use `/lp-check` and the QA template for browser and content validation.
+- `/add-resource` adds or removes a module or a PDF in the catalogue.
+- `/lp-check` and `templates/qa-report.md` cover browser and content validation.
 
 For Codex, `AGENTS.md` points to the same source of truth.
-
-## Checks and later preview
-
-`node scripts/doctor.cjs` validates the setup now and will also validate catalogue records and PDF paths when `data/resources.json` is added. It installs nothing. There is no `npm install`, `npm run build`, lint, or type-check command for the site.
-
-After pages exist, preview them through a local HTTP server, for example `python -m http.server 8000` from this project root, then open `http://localhost:8000/`. Do not rely on `file://` for pages that fetch JSON. Browser automation is optional and requires Python Playwright; `.claude/skills/webapp-testing/scripts/with_server.py --help` describes its helper.
 
 `vendor-manifest.json` records the origin and current hashes of copied external skill files. `NOTICE.md` records attribution. The optional hooks in `.claude/settings.optional.json` are not active.
