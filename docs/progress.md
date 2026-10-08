@@ -1,6 +1,6 @@
 # Critique fixes — progress
 
-State on 2026-10-07, when the work was paused. Nothing has been pushed.
+State on 2026-10-08. The eight steps are done and committed on `main`. **Nothing has been pushed.**
 
 ## Done
 
@@ -8,39 +8,78 @@ State on 2026-10-07, when the work was paused. Nothing has been pushed.
 | --- | --- | --- |
 | 1 | Phone layout: header in two rows, breadcrumb stops at the parent page (none on home), module code on the first line of the title, four tabs in one row, the two filters side by side | `5dffe52` |
 | 2 | Four defects: Arabic "PDF" and size isolated, space reserved for the size, filters built from the data, duplicate messages removed | `fad9796` |
+| 3 | Document rows: the title opens the PDF, one "Télécharger" button, facts as one line of plain text, "Avec corrigé" as the only badge | `4bcb529` (script, unfinished) and `6ecfbfe` |
+| 4 | Footer: run by students and not official, date of the last update, "Signaler une erreur". The same link beside "Fichier indisponible" | `fa54693` |
+| 5 | "Examens" link on each module row; visited colour on document titles | `e6366a3` |
+| 6 | Outlines only on things that can be tapped, module code as a solid block, muted tabs with zero documents | `8dd159c` |
+| 7 | "pour ... pour", Arabic correction labels, Arabic for "Contrôle", module shown once for a code search | `5fdef4b` |
+| 8 | Polish pass, detector on phone and desktop, final measurements | `b6eb22c` |
+| — | `.gitignore`: the Impeccable block and `.playwright-mcp/`; the critique file is now in Git | `cea5c5e` |
 
-Both were checked in headless Chrome at 320, 375, 768 and 1280px, in French and Arabic. Not checked on a real phone.
+One commit message is slightly wrong: step 7 lists "accessible names in Arabic use the Arabic comma", but that change is in the step 4 commit.
 
-Measurements for step 8, on a 375 by 812 screen, Examens tab of ASD3, with the sample notice shown:
+## Measurements
 
-| | Before | After step 1 |
-| --- | --- | --- |
-| First exam row starts, French | 867px | 453px |
-| First exam row starts, Arabic | 933px | 483px |
-| Whole exam rows on the first screen, French | 0 | 2 |
-| Whole exam rows on the first screen, Arabic | 0 | 1 |
+Method: a 375 by 812 Chrome window driven by Playwright, the Examens tab of ASD3, sample notice shown. The three versions were measured on 2026-10-08 in the same way: the site before the critique fixes (`b5a8631`), after steps 1 and 2 (`fad9796`), and now.
 
-## Interrupted: step 3, document rows
+| | Before | After steps 1 and 2 | Now |
+| --- | --- | --- | --- |
+| First exam row starts, French | 888px | 453px | 453px |
+| First exam row starts, Arabic | 945px | 483px | 483px |
+| Whole exam rows on the first screen, French | 0 | 1 | 2 |
+| Whole exam rows on the first screen, Arabic | 0 | 1 | 2 |
+| Whole Cours rows on the first screen, French | 0 | 2 | 4 |
+| Whole TD rows on the first screen, French | 0 | 2 | 4 |
+| Height of an exam row, French | 170 to 194px | 170 to 194px | 126 to 150px |
+| Height of an exam row, Arabic | 170 to 194px | 170 to 194px | 111 to 137px |
+| Height of a Cours row, French | 166 to 191px | 166 to 191px | 105 to 129px |
+| Height of a TD row, French | 166 to 215px | 166 to 215px | 105 to 154px |
 
-Saved in the commit "WIP: critique fixes in progress". **The site is not in a good state at that commit: document rows are drawn without their styles.**
+The earlier version of this file gave 867px and 933px for "before", and 2 and 1 whole rows after step 1. Those were measured in an earlier session by a method that was not written down. The table above replaces them.
 
-- Done: `js/resource-list.js` draws the new row (number and title as one link that opens the PDF, one "Télécharger" button, facts as a list of plain text, "Avec corrigé" as the only badge). `js/i18n.js` has the new `action.open` text and no longer has `action.view`.
-- Not done: `css/styles.css` has no rules yet for the new classes `resource__link`, `resource__download`, `facts`, `fact`, `fact--ok`, `fact--size`. The old rules for `tags`, `tag`, `tag--*`, `resource__body` and `resource__actions` are still there and must be removed.
-- Not done: `docs/design-system.md` (rows and actions) and `docs/project-brief.md` (the "PDF behavior" line still describes a "Voir" button).
-- Not checked in a browser at all.
+With real documents the page will have no sample notice and no "Exemple" mark. Removing both in the browser gives, in French, a first exam row at 415px, three whole exam rows on the first screen, and rows of 105 to 129px. In Arabic: 441px, two whole rows, rows of 111 to 137px. This is a simulation on the sample data, not a measurement of real documents.
 
-In search results, an exam row is now marked with its academic year instead of the word "Examen". This was not asked for; it avoids a link that would read "Examen Examen de janvier 2025". Say so if you prefer the old marker.
+## Checks that were run
 
-## Not started
+- **Browser.** Chrome through Playwright at 320, 375, 640, 768 and 1280px, in French and Arabic: home, module (each tab, an empty module, an unknown module, filters with and without a match), search (results, no result, nothing typed) and 404. Result: no horizontal overflow, no script error, every link, button, select and field at least 44px tall, tabs on one row.
+- **Documents.** The title opens the PDF (HTTP 200, `application/pdf`), "Télécharger" saves the file, the keyboard reaches both in that order, and rows keep their height when the file sizes arrive.
+- **States.** A missing PDF (simulated), a failed catalogue load (simulated), dark mode, the visited colour after opening a document.
+- **Impeccable detector.** 0 findings in the source files. 0 findings on eight rendered pages at 1280 by 800. At 390 by 844: 4 findings of one rule, all on the sample notice; after a small change to the notice, 0 findings on the three pages scanned again.
+- **`node scripts/doctor.cjs`.** OK, 53 sample records.
 
-- Step 4: footer (student-run and unofficial, date of the last update, "Signaler une erreur"), and the same link beside "Fichier indisponible".
-- Step 5: "Examens" link on each module row of the home page; visited state on document titles.
-- Step 6: outlines only on things that can be tapped, stronger module code, muted tabs with zero documents.
-- Step 7: "pour ... pour", Arabic correction labels, Arabic for "Contrôle", module shown once for an exact code search. The Arabic TP tab no longer wraps: step 1 changed the Arabic tabs to "TD" and "TP".
-- Step 8: polish, detector on phone and desktop, final before and after measurements.
-- The local server for checking on a phone.
+Not checked:
 
-## Waiting for the maintainer
+- A real phone. Everything above is desktop Chrome at phone sizes.
+- A real screen reader.
+- That a phone's mail app opens with the prepared email from "Signaler une erreur". On a computer with no mail app the link does nothing.
+- The visited colour on a phone that downloads PDFs instead of showing them.
+- Real browser zoom at 200%. The 640px layout, which is the same width, was checked.
+- The date of the last update on GitHub Pages. Locally it is the day `data/resources.json` was last saved.
+- `docs/qa-report.md` is not written. That belongs to Phase 4.
 
-- The email address for "Signaler une erreur". The request said "[YOUR EMAIL]", so no address has been used.
-- Whether the `.impeccable/` folder is committed or ignored. It is still untracked.
+## Choices made while building
+
+Say so if you prefer otherwise.
+
+- **"Examens" shortcut.** A module with no exam (MN, GP) has no shortcut, so nobody taps through to an empty tab.
+- **Date of the last update.** It comes from the server (the `Last-Modified` header of the catalogue), shown as the day in Algeria. Nobody types it. The 404 page does not load the catalogue, so it shows no date.
+- **"Signaler une erreur".** The address is set once, as `REPORT_EMAIL` in `js/components.js`. The email already names the page the reader was on and, for a missing PDF, the file. The footer asks "Un fichier manquant ou incorrect ?" before the link. The address is not printed on the page.
+- **Visited colour.** Purple: `#70359c` in light mode, `#cdb0ff` in dark mode.
+- **The Impeccable ignore block.** No official text was found in the installed Impeccable (version 0.1.11) or on the web. The lines between the two markers in `.gitignore` were written to do what was asked: keep `config.json`, `design.json`, `surfaces/*.md` and `critique/*.md`, ignore everything else in `.impeccable/`. Paste the official block over them if you have it.
+- **The critique file.** Its header holds the folder path on this computer (`C:\Users\STS\...`). It is in Git now and becomes public with the push.
+
+## Known and left as is
+
+- In Arabic, on a screen narrower than about 340px, the site name takes three lines and the header grows by 23px when it is drawn.
+- On a 320px screen the facts of a row can take four or five lines beside "Télécharger".
+- Searching "examen 2024" also finds the exams of 2024-2025. The critique noted it; it was not one of the eight steps.
+- A document opens in the same tab. The browser's back button returns to the list.
+- All Arabic text is still a draft awaiting the maintainer's review, including the new footer and report texts and the two labels changed in step 7.
+
+## Local server for checking on a phone
+
+The old server on `127.0.0.1:8000` was not running any more. A new one was started on 2026-10-08 with `python -m http.server 8000 --bind 0.0.0.0`, in a minimized window. It answered on `http://10.186.59.206:8000/`, the computer's address on the "Redmi 9" hotspot at that time. Whether the phone can reach it depends on Windows Firewall, which was not changed. `README.md` gives the command and what the firewall must allow.
+
+## Next
+
+The maintainer checks the site on the phone. On "continue": push, then Phase 4 (quality pass and `docs/qa-report.md`).
