@@ -26,7 +26,6 @@
   --color-ok-text: #17603a;
   --color-error-bg: #fdeaea;
   --color-error-text: #9b1c1c;
-  --color-error-border: #c53030;
 
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
   --line: 1.55;
@@ -74,7 +73,6 @@
     --color-ok-text: #86d6a5;
     --color-error-bg: #3d1a1a;
     --color-error-text: #ffb1b1;
-    --color-error-border: #e06b6b;
   }
 }
 
@@ -431,15 +429,19 @@ main {
 
 /* ---------- Module code ---------- */
 
-/* The abbreviation students use (ASD3, AO, POO1), set like a shelf mark.
+/* The abbreviation students use (ASD3, AO, POO1), set like a shelf mark: a solid block in the
+   text colour. It is the only solid dark shape on the page, and it has no outline, because
+   outlines are kept for things that can be tapped.
    It stays in Latin letters, left to right, in the Arabic view. */
 .module-code {
   display: inline-block;
   min-inline-size: 4.5rem;
   padding: 0.15em 0.5em;
+  /* Same colour as the fill. It keeps the shape visible where a system setting removes backgrounds. */
   border: 0.09375rem solid var(--color-text);
   border-radius: var(--radius-sm);
-  color: var(--color-text);
+  background: var(--color-text);
+  color: var(--color-bg);
   font-size: 0.9375rem;
   font-variant-numeric: lining-nums tabular-nums;
   font-weight: 700;
@@ -607,6 +609,13 @@ main {
 .tab__count {
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+
+/* A type with no document yet: the tab still opens, but it steps back until it is chosen. */
+.tab--empty:not([aria-selected="true"]) {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
   font-weight: 400;
 }
 
@@ -948,7 +957,9 @@ a.resource__link:visited .resource__title {
 
 .status--error {
   padding: var(--space-4);
-  border: 1px solid var(--color-error-border);
+  /* No visible outline: the fill marks the message. The transparent edge shows only where a
+     system setting removes backgrounds. */
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   background: var(--color-error-bg);
   color: var(--color-error-text);

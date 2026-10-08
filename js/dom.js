@@ -1,6 +1,6 @@
 // Builds DOM elements without innerHTML, so catalogue text is always inserted as text.
 //
-//   el('a', {class: 'row', href: 'module.html?id=asd3'}, 'ASD3')
+//   el('a', {class: 'module__link', href: 'module.html?id=asd3'}, 'ASD3')
 //
 // Attributes set to null, undefined or false are skipped. Children may be strings, nodes or arrays of them.
 export function el(tag, attributes = {}, ...children) {

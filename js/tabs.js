@@ -10,7 +10,8 @@ export function createTabs({label, tabs, selected, onSelect}) {
   const panel = el('div', {class: 'tab-panel', role: 'tabpanel', id: 'tab-panel', tabindex: '0'});
 
   const buttons = tabs.map(tab =>
-    el('button', {class: 'tab', type: 'button', role: 'tab', id: `tab-${tab.id}`, 'aria-controls': 'tab-panel', 'data-tab': tab.id},
+    // A tab with nothing in it yet is drawn muted (css/styles.css); it still opens and says so.
+    el('button', {class: tab.count === 0 ? 'tab tab--empty' : 'tab', type: 'button', role: 'tab', id: `tab-${tab.id}`, 'aria-controls': 'tab-panel', 'data-tab': tab.id},
       el('span', {class: 'tab__label'}, tab.label),
       // Sighted readers see the bare number; screen readers hear it with its unit ("5 documents").
       el('span', {class: 'tab__count', 'aria-hidden': 'true'}, String(tab.count)),

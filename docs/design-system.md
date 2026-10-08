@@ -4,7 +4,7 @@
 
 Use a calm academic style that makes the semester, module, resource type, and PDF action immediately clear. Prioritize reading and finding files over decoration. No university logo, colours, or fonts were supplied, so the style is neutral; do not invent a logo or crest.
 
-The one distinctive element is the **module code**: the abbreviation students already use (ASD3, AO, POO1) set as a bold bordered mark beside the full name, like a shelf mark in a library catalogue. Everything around it stays quiet: white page, dark text, one blue used only for things a student can act on.
+The one distinctive element is the **module code**: the abbreviation students already use (ASD3, AO, POO1) set as a solid block in the text colour beside the full name, like a shelf mark in a library catalogue. It is the only solid dark shape on a page. Everything around it stays quiet: white page, dark text, one blue used only for things a student can act on.
 
 ## Layout and navigation
 
@@ -13,6 +13,7 @@ The one distinctive element is the **module code**: the abbreviation students al
 - Keep navigation and PDF actions visible, clearly labeled, and reachable by keyboard. Avoid horizontal scrolling at 320 CSS pixels and test at 200% zoom.
 - Align content to the start edge (left in French, right in Arabic). Do not centre body content.
 - Separate list rows with a rule, not with boxes and shadows. Use a filled surface only for notices and status messages.
+- **An outline means "you can tap this".** Only the search field, the selects, the buttons, and the tabs have an outlined box. Facts about a document are plain text, the module code is a solid block, and messages are marked by a fill or by a rule above and below.
 - **The first phone screen shows a document.** On a 375 by 812 screen the first row of a module page starts at about 450px in French and 480px in Arabic (it was 867 and 933 before the design critique). Keep it there: anything added above the list on a phone must take its height from something else.
 - **Header.** Site name, language switch, and search field. On a phone they make two rows: the name beside the language switch, then the search field. From 60rem they share one row. The university name sits under the site name from 40rem; on a phone it is in the footer only.
 - **Breadcrumb.** It lists the pages above the current one, each as a link ("Accueil / Semestre 3"). The current page is not repeated, because its name is the title just below. The home page has no breadcrumb.
@@ -31,17 +32,17 @@ The site follows the reader's system setting for light or dark. Every pair below
 | --- | --- | --- | --- |
 | `--color-bg` | `#ffffff` | `#14181e` | Page background |
 | `--color-surface` | `#f3f5f8` | `#1c222b` | Footer, quiet panels |
-| `--color-text` | `#1b2430` | `#e7eaee` | Body text, headings, module code |
+| `--color-text` | `#1b2430` | `#e7eaee` | Body text, headings, fill of the module code |
 | `--color-text-muted` | `#55606e` | `#aab3bf` | Secondary text, counts, metadata |
 | `--color-link` | `#1b4f9c` | `#9cc2ff` | Links, focus ring, current tab or filter |
 | `--color-link-hover` | `#123a75` | `#c3daff` | Hovered and pressed links |
 | `--color-link-visited` | `#70359c` | `#cdb0ff` | Title of a document the reader has already opened |
 | `--color-border` | `#d3d9e0` | `#313a46` | Rules between rows, decorative edges |
-| `--color-border-strong` | `#737d89` | `#7d8896` | Borders of inputs, buttons, and the module code |
+| `--color-border-strong` | `#737d89` | `#7d8896` | Borders of the search field, selects, buttons, and tabs |
 | `--color-accent-surface` | `#e7eef9` | `#1f2f47` | Background of the current or selected item |
 | `--color-notice-bg` / `-text` / `-border` | `#fdf3d1` / `#4d3a00` / `#a37800` | `#3a2f0b` / `#f6e3a1` / `#c79a1c` | Sample-data notice, warnings |
 | `--color-ok-bg` / `-text` | `#e4f3ea` / `#17603a` | `#153223` / `#86d6a5` | "Correction available" |
-| `--color-error-bg` / `-text` / `-border` | `#fdeaea` / `#9b1c1c` / `#c53030` | `#3d1a1a` / `#ffb1b1` / `#e06b6b` | Load and file errors |
+| `--color-error-bg` / `-text` | `#fdeaea` / `#9b1c1c` | `#3d1a1a` / `#ffb1b1` | Load and file errors |
 
 Never rely on color alone to distinguish Cours, TD, TP, Examens, or correction availability. Each always has a text label.
 
@@ -85,18 +86,12 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 ### Module page
 
 - **Title.** The module code and the module name share one heading. The code stays on the first line and the name runs on after it. Nothing sits under the title: the semester is in the breadcrumb and each tab shows its own count.
-- **Tabs.** Cours, TD, TP, Examens in one row at every width: on a phone each tab is as wide as its label needs, from 40rem they are four equal columns. Each shows its document count. The Arabic tabs keep "TD" and "TP", which students say aloud and which fit. The open tab is marked by a fill, a heavier edge, and a bar. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction.
+- **Tabs.** Cours, TD, TP, Examens in one row at every width: on a phone each tab is as wide as its label needs, from 40rem they are four equal columns. Each shows its document count. The Arabic tabs keep "TD" and "TP", which students say aloud and which fit. The open tab is marked by a fill, a heavier edge, and a bar. A tab whose type has no document yet is muted (lighter edge, regular weight, grey label) until it is chosen; it still opens and says that nothing is there yet. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction.
 - **Resource rows.** One row per PDF. The chapter or sheet number ("Chapitre 2", "TD 3") and the title are one link that opens the PDF in the browser's own viewer. On a phone the number runs on before the title; from 36rem it has its own column. Under the title, the facts about the document make one quiet line of plain text with a dot between two facts: exam kind, session, year, "Sans corrigé", then the file type and size. "Avec corrigé" is the only fact drawn as a badge, filled green, so it is the one a student spots first. A line of facts never starts or ends with a dot. The title of a document the reader has already opened in this browser turns from blue to purple (`--color-link-visited`).
 - **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, side by side even on a phone. The label above each says what it filters, so the choices are short ("Toutes", "Normale", "Rattrapage"). Each filter lists only the years or sessions the module's exams really have, and a filter with nothing to choose between is not shown. While a filter is set, the number of exams shown appears with the reset button; with no filter the tab already shows that number, so it is only announced to screen readers.
 - **Actions.** Two per document. The title opens the PDF, and one outlined "Télécharger" button saves it. On a phone the button shares the second line with the facts; from 36rem it sits at the end of the row. Screen readers hear what each one does and which document it acts on. The file size is the last fact ("PDF, 1,4 Mo"). Its place is in the row from the start, at a width that fits the longest size, so the row does not move when the size arrives. In Arabic, "PDF" and the size are isolated from each other so the number stays beside its unit.
 - **Sample and missing files.** A sample record carries the fact "Exemple". A document whose PDF is not on the server keeps its title, which is then plain text and not a link, and shows "Fichier indisponible" in place of the facts and the button. "Signaler une erreur" sits beside that message; its email also names the missing file.
 - **Empty states.** An empty tab says which type has nothing yet. A module with no documents at all shows one message and no tabs. Filters with no match explain how to widen them. Each state says its message once.
-
-### Decided after the design critique, not built yet
-
-Maintainer decisions, 2026-10-07, from the design critique. Where they differ from the sections above, these win once built; update those sections in the same change.
-
-- **Outlines and the module code.** The maintainer added the critique's third priority to the scope: outlines only for things that can be tapped, tags as plain text, a stronger module code, and muted tabs when a type has no document.
 
 ### Search
 
