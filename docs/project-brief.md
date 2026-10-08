@@ -6,7 +6,7 @@
 - Goal: help students find, view, and download the right exam, tutorial, or exercise quickly.
 - Scope: L2 only. Show semesters S3 and S4, their confirmed modules, and resources grouped as Exams, Tutorials, and Exercises. Keep `level` in the data model for future expansion; do not create other levels now.
 - Language: French and Arabic. Arabic views need RTL layout. Exact Arabic translations and the university's preferred Arabic name remain to be supplied; do not invent them.
-- Hosting: GitHub Pages for the later static site. This setup creates only a local Git repository; a GitHub account name, remote repository, and deployment are not needed yet.
+- Hosting: GitHub Pages for the later static site. The local Git repository is connected to the GitHub remote `origin` (`https://github.com/ousssamaaslan-cell/university.git`), which implies a project path of `/university/`. GitHub Pages itself is not enabled or verified yet; deployment is a later phase.
 - Stack: plain HTML, CSS, and JavaScript. No site framework, build step, or npm dependencies.
 - Public access: students browse without accounts or login.
 - Content files: `data/resources.json` and PDFs in `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`. See `docs/content-model.md`.
@@ -50,7 +50,7 @@ Maintainer decision, 2026-10-07: real PDFs are added only after the site is fini
 
 ## Open decisions
 
-Confirm official module spellings, initial PDFs, approved university name styling, and Arabic translations before publishing real page content. S4 has no declared modules yet. GitHub Pages is the selected host, but no online repository has been created.
+Confirm official module spellings, initial PDFs, approved university name styling, and Arabic translations before publishing real page content. S4 has no declared modules yet. GitHub Pages is the selected host and the GitHub repository exists, but Pages has not been enabled and no public URL is confirmed.
 
 Also open: the stable module IDs (they become public `module.html?id=` links and PDF folder names), the French and Arabic labels for the three resource types, who supplies the Arabic interface text, and the concrete colour, type, and spacing values that `docs/design-system.md` describes only as principles. No style reference site was supplied, so the style stays neutral.
 

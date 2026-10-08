@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Add a module or PDF
 
-This project has one repository-based maintainer and no admin backend. Read `docs/project-brief.md`, `docs/content-model.md`, `.claude/rules/content-structure.md`, `.claude/rules/pdf-storage.md`, the current `data/resources.json` (when present), and $ARGUMENTS. Do not use the illustrative records in the content-model document as real data. Do not create another level or semester.
+This project has one repository-based maintainer and no admin backend. Read `docs/project-brief.md`, `docs/content-model.md`, `.claude/rules/content-structure.md`, `.claude/rules/pdf-storage.md`, the current `data/resources.json` (when present), and $ARGUMENTS. Do not use the illustrative records in the content-model document as real data. Do not create another level or semester. This workflow is for real content; the build-phase `sample-` records and placeholder PDFs described in the brief are the only exception to its real-PDF rule, and they are removed before publication.
 
 ## Add a module
 

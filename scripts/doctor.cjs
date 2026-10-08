@@ -93,12 +93,14 @@ for (const file of agents) {
 }
 
 function checkCatalogue() {
-  if (!exists('data/resources.json')) return {semesters: 0, modules: 0, resources: 0, status: 'not created yet'};
+  if (!exists('data/resources.json')) return {semesters: 0, modules: 0, resources: 0, samples: 0, status: 'not created yet'};
   const data = readJson('data/resources.json');
-  if (!data) return {semesters: 0, modules: 0, resources: 0, status: 'invalid'};
+  if (!data) return {semesters: 0, modules: 0, resources: 0, samples: 0, status: 'invalid'};
   for (const key of ['semesters', 'modules', 'resources']) if (!Array.isArray(data[key])) fail(`data/resources.json: ${key} must be an array`);
   if (errors.some(error => error.includes('data/resources.json:') && error.includes('must be an array'))) return {status: 'invalid'};
   const semIds = new Set(), moduleIds = new Set(), resourceIds = new Set(), pdfPaths = new Set();
+  // Build-phase sample records (docs/project-brief.md) are counted so they are not forgotten before publication.
+  let samples = 0;
   const slug = value => typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
   const ordered = value => Number.isInteger(value) && value >= 0;
   const text = value => typeof value === 'string' && value.trim().length > 0;
@@ -132,6 +134,9 @@ function checkCatalogue() {
     }
     if (pdfPaths.has(item.pdfPath)) fail(`Duplicate PDF path: ${item.pdfPath}`);
     pdfPaths.add(item.pdfPath);
+    const sampleId = typeof item.id === 'string' && item.id.startsWith('sample-');
+    if (sampleId !== path.basename(item.pdfPath).startsWith('sample-')) fail(`Sample ID and PDF filename must both start with sample-: ${label}`);
+    if (sampleId) samples++;
     const target = path.resolve(root, item.pdfPath);
     const pdfRoot = path.join(root, 'pdfs');
     if (!isInside(pdfRoot, target)) { fail(`PDF path escapes pdfs/: ${label}`); continue; }
@@ -140,7 +145,7 @@ function checkCatalogue() {
       if (!isInside(pdfRoot, real) || !fs.statSync(real).isFile() || fs.statSync(real).size === 0) fail(`Missing, empty, or unsafe PDF: ${item.pdfPath}`);
     } catch { fail(`Missing PDF: ${item.pdfPath}`); }
   }
-  return {semesters: data.semesters.length, modules: data.modules.length, resources: data.resources.length, status: 'checked'};
+  return {semesters: data.semesters.length, modules: data.modules.length, resources: data.resources.length, samples, status: 'checked'};
 }
 
 const catalogue = checkCatalogue();

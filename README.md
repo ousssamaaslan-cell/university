@@ -7,9 +7,10 @@ This separate `university` project is prepared for Claude Code to build a public
 - Public student site, no student login: S3/S4 → module → Exams, Tutorials, Exercises.
 - French and Arabic with RTL for Arabic. Exact translations and official name styling need confirmation before publication.
 - Plain HTML, CSS, and browser JavaScript, with no framework, site build step, or npm dependencies.
-- Planned files: `index.html`, `module.html?id=<module-id>`, and `data/resources.json`; PDFs under `pdfs/<semester>/<module-id>/`.
+- Planned files: `index.html`, `module.html?id=<module-id>`, `404.html`, and `data/resources.json`; PDFs under `pdfs/<semester>/<module-id>/`.
+- Until the site is finished, the catalogue holds `sample-` records that point to generated placeholder PDFs. They are visibly marked and removed before the site is announced. See `docs/project-brief.md`.
 - One maintainer adds or removes catalogue entries and local PDFs, then republishes the static site. `/add-resource` documents the steps. There is no admin dashboard, backend, or Google Drive integration in this setup.
-- GitHub Pages is the selected future host. This setup creates a local Git repository only; publishing will require a GitHub remote repository later. Use relative paths so the site works at a project subpath.
+- GitHub Pages is the selected future host. The repository is connected to the GitHub remote `origin`; Pages is not enabled yet. Use relative paths so the site works at a project subpath.
 
 Seven S3 module names have been supplied; S4 has no declared modules yet. Official spellings, Arabic translations, and the initial PDFs are still needed. See `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` before building.
 
