@@ -94,15 +94,19 @@ function moduleResults(catalogue, modules) {
 }
 
 // Documents are grouped under the module they belong to, each group linking to that module's page.
-function documentResults(documents) {
+// `listedModules` are the modules already shown above, in the Modules section.
+function documentResults(documents, listedModules) {
   const shown = documents.slice(0, MAX_DOCUMENTS);
   const modules = [...new Set(shown.map(entry => entry.module))];
+  // Typing a module's code finds that module and its documents. The module is then named once,
+  // in the Modules section just above, and its documents follow without a second heading.
+  const alreadyNamed = modules.length === 1 && listedModules.length === 1 && listedModules[0] === modules[0];
   return el('section', {class: 'section', 'aria-labelledby': 'results-documents'},
     el('div', {class: 'section__head'}, el('h2', {id: 'results-documents'}, t('search.documents'))),
     documents.length > shown.length && el('p', {class: 'search__note'}, t('search.capped', {shown: shown.length})),
     modules.map(module =>
       el('div', {class: 'result-group'},
-        el('h3', {class: 'result-group__title'},
+        !alreadyNamed && el('h3', {class: 'result-group__title'},
           el('a', {href: pageUrl('module.html', {id: module.id})}, moduleCode(module), el('span', {}, localized(module.title)))
         ),
         resourceList(shown.filter(entry => entry.module === module).map(entry => entry.resource), {mixed: true})
@@ -140,7 +144,7 @@ function results(catalogue, index, query) {
     summary: t('search.status', {summary: counts, query}),
     content: [
       modules.length > 0 && moduleResults(catalogue, modules),
-      documents.length > 0 && documentResults(documents)
+      documents.length > 0 && documentResults(documents, modules)
     ].filter(Boolean)
   };
 }
