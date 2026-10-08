@@ -8,11 +8,6 @@ export function moduleCode(module, {large = false} = {}) {
   return el('bdi', {class: large ? 'module-code module-code--lg' : 'module-code'}, module.abbr);
 }
 
-// Abbreviation and name as plain inline text, for breadcrumbs and titles.
-export function moduleLabel(module) {
-  return [el('bdi', {}, module.abbr), ' ', localized(module.title)];
-}
-
 // One line of a module list: abbreviation, name and number of documents, linking to the module page.
 export function moduleRow(module, documentCount) {
   return el('li', {},

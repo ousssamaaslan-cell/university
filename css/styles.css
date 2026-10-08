@@ -35,7 +35,7 @@
   --text-base: 1rem;
   --text-md: 1.125rem;
   --text-lg: 1.375rem;
-  --text-xl: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.6vw, 2.25rem);
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -210,9 +210,11 @@ main:focus {
 
 /* ---------- Site header ---------- */
 
+/* Two rows on a phone: the site name with the language switch, then the search field.
+   One row on a wide screen. */
 .site-header {
   /* Holds the space before js/layout.js fills it, so the page does not jump. */
-  min-block-size: 4.5rem;
+  min-block-size: 6.8125rem;
   border-block-end: 1px solid var(--color-border);
 }
 
@@ -220,16 +222,15 @@ main:focus {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-5);
-  padding-block: var(--space-3);
+  gap: var(--space-1) var(--space-3);
+  padding-block: var(--space-2);
 }
 
 .site-brand {
   display: grid;
+  /* Takes the room the language switch leaves, so both share the first row. */
+  flex: 1 1 0;
   min-inline-size: 0;
-  /* Pushes the language switch and the search field to the far end of the row. */
-  margin-inline-end: auto;
   color: var(--color-text);
   text-decoration: none;
 }
@@ -239,7 +240,6 @@ main:focus {
 }
 
 .site-brand__name {
-  font-size: var(--text-md);
   font-weight: 700;
   line-height: var(--line-tight);
 }
@@ -250,9 +250,30 @@ main:focus {
   text-underline-offset: 0.2em;
 }
 
+/* On a phone the university name is in the footer only; it joins the header from a tablet up. */
 .site-brand__org {
+  display: none;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+}
+
+@media (min-width: 40rem) {
+  .site-header {
+    min-block-size: 7.3125rem;
+  }
+
+  .site-header__inner {
+    column-gap: var(--space-5);
+    padding-block: var(--space-3);
+  }
+
+  .site-brand__name {
+    font-size: var(--text-md);
+  }
+
+  .site-brand__org {
+    display: block;
+  }
 }
 
 .lang-switch ul {
@@ -312,6 +333,10 @@ main:focus {
 }
 
 @media (min-width: 60rem) {
+  .site-header {
+    min-block-size: 4.5rem;
+  }
+
   .site-search {
     flex: 0 1 21rem;
   }
@@ -355,33 +380,26 @@ main:focus {
   color: var(--color-text-muted);
 }
 
-.breadcrumb a,
-.breadcrumb [aria-current="page"] {
+/* The padding makes each step tall enough to tap. */
+.breadcrumb a {
   display: inline-block;
   padding-block: var(--space-3);
-}
-
-.breadcrumb [aria-current="page"] {
-  color: var(--color-text);
-  font-weight: 600;
 }
 
 /* ---------- Page ---------- */
 
 main {
   flex: 1;
-  padding-block: var(--space-4) var(--space-8);
+  padding-block: var(--space-5) var(--space-8);
+}
+
+/* Under a breadcrumb, the breadcrumb's own padding already makes the gap. */
+.breadcrumb + main {
+  padding-block-start: var(--space-1);
 }
 
 .page-header {
-  margin-block-end: var(--space-6);
-}
-
-.page-header h1 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-4);
+  margin-block-end: var(--space-5);
 }
 
 .page-header .lede {
@@ -389,19 +407,6 @@ main {
   margin-block-start: var(--space-3);
   color: var(--color-text-muted);
   font-size: var(--text-md);
-}
-
-.page-header__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  margin-block-start: var(--space-3);
-  color: var(--color-text-muted);
-}
-
-.page-header__meta > * + * {
-  padding-inline-start: var(--space-3);
-  border-inline-start: 1px solid var(--color-border-strong);
 }
 
 .section + .section {
@@ -442,10 +447,15 @@ main {
   white-space: nowrap;
 }
 
+/* In a page title the code stays on the first line, and the module name runs on after it. */
 .module-code--lg {
   min-inline-size: 0;
+  margin-inline-end: 0.3em;
   border-width: 0.125rem;
   font-size: 0.62em;
+  line-height: 1.2;
+  /* Lifts the smaller letters to the middle of the capitals beside them. */
+  vertical-align: 0.22em;
 }
 
 /* ---------- Row lists ---------- */
@@ -515,20 +525,22 @@ a.row:hover .row__title {
 
 /* ---------- Tabs ---------- */
 
-/* Cours, TD, TP, Examens: two by two on a phone, four across from a tablet up. */
+/* Cours, TD, TP, Examens in one row. On a phone each tab is as wide as its label needs,
+   so the four fit; from a tablet up they are four equal columns. */
 .tabs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
 }
 
 .tab {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  min-block-size: 3rem;
-  padding: var(--space-2) var(--space-3);
+  justify-content: center;
+  gap: var(--space-1);
+  min-block-size: var(--tap);
+  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   background: var(--color-bg);
@@ -536,7 +548,7 @@ a.row:hover .row__title {
   font: inherit;
   font-weight: 600;
   line-height: 1.3;
-  text-align: start;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -558,12 +570,20 @@ a.row:hover .row__title {
 }
 
 .tab-panel {
-  margin-block-start: var(--space-5);
+  margin-block-start: var(--space-4);
 }
 
 @media (min-width: 40rem) {
   .tabs {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .tab {
+    flex-basis: 0;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-block-size: 3rem;
+    padding: var(--space-2) var(--space-3);
   }
 }
 
@@ -579,6 +599,7 @@ a.row:hover .row__title {
 .filters {
   min-inline-size: 0;
   margin: 0;
+  margin-block-end: var(--space-4);
   padding: 0;
   border: 0;
 }
@@ -587,19 +608,22 @@ a.row:hover .row__title {
   display: flex;
   flex-wrap: wrap;
   align-items: end;
-  gap: var(--space-3) var(--space-4);
+  gap: var(--space-3);
 }
 
+/* Narrow enough for the two filters to sit side by side on a phone. */
 .field {
   display: grid;
   gap: var(--space-1);
-  flex: 1 1 11rem;
+  flex: 1 1 8rem;
+  min-inline-size: 0;
   max-inline-size: 16rem;
 }
 
 .field label {
   font-size: var(--text-sm);
   font-weight: 600;
+  line-height: var(--line-tight);
 }
 
 .field select {
@@ -636,7 +660,7 @@ a.row:hover .row__title {
 }
 
 .filters__status {
-  margin-block: var(--space-4) var(--space-2);
+  margin-block-end: var(--space-2);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }

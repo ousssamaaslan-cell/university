@@ -5,7 +5,7 @@ import {el} from './dom.js';
 import {t, lang, languages, pageUrl, languageUrl, DEFAULT_LANG} from './i18n.js';
 import {isSample} from './catalogue.js';
 
-// Call once per page. `breadcrumb` is the first trail to show (see renderBreadcrumb).
+// Call once per page. `breadcrumb` is the trail to show first (see renderBreadcrumb).
 export function renderLayout({breadcrumb}) {
   const header = document.querySelector('[data-site-header]');
   const footer = document.querySelector('[data-site-footer]');
@@ -85,27 +85,24 @@ export function updateLanguageLinks() {
 }
 
 // Draws the breadcrumb under the header, replacing any earlier one.
-// `trail` is a list of {label, href}; the last item is the current page and needs no href.
-// A label is a string, or a list of strings and nodes.
+// `trail` is a list of {label, href}: the pages above the current one, each a link.
+// The current page is not repeated, because its name is the title just below.
+// The home page has nothing above it, so it passes an empty list and gets no breadcrumb.
 export function renderBreadcrumb(trail) {
-  const items = trail.map((item, index) => {
-    const isCurrent = index === trail.length - 1;
-    return el('li', {},
-      isCurrent
-        ? el('span', {'aria-current': 'page'}, item.label)
-        : el('a', {href: item.href}, item.label)
-    );
-  });
-  const nav = el('nav', {class: 'breadcrumb page-width', 'aria-label': t('breadcrumb.label'), 'data-breadcrumb': true},
-    el('ol', {role: 'list'}, items)
-  );
-
   const existing = document.querySelector('[data-breadcrumb]');
+  if (trail.length === 0) {
+    existing?.remove();
+    return;
+  }
+
+  const nav = el('nav', {class: 'breadcrumb page-width', 'aria-label': t('breadcrumb.label'), 'data-breadcrumb': true},
+    el('ol', {role: 'list'}, trail.map(item => el('li', {}, el('a', {href: item.href}, item.label))))
+  );
   if (existing) existing.replaceWith(nav);
   else document.getElementById('main').before(nav);
 }
 
-// The first step of every trail.
+// The first step of every trail below the home page.
 export function homeCrumb() {
   return {label: t('breadcrumb.home'), href: pageUrl('index.html')};
 }

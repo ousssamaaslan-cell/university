@@ -6,7 +6,7 @@ import {renderLayout, homeCrumb} from './layout.js';
 import {actionLink} from './components.js';
 
 document.title = t('notFound.docTitle');
-renderLayout({breadcrumb: [homeCrumb(), {label: t('notFound.title')}]});
+renderLayout({breadcrumb: [homeCrumb()]});
 
 document.getElementById('main').replaceChildren(
   el('div', {class: 'page-width'},

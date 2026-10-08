@@ -30,7 +30,7 @@ function semesterSection(catalogue, semester) {
 
 async function start() {
   document.title = t('home.docTitle');
-  renderLayout({breadcrumb: [{label: t('breadcrumb.home')}]});
+  renderLayout({breadcrumb: []});
 
   const content = el('div', {class: 'page-width'}, pageHeader(), loadingState());
   main.replaceChildren(content);

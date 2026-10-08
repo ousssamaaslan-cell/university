@@ -11,7 +11,7 @@
 - Stack: plain HTML, CSS, and JavaScript. No site framework, build step, or npm dependencies.
 - Public access: students browse without accounts or login.
 - Content files: `data/resources.json` and PDFs in `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`. See `docs/content-model.md`.
-- Pages: `index.html` lists S3/S4 and modules; `module.html?id=<module-id>` lists one module's resources under Cours, TD, TP, and Examens tabs; `search.html?q=<words>` shows search results; `404.html` handles unknown addresses on the static host. One script injects the shared header and footer, and every page has a breadcrumb.
+- Pages: `index.html` lists S3/S4 and modules; `module.html?id=<module-id>` lists one module's resources under Cours, TD, TP, and Examens tabs; `search.html?q=<words>` shows search results; `404.html` handles unknown addresses on the static host. One script injects the shared header and footer. Every page below the home page has a breadcrumb that leads back up to the home page and the semester.
 - Search: a field in the header of every page opens `search.html?q=<words>`. It matches a module's full name and its abbreviation, and a document's type, number, title, year, and session, in both languages whatever the page language. Every word typed must match; accents and Arabic letter variants are ignored. Matching modules are listed first, then documents grouped by module.
 - Filters: the Examens tab filters by academic year and session (normal or rattrapage). Cours, TD, and TP have no session filter.
 - Shareable views: the module page keeps the open tab and the exam filters in its address (`type=`, `year=`, `session=`), so a link opens the same view.

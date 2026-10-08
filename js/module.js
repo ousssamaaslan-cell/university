@@ -8,7 +8,7 @@ import {el} from './dom.js';
 import {t, tCount, localized, pageUrl} from './i18n.js';
 import {RESOURCE_TYPES, SESSIONS, loadCatalogue, findModule, findSemester, resourcesOf, sortedResources, semesterAnchor} from './catalogue.js';
 import {renderLayout, renderBreadcrumb, renderSampleNotice, homeCrumb, updateLanguageLinks} from './layout.js';
-import {moduleCode, moduleLabel, loadingState, errorState, emptyState, actionLink} from './components.js';
+import {moduleCode, loadingState, errorState, emptyState, actionLink} from './components.js';
 import {createTabs} from './tabs.js';
 import {resourceList} from './resource-list.js';
 
@@ -56,9 +56,9 @@ function examPanel(panel, exams) {
   if (!years.includes(filters.year)) filters.year = '';
 
   const year = selectField('filter-year', t('filter.year'),
-    [['', t('filter.year.all')], ...years.map(value => [value, value])], filters.year);
+    [['', t('filter.all')], ...years.map(value => [value, value])], filters.year);
   const session = selectField('filter-session', t('filter.session'),
-    [['', t('filter.session.all')], ...SESSIONS.map(value => [value, t(`session.${value}`)])], filters.session);
+    [['', t('filter.all')], ...SESSIONS.map(value => [value, t(`filter.session.${value}`)])], filters.session);
   const reset = el('button', {class: 'button', type: 'button'}, t('filter.reset'));
   // Announces the number of exams shown each time a filter changes.
   const status = el('p', {class: 'filters__status', role: 'status'});
@@ -69,7 +69,10 @@ function examPanel(panel, exams) {
       (!filters.year || exam.academicYear === filters.year) &&
       (!filters.session || exam.session === filters.session)
     );
-    reset.hidden = !filters.year && !filters.session;
+    const filtered = Boolean(filters.year || filters.session);
+    reset.hidden = !filtered;
+    // With no filter set, the Examens tab already shows this number, so it is only read aloud.
+    status.classList.toggle('visually-hidden', !filtered);
     status.textContent = tCount('count.exams', shown.length);
     results.replaceChildren(...(shown.length > 0
       ? examsByYear(shown)
@@ -107,22 +110,17 @@ function examPanel(panel, exams) {
 
 function modulePage(catalogue, module) {
   const semester = findSemester(catalogue, module.semester);
-  const semesterLabel = localized(semester.label);
   const total = resourcesOf(catalogue, module.id).length;
 
   document.title = t('module.docTitle', {abbr: module.abbr, title: localized(module.title)});
   renderBreadcrumb([
     homeCrumb(),
-    {label: semesterLabel, href: pageUrl('index.html', {}, semesterAnchor(semester.id))},
-    {label: moduleLabel(module)}
+    {label: localized(semester.label), href: pageUrl('index.html', {}, semesterAnchor(semester.id))}
   ]);
 
+  // The semester is in the breadcrumb and each tab shows its own count, so the title stands alone.
   const header = el('header', {class: 'page-header'},
-    el('h1', {}, moduleCode(module, {large: true}), el('span', {}, localized(module.title))),
-    el('p', {class: 'page-header__meta'},
-      el('span', {}, semesterLabel),
-      el('span', {}, tCount('count.documents', total))
-    )
+    el('h1', {}, moduleCode(module, {large: true}), ' ', localized(module.title))
   );
 
   if (total === 0) {
@@ -165,7 +163,6 @@ function modulePage(catalogue, module) {
 // Shown when ?id= is missing or matches no module.
 function moduleNotFound() {
   document.title = `${t('module.notFound.title')} | ${t('site.name')}`;
-  renderBreadcrumb([homeCrumb(), {label: t('module.notFound.title')}]);
   return [
     el('header', {class: 'page-header'},
       el('h1', {}, t('module.notFound.title')),

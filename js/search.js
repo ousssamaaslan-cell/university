@@ -39,7 +39,9 @@ function documentWords(module, resource) {
     ...everyLanguage(`type.${resource.type}`)
   ];
   if (resource.type === 'cours') words.push(...everyLanguage('marker.cours', {n: resource.chapter}));
-  if (resource.type === 'td' || resource.type === 'tp') words.push(...everyLanguage(`marker.${resource.type}`, {n: resource.number}));
+  if (resource.type === 'td' || resource.type === 'tp') {
+    words.push(...everyLanguage(`marker.${resource.type}`, {n: resource.number}), ...everyLanguage(`type.${resource.type}.name`));
+  }
   if (resource.type === 'examen') {
     words.push(...everyLanguage('marker.examen'), ...everyLanguage(`session.${resource.session}`));
     if (resource.examKind !== 'rattrapage') words.push(...everyLanguage(`kind.${resource.examKind}`));
@@ -143,7 +145,7 @@ function results(catalogue, index, query) {
 }
 
 async function start() {
-  renderLayout({breadcrumb: [homeCrumb(), {label: t('search.title')}]});
+  renderLayout({breadcrumb: [homeCrumb()]});
   document.title = t('search.docTitle');
 
   // Announces the outcome of each search to screen readers, and shows it under the heading.

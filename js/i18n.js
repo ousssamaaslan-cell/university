@@ -23,7 +23,8 @@ const strings = {
     'breadcrumb.label': "Fil d'Ariane",
     'breadcrumb.home': 'Accueil',
     'sample.title': "Données d'exemple.",
-    'sample.text': 'Les documents listés sont des fichiers factices, utilisés pendant la construction du site.',
+    // Short enough for one line on a phone.
+    'sample.text': 'Les fichiers sont factices.',
 
     'home.docTitle': 'Ressources L2 Informatique | Université Mohammed Seddik Benyahia – Jijel',
     'home.title': 'Ressources de Licence 2 Informatique',
@@ -48,6 +49,9 @@ const strings = {
     'type.td': 'TD',
     'type.tp': 'TP',
     'type.examen': 'Examens',
+    // The full names behind TD and TP. They are never shown as labels; search accepts them.
+    'type.td.name': 'Travaux dirigés',
+    'type.tp.name': 'Travaux pratiques',
     'empty.cours': 'Aucun cours pour le moment.',
     'empty.td': 'Aucun TD pour le moment.',
     'empty.tp': 'Aucun TP pour le moment.',
@@ -94,10 +98,12 @@ const strings = {
     'list.separator': ', ',
 
     'filter.legend': 'Filtrer les examens',
+    // The label above each list says what it filters, so the choices stay short enough for a phone.
     'filter.year': 'Année universitaire',
-    'filter.year.all': 'Toutes les années',
     'filter.session': 'Session',
-    'filter.session.all': 'Toutes les sessions',
+    'filter.all': 'Toutes',
+    'filter.session.normal': 'Normale',
+    'filter.session.rattrapage': 'Rattrapage',
     'filter.reset': 'Réinitialiser les filtres',
     'filter.none.title': 'Aucun examen ne correspond à ces filtres.',
     'filter.none.text': "Changez l'année ou la session, ou réinitialisez les filtres.",
@@ -121,7 +127,7 @@ const strings = {
     'breadcrumb.label': 'مسار التصفح',
     'breadcrumb.home': 'الرئيسية',
     'sample.title': 'بيانات تجريبية.',
-    'sample.text': 'الوثائق المعروضة ملفات وهمية تُستعمل أثناء إنشاء الموقع.',
+    'sample.text': 'الملفات وهمية.',
 
     'home.docTitle': 'موارد السنة الثانية ليسانس إعلام آلي | جامعة محمد الصديق بن يحيى – جيجل',
     'home.title': 'موارد السنة الثانية ليسانس إعلام آلي',
@@ -143,9 +149,12 @@ const strings = {
 
     'tabs.label': 'أنواع الوثائق',
     'type.cours': 'دروس',
-    'type.td': 'أعمال موجهة (TD)',
-    'type.tp': 'أعمال تطبيقية (TP)',
+    // The tabs keep the abbreviations students say aloud, which also fit four across on a phone.
+    'type.td': 'TD',
+    'type.tp': 'TP',
     'type.examen': 'امتحانات',
+    'type.td.name': 'أعمال موجهة',
+    'type.tp.name': 'أعمال تطبيقية',
     'empty.cours': 'لا توجد دروس حاليًا.',
     'empty.td': 'لا توجد أعمال موجهة حاليًا.',
     'empty.tp': 'لا توجد أعمال تطبيقية حاليًا.',
@@ -191,9 +200,10 @@ const strings = {
 
     'filter.legend': 'تصفية الامتحانات',
     'filter.year': 'السنة الجامعية',
-    'filter.year.all': 'كل السنوات',
     'filter.session': 'الدورة',
-    'filter.session.all': 'كل الدورات',
+    'filter.all': 'الكل',
+    'filter.session.normal': 'العادية',
+    'filter.session.rattrapage': 'الاستدراكية',
     'filter.reset': 'إعادة ضبط التصفية',
     'filter.none.title': 'لا يوجد امتحان يطابق هذه التصفية.',
     'filter.none.text': 'غيّر السنة أو الدورة، أو أعد ضبط التصفية.',

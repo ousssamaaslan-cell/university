@@ -13,7 +13,10 @@ The one distinctive element is the **module code**: the abbreviation students al
 - Keep navigation and PDF actions visible, clearly labeled, and reachable by keyboard. Avoid horizontal scrolling at 320 CSS pixels and test at 200% zoom.
 - Align content to the start edge (left in French, right in Arabic). Do not centre body content.
 - Separate list rows with a rule, not with boxes and shadows. Use a filled surface only for notices and status messages.
-- The header holds the site name, the university name, and the language switch. Semester navigation is the home page itself plus the breadcrumb.
+- **The first phone screen shows a document.** On a 375 by 812 screen the first row of a module page starts at about 450px in French and 480px in Arabic (it was 867 and 933 before the design critique). Keep it there: anything added above the list on a phone must take its height from something else.
+- **Header.** Site name, language switch, and search field. On a phone they make two rows: the name beside the language switch, then the search field. From 60rem they share one row. The university name sits under the site name from 40rem; on a phone it is in the footer only.
+- **Breadcrumb.** It lists the pages above the current one, each as a link ("Accueil / Semestre 3"). The current page is not repeated, because its name is the title just below. The home page has no breadcrumb.
+- Semester navigation is the home page itself plus the breadcrumb.
 
 ## Tokens
 
@@ -53,7 +56,7 @@ System fonts only, so nothing is downloaded and Arabic renders with the device's
 | `--text-base` | 1rem | Body |
 | `--text-md` | 1.125rem | Row titles, lead paragraph |
 | `--text-lg` | 1.375rem | Section headings (h2) |
-| `--text-xl` | 1.75rem to 2.25rem, fluid | Page heading (h1) |
+| `--text-xl` | 1.5rem to 2.25rem, fluid | Page heading (h1) |
 
 Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45. Headings are weight 700, the module code 700, everything else 400 or 600. Text lines stay under about 65 characters. Use sentence case; no all-capitals labels.
 
@@ -78,9 +81,10 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 
 ### Module page
 
-- **Tabs.** Four equal buttons for Cours, TD, TP, Examens: two by two on a phone, four across from 40rem. Each shows its document count. The open tab is marked by a fill, a heavier edge, and a bar. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction.
+- **Title.** The module code and the module name share one heading. The code stays on the first line and the name runs on after it. Nothing sits under the title: the semester is in the breadcrumb and each tab shows its own count.
+- **Tabs.** Cours, TD, TP, Examens in one row at every width: on a phone each tab is as wide as its label needs, from 40rem they are four equal columns. Each shows its document count. The Arabic tabs keep "TD" and "TP", which students say aloud and which fit. The open tab is marked by a fill, a heavier edge, and a bar. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction.
 - **Resource rows.** The chapter or sheet number ("Chapitre 2", "TD 3") sits above the title on a phone and in its own column from 36rem. Facts about the document are tags under the title, each in words: exam kind, session, year, "Avec corrigé" or "Sans corrigé". Only "Avec corrigé" is filled green, so it is the one a student spots first.
-- **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, the number of exams shown is announced, and the reset button appears only while a filter is set.
+- **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, side by side even on a phone. The label above each says what it filters, so the choices are short ("Toutes", "Normale", "Rattrapage"). While a filter is set, the number of exams shown appears with the reset button; with no filter the tab already shows that number, so it is only announced to screen readers.
 - **Actions.** "Voir" and "Télécharger" are two outlined buttons of equal weight, under the tags on a phone and at the end of the row from 36rem. Each also names its document for screen readers. The file size appears as one more tag ("PDF, 1,4 Mo").
 - **Sample and missing files.** A sample record carries an "Exemple" tag. A document whose PDF is not on the server shows "Fichier indisponible" at the end of its row instead of the two actions.
 - **Empty states.** An empty tab says which type has nothing yet. A module with no documents at all shows one message and no tabs. Filters with no match explain how to widen them.
@@ -89,7 +93,6 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 
 Maintainer decisions, 2026-10-07, from the critique saved in `.impeccable/critique/`. Where they differ from the sections above, these win once built; update those sections in the same change.
 
-- **Phone first screen comes first.** A document must appear on the first phone screen of a module page. Shrink the header, breadcrumb, tabs, and filters to get there.
 - **Rows.** The document title becomes the "Voir" link. One "Télécharger" button remains. Facts move to one quiet line of text, with "Avec corrigé" as the only badge. Viewing and downloading both stay available.
 - **Scope.** Fix the phone first screen, the rows, the footer, and the four small defects listed in the critique. The restyle of the module code and outlines (the critique's P3) is left for later.
 - **Footer.** It says the site is student-run and unofficial. See `docs/project-brief.md`.
