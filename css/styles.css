@@ -637,7 +637,7 @@ a.row:hover .row__title {
   font: inherit;
 }
 
-/* Used by real buttons and by links that act on a document (Voir, Télécharger). */
+/* Used by real buttons and by the Télécharger link of a document. */
 .button {
   display: inline-flex;
   align-items: center;
@@ -680,13 +680,35 @@ a.row:hover .row__title {
   border-block-start: 1px solid var(--color-border);
 }
 
-/* On a phone the number sits above the title; from a tablet up it gets its own column. */
+/* One document. On a phone the title takes the first line, and the facts share the second with
+   Télécharger. From a tablet up, Télécharger sits at the end of the row. */
 .resource {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-1) var(--space-4);
-  padding-block: var(--space-3);
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-3);
+  padding-block: var(--space-1) var(--space-3);
   border-block-end: 1px solid var(--color-border);
+}
+
+/* The number and the title: one link that opens the PDF. */
+.resource__link {
+  display: block;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  /* Room at the sides for the focus ring, without moving the text. */
+  margin-inline: calc(var(--space-2) * -1);
+  /* The block padding makes a one-line title as tall as a tap target. */
+  padding: calc((var(--tap) - 1.35em) / 2) var(--space-2);
+  color: var(--color-text);
+  font-size: var(--text-md);
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+/* Drawn inside the link, so the ring does not run over Télécharger just below. */
+.resource__link:focus-visible {
+  outline-offset: -3px;
 }
 
 .resource__marker {
@@ -695,69 +717,92 @@ a.row:hover .row__title {
 }
 
 .resource__title {
-  font-size: var(--text-md);
   font-weight: 600;
-  line-height: 1.35;
 }
 
-.tags {
+a.resource__link .resource__title {
+  color: var(--color-link);
+}
+
+a.resource__link:hover .resource__title {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.2em;
+}
+
+.resource__download {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+/* Facts about the document, as one quiet line of text with a dot between two facts. */
+.facts {
+  --fact-gap: 1.25em;
+
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-block-start: var(--space-2);
-}
-
-/* One fact about a resource. Each tag carries its meaning in words. */
-.tag {
-  padding-inline: var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  grid-column: 1;
+  grid-row: 2;
+  align-items: baseline;
+  column-gap: var(--fact-gap);
+  /* Hides the dot of the first fact on each line; see .fact. */
+  overflow: hidden;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
-  line-height: 1.6;
 }
 
-.tag--ok {
-  border-color: transparent;
+/* Every fact carries a dot in a margin before it. For the first fact of a line that margin
+   hangs outside the list, where it is cut off, so no line starts or ends with a dot. */
+.fact {
+  position: relative;
+  margin-inline-start: calc(var(--fact-gap) * -1);
+  padding-inline-start: var(--fact-gap);
+}
+
+.fact::before {
+  position: absolute;
+  inset-inline-start: 0;
+  inline-size: var(--fact-gap);
+  text-align: center;
+  content: "·";
+  /* Where supported, the dot is not read aloud. */
+  content: "·" / "";
+}
+
+/* "Avec corrigé" is the only fact drawn as a badge, so it is the one a student spots first. */
+.fact__badge {
+  /* Stays one tidy block when a long label has to wrap on a narrow phone. */
+  display: inline-block;
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
   background: var(--color-ok-bg);
   color: var(--color-ok-text);
   font-weight: 600;
 }
 
-.tag--sample {
-  border-color: transparent;
-  background: var(--color-notice-bg);
-  color: var(--color-notice-text);
+/* The file size is filled in after the page is drawn. Its place is wide enough from the start
+   for "PDF, 99,9 Mo" (in Arabic, "PDF، 999 كيلوبايت"), so filling it in never moves the row. */
+.fact--size {
+  min-inline-size: calc(var(--fact-gap) + 5.75em);
 }
 
-/* The file size is filled in after the page is drawn. Its tag is wide enough for the longest
-   size from the start, so filling it in never moves the row. */
-.tag--size {
-  min-inline-size: 7.25em;
+:lang(ar) .fact--size {
+  min-inline-size: calc(var(--fact-gap) + 7.75em);
 }
 
-:lang(ar) .tag--size {
-  min-inline-size: 9.5em;
+/* A document whose PDF is not on the server: the title is not a link, and this message
+   takes the place of the facts and of Télécharger. */
+.resource--missing .resource__title {
+  color: var(--color-text-muted);
 }
 
 .resource__missing {
-  padding-inline: var(--space-2);
-  border: 1px solid var(--color-error-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-error-bg);
+  grid-column: 1 / -1;
+  grid-row: 2;
   color: var(--color-error-text);
   font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.6;
-}
-
-/* Voir and Télécharger, or the missing-file message. Under the tags on a phone, at the end of the row from a tablet up. */
-.resource__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  justify-self: start;
-  margin-block-start: var(--space-2);
 }
 
 /* ---------- Search results ---------- */
@@ -786,20 +831,29 @@ a.row:hover .row__title {
 
 @media (min-width: 36rem) {
   .resource {
-    grid-template-columns: minmax(0, 1fr) auto;
-    /* Sits the number on the same text line as the first line of the title. */
+    column-gap: var(--space-4);
+  }
+
+  .resource__link,
+  .resource__missing {
+    grid-column: 1;
+  }
+
+  .resource__download {
+    grid-row: 1 / span 2;
+  }
+
+  /* The number gets its own column, and the title and the facts line up after it. */
+  .resource--marked .resource__link {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
     align-items: baseline;
+    column-gap: var(--space-4);
   }
 
-  .resource--marked {
-    grid-template-columns: 6rem minmax(0, 1fr) auto;
-  }
-
-  .resource__actions {
-    align-self: center;
-    justify-self: end;
-    flex-wrap: nowrap;
-    margin-block-start: 0;
+  .resource--marked .facts,
+  .resource--marked .resource__missing {
+    margin-inline-start: calc(6rem + var(--space-4));
   }
 }
 

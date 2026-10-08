@@ -2,7 +2,7 @@
 
 A public resource library for Licence 2 Informatique students at Université Mohammed Seddik Benyahia – Jijel. Students pick a semester and a module, then view or download its Cours, TD, TP, and Examens as PDFs.
 
-**The site is under construction.** Built so far: the home page with both semesters, module pages with Cours, TD, TP, and Examens tabs, the year and session filters on Examens, search across modules and documents, "Voir" and "Télécharger" for each PDF, empty and missing-file states, and the 404 page. Still to do: the quality pass and deployment to GitHub Pages. The catalogue holds sample records and placeholder PDFs only; see "Sample data" below.
+**The site is under construction.** Built so far: the home page with both semesters, module pages with Cours, TD, TP, and Examens tabs, the year and session filters on Examens, search across modules and documents, a title that opens each PDF and a "Télécharger" button that saves it, empty and missing-file states, and the 404 page. Still to do: the quality pass and deployment to GitHub Pages. The catalogue holds sample records and placeholder PDFs only; see "Sample data" below.
 
 ## What is confirmed
 

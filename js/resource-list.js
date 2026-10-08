@@ -31,7 +31,7 @@ function facts(resource) {
   }
   if ('hasCorrection' in resource) {
     items.push(resource.hasCorrection
-      ? fact(t(resource.type === 'tp' ? 'correction.tp.yes' : 'correction.yes'), 'ok')
+      ? fact(el('span', {class: 'fact__badge'}, t(resource.type === 'tp' ? 'correction.tp.yes' : 'correction.yes')))
       : fact(t('correction.no')));
   }
   if (isSample(resource)) items.push(fact(t('sample.tag')));

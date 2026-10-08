@@ -73,7 +73,7 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 
 - Site header with language switch; site footer; breadcrumb; sample-data notice.
 - Module code; module row (code, full name, document count); semester section with its empty state.
-- Resource list and item; type label; chapter or sheet number; year, session, exam-kind, and correction metadata; View PDF and Download PDF actions.
+- Resource list and item; type label; chapter or sheet number; year, session, exam-kind, and correction facts; the title link that opens the PDF and the "Télécharger" button.
 - Tabs for Cours, TD, TP, Examens; year and session filters on Examens; search.
 - Empty, loading, and error states. Say what is missing and what the student can do next.
 - Use text labels with icons where icons help. Do not use icons as the only identifier for an action.
@@ -83,17 +83,16 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 
 - **Title.** The module code and the module name share one heading. The code stays on the first line and the name runs on after it. Nothing sits under the title: the semester is in the breadcrumb and each tab shows its own count.
 - **Tabs.** Cours, TD, TP, Examens in one row at every width: on a phone each tab is as wide as its label needs, from 40rem they are four equal columns. Each shows its document count. The Arabic tabs keep "TD" and "TP", which students say aloud and which fit. The open tab is marked by a fill, a heavier edge, and a bar. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction.
-- **Resource rows.** The chapter or sheet number ("Chapitre 2", "TD 3") sits above the title on a phone and in its own column from 36rem. Facts about the document are tags under the title, each in words: exam kind, session, year, "Avec corrigé" or "Sans corrigé". Only "Avec corrigé" is filled green, so it is the one a student spots first.
+- **Resource rows.** One row per PDF. The chapter or sheet number ("Chapitre 2", "TD 3") and the title are one link that opens the PDF in the browser's own viewer. On a phone the number runs on before the title; from 36rem it has its own column. Under the title, the facts about the document make one quiet line of plain text with a dot between two facts: exam kind, session, year, "Sans corrigé", then the file type and size. "Avec corrigé" is the only fact drawn as a badge, filled green, so it is the one a student spots first. A line of facts never starts or ends with a dot.
 - **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, side by side even on a phone. The label above each says what it filters, so the choices are short ("Toutes", "Normale", "Rattrapage"). Each filter lists only the years or sessions the module's exams really have, and a filter with nothing to choose between is not shown. While a filter is set, the number of exams shown appears with the reset button; with no filter the tab already shows that number, so it is only announced to screen readers.
-- **Actions.** "Voir" and "Télécharger" are two outlined buttons of equal weight, under the tags on a phone and at the end of the row from 36rem. Each also names its document for screen readers. The file size appears as one more tag ("PDF, 1,4 Mo"). The tag is in the row from the start, at a width that fits the longest size, so the row does not move when the size arrives. In Arabic, "PDF" and the size are isolated from each other so the number stays beside its unit.
-- **Sample and missing files.** A sample record carries an "Exemple" tag. A document whose PDF is not on the server shows "Fichier indisponible" at the end of its row instead of the two actions.
+- **Actions.** Two per document. The title opens the PDF, and one outlined "Télécharger" button saves it. On a phone the button shares the second line with the facts; from 36rem it sits at the end of the row. Screen readers hear what each one does and which document it acts on. The file size is the last fact ("PDF, 1,4 Mo"). Its place is in the row from the start, at a width that fits the longest size, so the row does not move when the size arrives. In Arabic, "PDF" and the size are isolated from each other so the number stays beside its unit.
+- **Sample and missing files.** A sample record carries the fact "Exemple". A document whose PDF is not on the server keeps its title, which is then plain text and not a link, and shows "Fichier indisponible" in place of the facts and the button.
 - **Empty states.** An empty tab says which type has nothing yet. A module with no documents at all shows one message and no tabs. Filters with no match explain how to widen them. Each state says its message once.
 
 ### Decided after the design critique, not built yet
 
 Maintainer decisions, 2026-10-07, from the design critique. Where they differ from the sections above, these win once built; update those sections in the same change.
 
-- **Rows.** The document title becomes the link that opens the PDF. One "Télécharger" button remains. Facts move to one quiet line of text, with "Avec corrigé" as the only badge. Viewing and downloading both stay available.
 - **Footer.** It says the site is student-run and unofficial, gives the date of the last update, and links to "Signaler une erreur". The same link sits beside "Fichier indisponible". See `docs/project-brief.md`.
 - **Shortcuts.** Each module row on the home page gets a direct "Examens" link. A document title that was already opened looks visited.
 - **Outlines and the module code.** The maintainer added the critique's third priority to the scope: outlines only for things that can be tapped, tags as plain text, a stronger module code, and muted tabs when a type has no document.
@@ -101,7 +100,7 @@ Maintainer decisions, 2026-10-07, from the design critique. Where they differ fr
 ### Search
 
 - **Header field.** On every page, after the language switch: its own row on a phone, the end of the first row from 60rem. It is a plain form with a "Rechercher" button, so Enter works and the result address can be shared.
-- **Results page.** A line under the heading states the outcome ("1 module, 22 documents pour « asd3 »") and is announced to screen readers. Modules come first, in the same rows as the home page. Documents follow, grouped under a link to their module, in the same rows as the module page; an exam is marked "Examen" and carries its year, since it is no longer under a year heading.
+- **Results page.** A line under the heading states the outcome ("1 module, 22 documents pour « asd3 »") and is announced to screen readers. Modules come first, in the same rows as the home page. Documents follow, grouped under a link to their module, in the same rows as the module page; an exam is marked with its academic year ("2024-2025") where a TD has "TD 3", since it is no longer under a year heading.
 - **While typing.** On the results page the list updates after a short pause in typing.
 - **States.** Nothing typed, fewer than two characters, no match (with ways to widen the search and a link to all modules), and a load error are four different messages. At most 30 documents are listed; beyond that the page asks for one more word.
 
