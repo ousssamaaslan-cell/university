@@ -1,13 +1,51 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.idea/
+*.swp
+
+# Node.js
 node_modules/
-dist/
-.astro/
-.next/
+npm-debug.log*
+
+# Python
 .venv/
+venv/
 __pycache__/
 *.pyc
+
+# Environment and secrets
 .env
 .env.*
 !.env.example
+
+# Build output (not used now, kept in case of a framework later)
+dist/
+.astro/
+.next/
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# Test and QA output
+test-results/
+playwright-report/
+screenshots/
+artifacts/
+
+# Claude Code personal files
 .claude/settings.local.json
 .claude/agent-memory-local/
-artifacts/
+CLAUDE.local.md
+
+# Deployment
+.netlify/
+.vercel/
+
+# Raw PDFs before they are organized
+to-add/
