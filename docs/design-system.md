@@ -60,7 +60,7 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 ### Spacing, shape, and size
 
 - Spacing scale: 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4 rem (`--space-1` to `--space-8`).
-- Page width: up to 64rem, with a side gutter between 1rem and 2rem.
+- Page width: up to 56rem, with a side gutter between 1rem and 2rem. A document count stays close to the name it belongs to.
 - Corners: 4px on controls and the module code, 8px on notices. No shadows.
 - Tap targets: at least 44 by 44 CSS pixels for links in lists, tabs, and buttons.
 - Focus: a 3px ring in `--color-link`, offset 2px, on every focusable element.
