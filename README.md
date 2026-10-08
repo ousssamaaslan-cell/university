@@ -27,6 +27,14 @@ python -m http.server 8000
 
 Then open `http://localhost:8000/`. Do not open the HTML files directly with `file://`; the pages fetch the catalogue and the browser blocks that.
 
+To open the site on a phone that is on the same network as the computer, start the server on every network interface instead:
+
+```
+python -m http.server 8000 --bind 0.0.0.0
+```
+
+Then open `http://<the computer's IP address>:8000/` on the phone (`ipconfig` shows the address under "IPv4"). Windows Firewall must allow incoming connections on TCP port 8000. The server shows the whole project folder to that network, so stop it when the check is done.
+
 ## Sample data
 
 Until the real PDFs are added, every resource in `data/resources.json` has an `id` starting with `sample-` and points to a generated placeholder PDF. The site shows a notice while any sample record exists.

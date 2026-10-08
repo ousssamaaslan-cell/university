@@ -106,8 +106,12 @@ function documentResults(documents, listedModules) {
     documents.length > shown.length && el('p', {class: 'search__note'}, t('search.capped', {shown: shown.length})),
     modules.map(module =>
       el('div', {class: 'result-group'},
-        !alreadyNamed && el('h3', {class: 'result-group__title'},
-          el('a', {href: pageUrl('module.html', {id: module.id})}, moduleCode(module), el('span', {}, localized(module.title)))
+        // The same link as in a module row, so a module looks the same wherever it is named.
+        !alreadyNamed && el('h3', {},
+          el('a', {class: 'module__link', href: pageUrl('module.html', {id: module.id})},
+            moduleCode(module),
+            el('span', {class: 'module__title'}, localized(module.title))
+          )
         ),
         resourceList(shown.filter(entry => entry.module === module).map(entry => entry.resource), {mixed: true})
       )

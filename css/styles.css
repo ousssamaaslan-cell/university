@@ -48,6 +48,8 @@
 
   --radius-sm: 4px;
   --radius-md: 8px;
+  /* The width every module code takes, so codes and the names after them line up down a list. */
+  --code-column: 4.5rem;
   --page-max: 56rem;
   --gutter: clamp(1rem, 4vw, 2rem);
   --measure: 65ch;
@@ -157,6 +159,16 @@ a:hover {
   border-radius: var(--radius-sm);
 }
 
+/* Selected text and the typing cursor take the site's blue, in light and in dark. */
+::selection {
+  background: var(--color-link);
+  color: var(--color-bg);
+}
+
+input {
+  caret-color: var(--color-link);
+}
+
 /* The skip link moves focus to <main>; it is not a tab stop, so it needs no ring. */
 main:focus {
   outline: none;
@@ -213,9 +225,14 @@ main:focus {
 /* Two rows on a phone: the site name with the language switch, then the search field.
    One row on a wide screen. */
 .site-header {
-  /* Holds the space before js/layout.js fills it, so the page does not jump. */
+  /* Holds the space before js/layout.js fills it, so the page does not jump.
+     Arabic lines are taller, so the Arabic header reserves a little more at each width. */
   min-block-size: 6.8125rem;
   border-block-end: 1px solid var(--color-border);
+}
+
+:root:lang(ar) .site-header {
+  min-block-size: 6.9625rem;
 }
 
 .site-header__inner {
@@ -230,7 +247,10 @@ main:focus {
   display: grid;
   /* Takes the room the language switch leaves, so both share the first row. */
   flex: 1 1 0;
+  align-content: center;
   min-inline-size: 0;
+  /* Tall enough to tap, even when the name fits on one line. */
+  min-block-size: var(--tap);
   color: var(--color-text);
   text-decoration: none;
 }
@@ -260,6 +280,10 @@ main:focus {
 @media (min-width: 40rem) {
   .site-header {
     min-block-size: 7.3125rem;
+  }
+
+  :root:lang(ar) .site-header {
+    min-block-size: 7.77rem;
   }
 
   .site-header__inner {
@@ -334,7 +358,11 @@ main:focus {
 
 @media (min-width: 60rem) {
   .site-header {
-    min-block-size: 4.5rem;
+    min-block-size: 4.3125rem;
+  }
+
+  :root:lang(ar) .site-header {
+    min-block-size: 4.77rem;
   }
 
   .site-search {
@@ -435,7 +463,7 @@ main {
    It stays in Latin letters, left to right, in the Arabic view. */
 .module-code {
   display: inline-block;
-  min-inline-size: 4.5rem;
+  min-inline-size: var(--code-column);
   padding: 0.15em 0.5em;
   /* Same colour as the fill. It keeps the shape visible where a system setting removes backgrounds. */
   border: 0.09375rem solid var(--color-text);
@@ -475,16 +503,15 @@ main {
 /* One module. On a phone: the code and the name, then under the name the number of documents
    with the Examens shortcut at the end of the line. From a tablet up: one line. */
 .module {
-  --module-code-column: 4.5rem;
-
   display: grid;
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* The code and the name: one link to the module page. */
+/* The code and the name: one link to the module page. Search results use it too, above a
+   module's documents. */
 .module__link {
   display: grid;
-  grid-template-columns: minmax(var(--module-code-column), auto) minmax(0, 1fr);
+  grid-template-columns: minmax(var(--code-column), auto) minmax(0, 1fr);
   align-items: center;
   column-gap: var(--space-4);
   /* Lets the hover fill reach a little past the text without moving it. */
@@ -499,6 +526,7 @@ main {
   font-size: var(--text-md);
   font-weight: 600;
   line-height: 1.35;
+  text-wrap: pretty;
 }
 
 .module__link:hover {
@@ -519,7 +547,7 @@ main {
   column-gap: var(--space-4);
   /* Starts under the name, and sits close to it. */
   margin-block-start: calc(var(--space-1) * -1);
-  margin-inline-start: calc(var(--module-code-column) + var(--space-4));
+  margin-inline-start: calc(var(--code-column) + var(--space-4));
   color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
@@ -623,6 +651,13 @@ main {
   margin-block-start: var(--space-4);
 }
 
+/* On the narrowest screens the tabs give up side padding, so the four still share one row. */
+@media (max-width: 21.25rem) {
+  .tab {
+    padding-inline: var(--space-1);
+  }
+}
+
 @media (min-width: 40rem) {
   .tabs {
     gap: var(--space-2);
@@ -709,6 +744,15 @@ main {
   color: var(--color-link-hover);
 }
 
+/* A press answers at once, which matters most on a phone, where nothing hovers. */
+.button:active,
+.tab:active,
+.module__link:active,
+a.resource__link:active,
+.lang-switch a:active {
+  background: var(--color-accent-surface);
+}
+
 .filters__status {
   margin-block-end: var(--space-2);
   color: var(--color-text-muted);
@@ -750,10 +794,13 @@ main {
   margin-inline: calc(var(--space-2) * -1);
   /* The block padding makes a one-line title as tall as a tap target. */
   padding: calc((var(--tap) - 1.35em) / 2) var(--space-2);
+  border-radius: var(--radius-sm);
   color: var(--color-text);
   font-size: var(--text-md);
   line-height: 1.35;
   text-decoration: none;
+  /* Avoids a last line with a single word, where the browser supports it. */
+  text-wrap: pretty;
 }
 
 /* Drawn inside the link, so the ring does not run over Télécharger just below. */
@@ -880,18 +927,6 @@ a.resource__link:visited .resource__title {
   margin-block-start: var(--space-6);
 }
 
-.result-group__title {
-  margin-block-end: var(--space-2);
-  font-size: var(--text-md);
-}
-
-.result-group__title a {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-3);
-  padding-block: var(--space-2);
-}
 
 @media (min-width: 36rem) {
   .resource {

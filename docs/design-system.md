@@ -14,7 +14,7 @@ The one distinctive element is the **module code**: the abbreviation students al
 - Align content to the start edge (left in French, right in Arabic). Do not centre body content.
 - Separate list rows with a rule, not with boxes and shadows. Use a filled surface only for notices and status messages.
 - **An outline means "you can tap this".** Only the search field, the selects, the buttons, and the tabs have an outlined box. Facts about a document are plain text, the module code is a solid block, and messages are marked by a fill or by a rule above and below.
-- **The first phone screen shows a document.** On a 375 by 812 screen the first row of a module page starts at about 450px in French and 480px in Arabic (it was 867 and 933 before the design critique). Keep it there: anything added above the list on a phone must take its height from something else.
+- **The first phone screen shows a document.** On a 375 by 812 screen the first row of a module page starts at about 450px in French and 480px in Arabic, and two whole exam rows fit under it (before the design critique the first row started below the screen). Keep it there: anything added above the list on a phone must take its height from something else. A document row with a one-line title is about 105px tall on that phone, and 126px for an exam while the sample mark is shown; rows were 166 to 215px. `docs/progress.md` has the measurements.
 - **Header.** Site name, language switch, and search field. On a phone they make two rows: the name beside the language switch, then the search field. From 60rem they share one row. The university name sits under the site name from 40rem; on a phone it is in the footer only.
 - **Breadcrumb.** It lists the pages above the current one, each as a link ("Accueil / Semestre 3"). The current page is not repeated, because its name is the title just below. The home page has no breadcrumb.
 - **Footer.** It answers who runs the site and whether it can be trusted: the site name, one sentence saying it is run by students and is not an official site of the university, the date of the last update, and "Signaler une erreur" after the question "Un fichier manquant ou incorrect ?". The date is the day, in Algeria, on which the server says `data/resources.json` last changed; nobody types it, and the line is left out when the server gives no date (and on the 404 page, which does not load the catalogue). "Signaler une erreur" opens an email to the maintainer that already names the page the reader was on.
@@ -63,13 +63,17 @@ System fonts only, so nothing is downloaded and Arabic renders with the device's
 
 Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45. Headings are weight 700, the module code 700, everything else 400 or 600. Text lines stay under about 65 characters. Use sentence case; no all-capitals labels.
 
+French puts a space before `?`, `!`, `:`, `;` and `»`, and after `«` and `n°`. Type an ordinary space in `js/i18n.js` and in the catalogue; the page turns it into a no-break space, so a narrow screen never leaves the mark alone at the start of a line.
+
 ### Spacing, shape, and size
 
 - Spacing scale: 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4 rem (`--space-1` to `--space-8`).
 - Page width: up to 56rem, with a side gutter between 1rem and 2rem. A document count stays close to the name it belongs to.
 - Corners: 4px on controls and the module code, 8px on notices. No shadows.
 - Tap targets: at least 44 by 44 CSS pixels for links in lists, tabs, and buttons.
-- Focus: a 3px ring in `--color-link`, offset 2px, on every focusable element.
+- Focus: a 3px ring in `--color-link`, offset 2px, on every focusable element. On a document title the ring is drawn inside the link, so it does not run over the button below.
+- Press: buttons, tabs, and the links of module and document rows fill with `--color-accent-surface` while pressed, so a tap on a phone gets an answer at once.
+- Selected text and the typing cursor use `--color-link`.
 - Motion: none on load. Transitions are limited to colour changes under 150ms and are removed under `prefers-reduced-motion`.
 
 ## Components and states
@@ -96,7 +100,7 @@ Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45.
 ### Search
 
 - **Header field.** On every page, after the language switch: its own row on a phone, the end of the first row from 60rem. It is a plain form with a "Rechercher" button, so Enter works and the result address can be shared.
-- **Results page.** A line under the heading states the outcome ("1 module, 22 documents pour « asd3 »") and is announced to screen readers. Modules come first, in the same rows as the home page. Documents follow, grouped under a link to their module, in the same rows as the module page; an exam is marked with its academic year ("2024-2025") where a TD has "TD 3", since it is no longer under a year heading. When a search finds one module and only that module's documents, as typing "asd3" does, the module is named once: its row under Modules, then its documents with no second heading.
+- **Results page.** A line under the heading states the outcome ("1 module, 22 documents pour « asd3 »") and is announced to screen readers. Modules come first, in the same rows as the home page. Documents follow, grouped under a link to their module that looks like the link of a module row, in the same rows as the module page; an exam is marked with its academic year ("2024-2025") where a TD has "TD 3", since it is no longer under a year heading. When a search finds one module and only that module's documents, as typing "asd3" does, the module is named once: its row under Modules, then its documents with no second heading.
 - **While typing.** On the results page the list updates after a short pause in typing.
 - **States.** Nothing typed, fewer than two characters, no match (with ways to widen the search and a link to all modules), and a load error are four different messages. At most 30 documents are listed; beyond that the page asks for one more word.
 

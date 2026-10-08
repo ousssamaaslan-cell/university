@@ -271,9 +271,17 @@ function fill(template, values) {
   return template.replace(/\{(\w+)\}/g, (placeholder, name) => values[name] ?? placeholder);
 }
 
+// French puts a space before ? ! : ; and » and after « and "n°". On the page that space must not
+// break, or a narrow screen leaves the mark alone at the start of a line. The texts above and the
+// catalogue are typed with ordinary spaces; this turns those spaces into no-break spaces.
+function typeset(text) {
+  if (lang !== 'fr') return text;
+  return text.replace(/ ([?!:;»])/g, ' $1').replace(/(«|n°) /g, '$1 ');
+}
+
 // Returns the label for a key, with {name} placeholders filled from values.
 export function t(key, values = {}) {
-  return fill(strings[lang][key] ?? strings[DEFAULT_LANG][key] ?? key, values);
+  return typeset(fill(strings[lang][key] ?? strings[DEFAULT_LANG][key] ?? key, values));
 }
 
 // The same label in every language. Search uses it, because a reader may type in either language.
@@ -308,7 +316,7 @@ export function tCount(key, count) {
 
 // Picks the current language from a catalogue text such as { "fr": "...", "ar": "..." }.
 export function localized(text) {
-  return text[lang] || text[DEFAULT_LANG];
+  return typeset(text[lang] || text[DEFAULT_LANG]);
 }
 
 // Builds a relative link to a page of the site. It keeps the reader's language by adding

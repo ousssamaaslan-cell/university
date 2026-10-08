@@ -123,7 +123,7 @@ function renderSampleNotice(catalogue) {
   if (!catalogue.resources.some(isSample) || document.querySelector('[data-sample-notice]')) return;
   document.querySelector('[data-site-header]').after(
     el('div', {class: 'notice', role: 'note', 'data-sample-notice': true},
-      el('p', {class: 'page-width'}, el('strong', {}, t('sample.title')), ' ', t('sample.text'))
+      el('div', {class: 'page-width'}, el('p', {}, el('strong', {}, t('sample.title')), ' ', t('sample.text')))
     )
   );
 }
