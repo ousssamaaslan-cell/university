@@ -15,51 +15,12 @@
     <meta name="twitter:title" content="Ressources L2 Informatique | Université Mohammed Seddik Benyahia – Jijel" />
     <meta name="twitter:description" content="Cours, TD, TP et examens de Licence 2 Informatique, classés par semestre et par module." />
     <meta name="twitter:image" content="/assets/social-preview.png" />
-    <!--
-      Leave empty to let the script below find where the site starts.
-      Set it (for example "/" or "/my-folder/") only if this page loads without its styles on your host.
-    -->
-    <meta name="site-root" content="" />
-    <script>
-      // The host shows this file for any unknown address, at any folder depth, so links written
-      // as "css/styles.css" would point into a folder that does not exist. Work out where the
-      // site starts, tell the browser with <base>, then load the shared files from there.
-      (function () {
-        var path = location.pathname;
-        var root = document.querySelector('meta[name="site-root"]').content;
-        if (!root) {
-          if (/\.github\.io$/.test(location.hostname) && path.split('/').length > 2) {
-            // A GitHub Pages project site lives at /<repository>/. This comes first, so that an
-            // unknown address that happens to end in "/404" is not mistaken for this file.
-            root = '/' + path.split('/')[1] + '/';
-          } else if (/\/404(\.html)?$/.test(path)) {
-            // Opened directly, as during local preview: the site starts in this folder.
-            root = path.replace(/[^/]*$/, '');
-          } else {
-            root = '/';
-          }
-        }
-
-        function add(tag, attributes) {
-          var node = document.createElement(tag);
-          for (var name in attributes) node.setAttribute(name, attributes[name]);
-          document.head.appendChild(node);
-          return node;
-        }
-
-        add('base', {href: root});
-        add('link', {rel: 'icon', href: 'assets/favicon.svg', type: 'image/svg+xml'});
-        // "blocking" asks the browser to wait for the styles before drawing, as it does for a
-        // stylesheet written in the page, so the header never shows without them.
-        add('link', {rel: 'stylesheet', href: 'css/styles.css', blocking: 'render'});
-        // The page script reads the language that js/lang.js sets, so it must load second.
-        // If js/lang.js cannot be loaded, the page is still drawn, in French.
-        var language = add('script', {src: 'js/lang.js'});
-        language.onload = language.onerror = function () {
-          add('script', {type: 'module', src: 'js/not-found.js'});
-        };
-      })();
-    </script>
+    <!-- Netlify serves this file at unknown paths; the base keeps shared files at the site root. -->
+    <base href="/" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="js/lang.js"></script>
+    <script type="module" src="js/not-found.js"></script>
   </head>
   <body>
     <!-- js/layout.js fills the header and footer and adds the breadcrumb. -->

@@ -226,7 +226,7 @@ These four records show the shape of each type. The titles and files are example
 - Keep both `fr` and `ar` text for every semester label, module title, and resource title. Arabic text drafted by Claude is allowed; it is listed in `docs/project-brief.md` as awaiting the maintainer's review.
 - Every module's `semester` refers to one listed semester. Every resource's `module` refers to one listed module, and its `level` and `semester` match that module.
 - An exam whose `examKind` is `rattrapage` belongs to the `rattrapage` session. Do not guess a session or an exam kind.
-- `pdfPath` is a relative, case-sensitive site path. Its semester and module directory must match the record, and the file must exist before the record is published. Do not start it with `/`, so it works under a GitHub Pages project path as well as at a domain root.
+- `pdfPath` is a relative, case-sensitive site path. Its semester and module directory must match the record, and the file must exist before the record is published. Do not start it with `/`, so links resolve from the site's pages.
 - If a correction is a separate PDF, add a separate resource record for it or extend the model deliberately before publishing it.
 - Keep unverified or missing PDFs out of `resources.json`; do not publish broken View or Download links.
 - Build-phase sample data is the one exception to the real-content rules above. Records whose `id` and PDF filename start with `sample-` may point to generated placeholder PDFs, as described in `docs/project-brief.md`. They follow the same schema, relationship, and path rules, and are removed before the site is announced to students.

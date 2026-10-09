@@ -1,13 +1,13 @@
 # L2 study resource library — Claude Code instructions
 
-This is an academic PDF resource library for Licence 2 students. It is **not** a marketing landing page. Read `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` before planning or building. The field is Informatique, the university is Université Mohammed Seddik Benyahia – Jijel, the languages are French (default) and Arabic, and the future host is GitHub Pages. The seven confirmed modules (ASD3, AO, SI, MN, POO1, PS1, GP) belong to S3; show S4 as an empty semester until its modules are provided. Keep unknown facts explicit; never invent modules, PDFs, branding, or university claims. Two exceptions are recorded in `docs/project-brief.md`: Claude drafts the Arabic text, which stays listed there as awaiting the maintainer's review, and the build-phase `sample-` data, which stays visibly marked and is removed before publication.
+This is an academic PDF resource library for Licence 2 students. It is **not** a marketing landing page. Read `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` before planning or building. The field is Informatique, the university is Université Mohammed Seddik Benyahia – Jijel, the languages are French (default) and Arabic, and the host is Netlify. The seven confirmed modules (ASD3, AO, SI, MN, POO1, PS1, GP) belong to S3; show S4 as an empty semester until its modules are provided. Keep unknown facts explicit; never invent modules, PDFs, branding, or university claims. Two exceptions are recorded in `docs/project-brief.md`: Claude drafts the Arabic text, which stays listed there as awaiting the maintainer's review, and the build-phase `sample-` data, which stays visibly marked and is removed before publication.
 
 ## Scope and stack
 
 - Build L2 only: Semester S3 or S4 → Module → Cours, TD, TP, Examens, in that order. Show each module's abbreviation next to its name everywhere. Retain `level: "L2"` in records for future extension without adding routes for other levels.
-- Use plain HTML, CSS, and browser JavaScript. No framework, site build step, npm dependency, server rendering, or student login.
-- The site uses `index.html`, `module.html?id=<module-id>`, `search.html?q=<words>`, `404.html`, `data/resources.json`, `css/`, `js/`, `assets/`, and PDFs under `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`.
-- Student pages must work on static hosting, including a GitHub Pages project subpath. Use relative URLs, stable module IDs, and no assumed domain root.
+- Use plain HTML, CSS, and browser JavaScript. No framework, compilation, npm dependency, server rendering, or student login. Netlify uses a small allowlisted copy step into its publish folder.
+- The site uses `index.html`, `module.html?id=<module-id>`, `search.html?q=<words>`, `report.html`, `404.html`, `data/resources.json`, `css/`, `js/`, `assets/`, and PDFs under `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`.
+- Student pages must work on Netlify static hosting. Use relative page and PDF URLs and stable module IDs; Netlify serves this project at its site root.
 - One maintainer edits the catalogue and PDFs and republishes. Use `/add-resource` for the exact content workflow. No admin dashboard, API, database, Google Drive, or in-browser upload is part of this static setup. Treat those as a separate architecture decision if later requested.
 
 ## Workflows

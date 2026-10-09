@@ -9,11 +9,11 @@
 - Goal: help students find, view, and download the right course, TD, TP, or exam quickly.
 - Scope: L2 only. Show semesters S3 and S4, their confirmed modules, and resources grouped as Cours, TD, TP, and Examens, in that order. Keep `level` in the data model for future expansion; do not create other levels now.
 - Language: French and Arabic, both complete: every interface label, module name, and resource title. French is the default. A visible language switch is on every page, and Arabic views use RTL layout. Claude drafts the Arabic text; see "Arabic text awaiting review".
-- Hosting: GitHub Pages for the later static site. The local Git repository is connected to the GitHub remote `origin` (`https://github.com/ousssamaaslan-cell/university.git`), which implies a project path of `/university/`. GitHub Pages itself is not enabled or verified yet; deployment is a later phase.
-- Stack: plain HTML, CSS, and JavaScript. No site framework, build step, or npm dependencies.
+- Hosting: Netlify, connected to the GitHub repository `ousssamaaslan-cell/university`. `netlify.toml` runs the doctor and copies allowlisted website files into `.netlify-publish`; that folder alone is deployed. The Netlify project and public URL are not connected or verified yet.
+- Stack: plain HTML, CSS, and JavaScript. No site framework, compilation, or npm dependencies; the Netlify copy step only prepares the publish folder.
 - Public access: students browse without accounts or login.
 - Content files: `data/resources.json` and PDFs in `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`. See `docs/content-model.md`.
-- Pages: `index.html` lists S3/S4 and modules; `module.html?id=<module-id>` lists one module's resources under Cours, TD, TP, and Examens tabs; `search.html?q=<words>` shows search results; `404.html` handles unknown addresses on the static host. One script injects the shared header and footer. Every page below the home page has a breadcrumb that leads back up to the home page and the semester. The home page and each module page set their own title and description in the page language; the results page, the 404 page, and an unknown module are marked `noindex`.
+- Pages: `index.html` lists S3/S4 and modules; `module.html?id=<module-id>` lists one module's resources under Cours, TD, TP, and Examens tabs; `search.html?q=<words>` shows search results; `report.html` holds the report form; `404.html` handles unknown addresses on the static host. One script injects the shared header and footer. Every page below the home page has a breadcrumb that leads back up to the home page and the semester when known. The home page and each module page set their own title and description in the page language; the results page, report page, the 404 page, and an unknown module are marked `noindex`.
 - Search: a field in the header of every page opens `search.html?q=<words>`. It matches a module's full name and its abbreviation, and a document's type, number, title, year, and session, in both languages whatever the page language. Every word typed must match; accents and Arabic letter variants are ignored. A sheet or chapter number typed after its word ("td 3", "chapitre 2") must be the document's own number. Matching modules are listed first, then documents grouped by module.
 - Filters: the Examens tab filters by academic year and session (normal or rattrapage). Cours, TD, and TP have no session filter.
 - Shareable views: the module page keeps the open tab and the exam filters in its address (`type=`, `year=`, `session=`), so a link opens the same view.
@@ -90,7 +90,7 @@ Maintainer decision, 2026-10-07: real PDFs are added only after the site is fini
 - The Arabic text listed above needs the maintainer's review.
 - S4 modules have not been supplied.
 - Real PDFs replace the sample data after the site is finished.
-- GitHub Pages has not been enabled, and no public URL is confirmed.
+- The Netlify project has not been connected, and no public URL is confirmed.
 - No university logo, colours, or fonts were supplied, and no style reference site. The style stays neutral; `docs/design-system.md` records the values chosen.
 
 **[ARABIC DRAFTS, S4 MODULES, REAL PDFS, AND PUBLIC URL — TO CONFIRM]**

@@ -22,7 +22,8 @@ __pycache__/
 .env.*
 !.env.example
 
-# Build output (not used now, kept in case of a framework later)
+# Build output
+.netlify-publish/
 dist/
 .astro/
 .next/

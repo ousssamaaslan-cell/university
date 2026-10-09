@@ -1,7 +1,21 @@
 # QA report — L2 study resources
 
+## Phase 5 verification — 2026-10-08
+
+The detailed Phase 4 report below is a historical baseline. After the four review decisions and Netlify preparation, these checks were run against the new code:
+
+| Check | Status | Evidence and limit |
+| --- | --- | --- |
+| Catalogue and project doctor | Passed | `node scripts/doctor.cjs` returned `ok: true`, with 53 resources and 53 visibly labelled samples. |
+| Publish boundary | Passed | `node scripts/publish.cjs` made 76 files in `.netlify-publish`: five HTML pages, one CSS file, 14 browser JS files, one JSON catalogue, two image assets, and 53 catalogue-linked sample PDFs. `docs/published-files.md` lists every file. The manifest matched the generated folder, and text files contained neither the maintainer address nor a local machine path. No docs, templates, scripts, tests, project instructions, or `assets/README.md` appeared. |
+| Static form and social metadata | Passed | All five HTML pages have French Open Graph and Twitter title, description, and image tags. `report.html` contains a Netlify-detectable form with `form-name`, module, document, required problem, optional email, and a honeypot. JavaScript syntax checks passed. |
+| Language memory | Passed in an isolated script check | A `?lang=ar` URL selects Arabic without writing local storage; a saved Arabic switch choice is read; an invalid query falls back to French. An interactive browser click on the switch was unavailable. |
+| Local HTTP paths | Passed | A local server rooted at `.netlify-publish` returned 200 with the expected content types for the home, module, search, report and direct 404 pages, CSS, report JS, catalogue, preview PNG, and a sample PDF. The server was stopped afterward. |
+| Browser interaction and responsive layout | Blocked | No browser control surface was available in this session. The form, language switch click, missing-file prefill, 404 at an unknown Netlify path, keyboard use, RTL layout, and phone appearance were not rechecked in a browser after the changes. |
+| Live Netlify deployment | Blocked | The GitHub repository has not been connected to a Netlify project here. Form detection, POST handling, email notifications, security and cache headers, custom 404 response, and public link previews need checks on the deployed URL. |
+
 Date / revision: 2026-10-08. The site as it is in the Phase 4 commit that contains this file (it follows `3826c85`). Every result below was obtained on that final code, after the fixes.
-URL / environment (local or published): local only, `python -m http.server` on `http://127.0.0.1:8000/`. A GitHub Pages project site (`https://<user>.github.io/university/`) was emulated inside the test browser, with every request answered from the local files. Nothing is published yet.
+URL / environment (local or published): local only, `python -m http.server` on `http://127.0.0.1:8000/`. A project subpath was emulated inside the test browser, with every request answered from the local files. Nothing was published at the time of this Phase 4 report.
 Browser / viewport / device: Chrome 155 on Windows 10, driven by Playwright. Phone checks at 375 by 812, desktop at 1280 by 800, layout also at 320, 640 and 768. This is desktop Chrome resized, not a real phone. No real screen reader.
 Language and direction tested: French (left to right) and Arabic (right to left), every check in both.
 Catalogue revision / sample module and PDF: 2 semesters, 7 modules, 53 sample records and 53 placeholder PDFs. Most detailed checks use ASD3 (22 documents); MN has an empty Examens tab, GP has no document.
@@ -25,7 +39,7 @@ Use Passed, Failed, Blocked, or Not applicable. A source inspection alone is not
 | Empty/loading/file-error states | Passed | Empty tab, empty module, no exam for the filters, no search result, nothing typed; "Chargement…" appears after a short wait on a slow catalogue; catalogue HTTP 500, 404, not JSON, JSON without its lists, empty file and offline each give one alert with a working reload link; a missing PDF shows "Fichier indisponible" and the report link; a failed file check (offline, HTTP 500) leaves the row usable. | Failures were simulated in the browser. |
 | Console errors and failed requests | Passed | No script error or warning on any page, language, width or state in the runs above. | Expected entries only: the browser logs the document's own 404 on an unknown address, and the site logs one warning per missing PDF. |
 | Performance lab baseline, if tooling exists | Passed | Chrome at 375 by 812, network shaped to about slow 4G (150 ms delay, 1.6 Mbit/s). Home: 10 requests, 89 kB. Module page: 18 to 20 requests, about 108 kB (10 scripts, 55 kB). Search: 34 to 42 requests (one header request per listed PDF). List on screen about 1.7 s after navigation. Layout shift about 0.04 with the sample notice and 0 to 0.03 without it; it was 0.46 to 0.96 before the fixes. | Lab figures from localhost with an uncompressed test server; a real host and phone will differ. Lighthouse is not installed and was not run. Largest-contentful-paint was not captured. |
-| Titles, metadata, sitemap, and static-host paths | Passed, except sitemap: Blocked | Static HTML of the four pages: doctype, `lang`, `dir`, charset, viewport, title, description where indexable, `noindex` on search and 404, no address starting at the domain root, no external address. At runtime: title per page in the page language, a description per module, Arabic descriptions. Emulated project path: home, shortcut, PDF address, search, breadcrumb and five unknown addresses all stay under `/university/`. | Sitemap, canonical links and `robots.txt` need the public URL, which is not confirmed. They belong to Phase 5. |
+| Titles, metadata, sitemap, and static-host paths | Passed, except sitemap: Blocked | Static HTML of the four Phase 4 pages: doctype, `lang`, `dir`, charset, viewport, title, description where indexable, `noindex` on search and 404, no address starting at the domain root, no external address. At runtime: title per page in the page language, a description per module, Arabic descriptions. Emulated project path: home, shortcut, PDF address, search, breadcrumb and five unknown addresses stayed under `/university/`. | Sitemap and canonical links need the public URL, which is not confirmed. |
 | Published deployment and public PDF links, if released | Not applicable | Nothing is published. | Phase 5. |
 
 Total: about 4,800 automated checks in seven test scripts, plus the axe-core scan, all passing on the final code. The scripts were temporary and are not in the repository.
@@ -66,22 +80,22 @@ None for this phase. Before the site is announced: the open decisions in `docs/p
 
 Nothing here was changed. The first two are points where a reviewer disagrees with a design decision already made.
 
-- **Muted tabs.** The edge of a tab with no document is 1.42:1 against the page (1.55:1 in dark mode), below the 3:1 the design system gives for control borders. Its label is 6.4:1. The design reviewer suggests keeping the grey label and regular weight but the normal edge, so the tab still looks tappable.
+- **Muted tabs (resolved after Phase 4).** An empty tab now keeps the normal edge; only its label and weight are muted.
 - **Purple for opened titles.** In light mode the purple and the link blue are equally dark (7.8:1 and 7.9:1), so only the hue differs. A clearly lighter or darker purple would hold up better in sunlight and for colour-blind readers.
 - **A jump to Semestre 4 on the phone home page.** S4 is two screens down. Once it has modules, two small links ("Semestre 3", "Semestre 4") under the introduction would save that scroll.
-- **"Signaler une erreur" without a mail app.** The link does nothing on a computer with no mail app, and the address is not printed. The address is also readable in the page source, so address harvesters will find it; a dedicated address would avoid that.
-- **Language memory.** Opening any link with `?lang=ar` makes Arabic the remembered language, not only a click on the switch.
-- **Link previews.** WhatsApp, Messenger and Telegram do not run scripts, so every shared module link previews as "Module | Ressources L2 Informatique". Fixing that needs one static HTML page per module.
+- **"Signaler une erreur" (resolved after Phase 4).** It now opens a Netlify report form, with the module and document filled in for a missing PDF. The maintainer address is absent from site source.
+- **Language memory (resolved after Phase 4).** Only clicking the language switch saves the choice.
+- **Link previews (partly resolved after Phase 4).** Static French Open Graph and Twitter defaults and an image are on every page. A distinct preview per module would still need one static HTML page per module.
 - **Search by a bare number.** "2024" finds both academic years that contain it, and a number without its word ("asd3 3") still matches the 3 of "ASD3".
 - **A module code longer than about seven characters** would misalign its row. None exists.
 
 ## For Phase 5 (deployment)
 
-- **What gets published.** With a plain branch deployment, GitHub Pages would also publish `docs/`, `templates/`, `README.md`, `AGENTS.md` and `scripts/`. Publish only the four HTML files and `css/`, `js/`, `data/`, `assets/`, `pdfs/`.
+- **What gets published.** Netlify uses an allowlisted copy of five HTML files and the website's CSS, JavaScript, catalogue, images, and catalogue-linked PDFs. `docs/published-files.md` lists the exact current files. Repository documents, templates, instructions, and scripts are excluded.
 - **Needs the public URL:** sitemap, canonical links, language alternates. A `robots.txt` inside `/university/` has no effect.
 - **Faster first load on slow connections:** the scripts load in three steps before the catalogue is asked for. `<link rel="modulepreload">` lines in the three pages would make that one step.
 - **Icon:** the favicon is SVG only, which Safari and iPhone home-screen bookmarks do not use. A PNG and an `apple-touch-icon` are needed.
-- **After a release,** pages, styles and scripts expire separately for up to about 10 minutes on GitHub Pages, so a reader can briefly run old and new files together. Content updates are not affected: the catalogue is checked on every visit.
+- **After a release,** the configured browser cache is five minutes for CSS and JavaScript, one hour for PDFs, and revalidation on each visit for HTML and the catalogue. These header rules still need a live Netlify check.
 
 ## Checks not applicable or unavailable
 
@@ -89,7 +103,7 @@ Nothing here was changed. The first two are points where a reviewer disagrees wi
 - **A real screen reader:** how tab names, the facts list, the two status lines and Latin codes inside Arabic are read.
 - **Safari and Firefox.** Only Chrome was used.
 - **The mail app:** that "Signaler une erreur" opens with the prepared email.
-- **GitHub Pages itself:** that it sends the size of a PDF and a `Last-Modified` date, and what date that is. The footer date and the file sizes depend on them.
+- **Netlify itself:** that it sends the size of a PDF and a `Last-Modified` date, and what date that is. The footer date and the file sizes depend on them. Form detection, submissions, and notifications also need live verification.
 - **Real browser zoom, Lighthouse, field performance data.**
 - **Real documents.** All 53 PDFs are placeholders of about 1.5 kB.
 - **`webapp-testing` with Python Playwright:** not installed on this computer. The Playwright browser tool of Claude Code was used instead.

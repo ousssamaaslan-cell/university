@@ -2,16 +2,22 @@
 
 State on 2026-10-08.
 
-- Phases 0 to 3 and the eight critique fixes: done and **pushed**. GitHub `main` is at `3826c85`.
-- Phase 4, quality: done and committed on `main`. **Not pushed.**
-- Phase 5, deployment: not started.
+- Phases 0 to 4 and the eight critique fixes: done and committed on `main`.
+- Phase 4 review decisions: the normal empty-tab edge, click-only language memory, Netlify report form, and static French social previews are implemented in four separate commits. The purple visited-title colour is unchanged; no S4 jump links were added.
+- Phase 5 repository setup: Netlify configuration, a restricted publish copy, documentation, and an exact file manifest are ready. The maintainer still needs to connect the GitHub repository in Netlify and enable form notifications. No public deployment has been verified.
+
+## Phase 5 — Netlify preparation
+
+- `netlify.toml` runs `node scripts/doctor.cjs && node scripts/publish.cjs` and publishes `.netlify-publish` only. The copy contains 76 files: five HTML pages, one stylesheet, 14 browser scripts, the catalogue, two image assets, and 53 catalogue-linked placeholder PDFs. `docs/published-files.md` lists each file. It excludes project docs, templates, scripts, tests, instructions, and `assets/README.md`.
+- The root `404.html` works for unknown Netlify paths with `<base href="/">`. Security headers and short browser cache times are configured; PDFs cache for one hour. Forms need Netlify form detection and an email notification after connection.
+- The 53 PDFs are still visibly marked samples. Arabic review, S4 modules, real PDFs, and the public URL remain open decisions. No live host, form submission, or notification has been verified yet.
 
 ## Phase 4 — quality
 
 `docs/qa-report.md` is the full record: what was tested, each finding, and what is not verified. In short:
 
 - **Reviews.** The `design-reviewer` and `quality-reviewer` agents read the whole site with 35 screenshots and the test results. Neither found a high-severity problem. Each of their findings was reproduced in the browser before it was fixed. `/lp-check` cannot be called by Claude, so its written steps were followed by hand, with `templates/qa-report.md`.
-- **Tests.** About 4,800 automated browser checks in French and Arabic at 375 and 1280px (layout also at 320, 640 and 768): home, every module and tab, filters, search, PDFs, the report link, the language switch, the 404 page, an emulated GitHub Pages project path, a crawl of 272 links, keyboard only, headings, labels, names and contrast, loading and error states, metadata, and the add-a-document workflow in a throwaway copy. axe-core 4.10.2 on 128 page states. All pass on the final code, with no console error.
+- **Tests.** About 4,800 automated browser checks in French and Arabic at 375 and 1280px (layout also at 320, 640 and 768): home, every module and tab, filters, search, PDFs, the former email report link, the language switch, the 404 page, an emulated project subpath, a crawl of 272 links, keyboard only, headings, labels, names and contrast, loading and error states, metadata, and the add-a-document workflow in a throwaway copy. axe-core 4.10.2 on 128 page states. All passed on the Phase 4 code, before the review decisions above.
 - **Found and fixed: 23 findings.** Nine medium, fourteen low. The main ones:
   - the page jumped while loading (layout shift 0.46 to 0.96, now about 0.04);
   - "Recharger la page" did nothing on an address ending in `#s3`;
@@ -23,17 +29,15 @@ State on 2026-10-08.
 - **Design kept.** No decision from the design critique was undone. The measurements below are unchanged, and the Impeccable detector still reports 0 findings in the source files and on eight pages at 1280 by 800 and 390 by 844.
 - **Layout changes a reader can see.** The footer appears together with the list instead of before it. With a filter set, the count and the reset button share one line. From the tabs, Tab goes straight to the first document. In search results the module name lines up with the titles under it.
 
-For the maintainer to decide; nothing was changed for these, and `docs/qa-report.md` gives the detail:
+The Phase 4 review left these decisions. The maintainer has now chosen the empty-tab edge, report form, language memory, and social previews, as recorded above. The following stay unchanged:
 
-- Two points where the design reviewer disagrees with a decision already made: the pale edge of an empty tab (1.42:1), and the purple of opened titles, which is as dark as the link blue.
+- The purple of opened titles, which is as dark as the link blue.
 - A jump to Semestre 4 on the phone home page, once S4 has modules.
-- "Signaler une erreur" does nothing without a mail app, and the address can be harvested from the page source.
-- Any link with `?lang=ar` changes the remembered language.
-- Shared links preview as "Module | Ressources L2 Informatique" in chat apps, because those do not run scripts.
+- Individual module names in chat previews still require separate static module pages; the current tags provide a shared French default.
 
-Not verified: a real phone, a real screen reader, Safari and Firefox, the mail app, GitHub Pages itself (file sizes and the date of the last update depend on what it sends), real browser zoom, Lighthouse.
+Not verified: a real phone, a real screen reader, Safari and Firefox, Netlify's live file headers and form handling, real browser zoom, Lighthouse.
 
-For Phase 5: publish only the site files (a plain branch deployment would also publish `docs/`, `templates/`, `scripts/` and the README); sitemap and canonical links once the public URL is known; `modulepreload` lines for a faster first load; a PNG icon for Safari and iPhone.
+After the public URL is known: sitemap and canonical links; `modulepreload` lines for a faster first load and a PNG icon for Safari and iPhone remain outside this request.
 
 No test server is left running, and the temporary test scripts and screenshots were deleted.
 
@@ -93,7 +97,7 @@ Not checked:
 - That a phone's mail app opens with the prepared email from "Signaler une erreur". On a computer with no mail app the link does nothing.
 - The visited colour on a phone that downloads PDFs instead of showing them.
 - Real browser zoom at 200%. The 640px layout, which is the same width, was checked.
-- The date of the last update on GitHub Pages. Locally it is the day `data/resources.json` was last saved.
+- The date of the last update on the future public host. Locally it is the day `data/resources.json` was last saved.
 
 ### Choices made while building
 
@@ -101,7 +105,7 @@ Say so if you prefer otherwise.
 
 - **"Examens" shortcut.** A module with no exam (MN, GP) has no shortcut, so nobody taps through to an empty tab.
 - **Date of the last update.** It comes from the server (the `Last-Modified` header of the catalogue), shown as the day in Algeria. Nobody types it. The 404 page does not load the catalogue, so it shows no date.
-- **"Signaler une erreur".** The address is set once, as `REPORT_EMAIL` in `js/components.js`. The email already names the page the reader was on and, for a missing PDF, the file. The footer asks "Un fichier manquant ou incorrect ?" before the link. The address is not printed on the page.
+- **"Signaler une erreur" at that stage.** It opened a prepared email. Phase 4 review replaced it with the Netlify form described above.
 - **Visited colour.** Purple: `#70359c` in light mode, `#cdb0ff` in dark mode.
 - **The Impeccable ignore block.** No official text was found in the installed Impeccable (version 0.1.11) or on the web. The lines between the two markers in `.gitignore` were written to do what was asked: keep `config.json`, `design.json`, `surfaces/*.md` and `critique/*.md`, ignore everything else in `.impeccable/`. Paste the official block over them if you have it.
 - **The critique file.** Its header holds the folder path on this computer (`C:\Users\STS\...`). It is in Git now and becomes public with the push.
@@ -118,4 +122,4 @@ The check on a real phone was skipped at the maintainer's request. Windows Firew
 
 ## Next
 
-Waiting for the maintainer. On "continue": push the Phase 4 commit, then Phase 5 (deployment to GitHub Pages). Phase 5 has not been started.
+Push the repository changes, then connect the repository in Netlify, enable form detection and email notifications, and verify the public site. Do not announce it as real study material while the sample PDFs remain.
