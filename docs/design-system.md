@@ -112,7 +112,7 @@ French puts a space before `?`, `!`, `:`, `;` and `»`, and after `«` and `n°`
 
 ## Language and direction
 
-The site is complete in French and Arabic. French is the default. The language switch is in the header on every page and names each language in its own script ("Français", "العربية"). The choice is kept in the URL (`?lang=ar`) and remembered in the browser.
+The site is complete in French and Arabic. French is the default. The language switch is in the header on every page and names each language in its own script ("Français", "العربية"). The choice is kept in the URL (`?lang=ar`). It is remembered in the browser only after the reader clicks the switch; opening a shared `?lang=` link does not change the saved choice.
 
 The Arabic text is drafted by Claude and awaits the maintainer's review; `docs/project-brief.md` lists what is pending.
 

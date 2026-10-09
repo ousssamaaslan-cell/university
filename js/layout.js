@@ -57,16 +57,22 @@ export function renderFooter(catalogue = null) {
 function languageSwitch() {
   return el('nav', {class: 'lang-switch', 'aria-label': t('lang.label')},
     el('ul', {role: 'list'},
-      languages.map(language =>
-        el('li', {},
-          el('a', {
+      languages.map(language => {
+        const link = el('a', {
             href: languageUrl(language.code),
             lang: language.code,
             hreflang: language.code,
             'aria-current': language.code === lang ? 'true' : null
-          }, language.name)
-        )
-      )
+          }, language.name);
+        link.addEventListener('click', () => {
+          try {
+            localStorage.setItem('l2-resources-lang', language.code);
+          } catch (error) {
+            // The URL still carries this choice when storage is unavailable.
+          }
+        });
+        return el('li', {}, link);
+      })
     )
   );
 }
