@@ -149,7 +149,7 @@
     return {path: asset.path, name: asset.fileObj.name, size: asset.fileObj.size, isPdf: String.fromCharCode(...start) === '%PDF-'};
   }
 
-  // Notes stay at the bottom of the window until closed: the local-preview notice, what a save
+  // Notes stay at the bottom left of the window until closed: the local-preview notice, what a save
   // stored, and why a save was refused. Decap's own messages disappear after a few seconds, too
   // soon to correct several fields or to copy a document's ID.
   function showNote(kind, text, lines = []) {

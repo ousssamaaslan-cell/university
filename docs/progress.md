@@ -36,10 +36,14 @@ Choices made while building. Say so if you prefer otherwise.
 - **A published document keeps its module and type.** To move one, remove it and add it again; its address and file name come from both.
 - **The local preview does not touch GitHub.** On `localhost` the form works on a copy in the browser tab, to try it safely.
 
+Verified on the published site after the push (commit `43c45a0`): `/admin/` answers with `X-Robots-Tag: noindex, nofollow` and shows Decap's "Se connecter avec GitHub" screen, `/admin` redirects to it, every admin file is byte for byte the repository's, and the repository's documents, scripts, and instructions answer 404. `docs/qa-report.md` has the details.
+
 Not verified, because they need the maintainer:
 
 - The GitHub login on the published site.
 - A real save: the commit on GitHub, the Netlify build, and the document on the site.
+
+Seen on the published site, not changed: Netlify adds a "Powered by Netlify" badge, through a script of its own, to every page it serves. The admin's notes were moved to the bottom left so the badge does not cover them.
 
 Known and left as is:
 

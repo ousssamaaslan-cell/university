@@ -9,14 +9,17 @@
     <title>Administration | Ressources L2 Informatique</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
     <style>
-      /* Notes from admin.js, above Decap's interface: the local-preview notice, and why a save was refused. */
+      /* Notes from admin.js, above Decap's interface: the local-preview notice, what a save stored, and why a save was refused. */
       .admin-notes {
         position: fixed;
-        inset: auto 0 0 0;
+        inset: auto auto 0 0;
+        /* The bottom right corner stays free for the badge Netlify adds to every page it serves. */
+        width: min(52rem, calc(100vw - 14rem));
         z-index: 100000;
         max-height: 60vh;
         overflow: auto;
         font: 1rem/1.5 system-ui, sans-serif;
+        box-shadow: 0 0 0.75rem rgb(0 0 0 / 0.25);
       }
       .admin-note {
         display: flex;
@@ -26,6 +29,7 @@
         gap: 0.5rem 1rem;
         padding: 0.5rem 1rem;
         border-top: 2px solid #8a5a00;
+        border-inline-end: 2px solid #8a5a00;
         background: #fff8e1;
         color: #3d2c00;
       }
