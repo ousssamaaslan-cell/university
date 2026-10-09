@@ -654,7 +654,6 @@ main {
 
 /* A type with no document yet: the tab still opens, but it steps back until it is chosen. */
 .tab--empty:not([aria-selected="true"]) {
-  border-color: var(--color-border);
   color: var(--color-text-muted);
   font-weight: 400;
 }
