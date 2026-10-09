@@ -14,6 +14,13 @@ Anthropic skills: Anthropic, PBC, Apache-2.0.
 Marketing Skills: Corey Haines, MIT.
 Web Quality Skills: Addy Osmani, MIT.
 Vercel Agent Skills: Vercel, MIT as declared in the upstream README.
+Decap CMS: Netlify and the Decap CMS contributors, MIT.
+
+The admin form runs Decap CMS 3.16.3. `admin/decap-cms.js` is the browser bundle
+from the npm package `decap-cms@3.16.3`, unchanged; the package's checksum, the
+file's hash, and the release commit are in `vendor-manifest.json`. Its licence is
+`admin/decap-cms.LICENSE.txt`, and the notices of the libraries built into the
+bundle are in `admin/decap-cms.js.LICENSE.txt`. Both are published beside it.
 
 The `lp-*` workflows, reviewer definitions, rules, hooks, doctor script, project
 documents, and templates are adapted for this university project. Marketing and

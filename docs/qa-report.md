@@ -1,5 +1,40 @@
 # QA report — L2 study resources
 
+## Phase 6 verification — 2026-10-09 (admin form)
+
+Environment: Windows 10, Node 24.11, Chrome driven by Playwright at 1280 by 800. The pages were served by a small local static server; the published copy was served from `.netlify-publish`. The test scripts were temporary and are not in the repository, except `scripts/test-admin.cjs`.
+
+| Check | Status | Evidence and limit |
+| --- | --- | --- |
+| Catalogue and project doctor | Passed | `node scripts/doctor.cjs` returned `ok: true`: 53 resources, 53 samples, 48 vendored files verified, including the three Decap files. |
+| Save rules and GitHub commit, without a browser | Passed | `node scripts/test-admin.cjs`: 17 tests pass. They cover what a save writes for each type, what it refuses, the commit against a stand-in for GitHub's API, and the doctor checks below. |
+| The doctor accepts what the admin commits | Passed | In a throwaway copy of the project: four documents added through the save rules (one of each type), then one PDF replaced, one title changed, and one document removed. The doctor returned no error after each round. |
+| The doctor stops a bad entry made through the admin | Passed | In the same copy, 16 kinds of bad entry each made the doctor fail with its own message: the form as Decap alone would save it, a PDF left in the staging folder, a record without its PDF, a file that is not a PDF, an empty PDF, a wrong file name, a wrong folder, a wrong semester, an ID without its module, a number typed as text, a field of another type, an optional field written empty, a title in one language, a rattrapage exam in the normal session, the form's own field carried into the file, and the module list dropped. It also fails on a GitHub token or an OAuth secret in a published file, on a publish folder other than `.netlify-publish`, and on a missing Decap bundle. |
+| Admin form in the local preview | Passed | Six scripted scenarios in the browser: add a TD with a PDF named `Série TD N°7 (Corrigé).PDF` (saved as `pdfs/S3/asd3/asd3-td-07.pdf`, record between TD 6 and TP 1, rest of the file byte for byte unchanged); change it in the same session; a second TD 7 (`asd3-td-07-2`); an exam refused for three reasons, corrected, and accepted; a PDF replaced at the same path; a module change refused; a document removed; a form made stale by another change, refused; two documents in one save; an upload from the media library, refused. No request failed and no console error appeared beyond the logged refusals. The local preview writes to a copy in the browser tab, never to GitHub. |
+| Admin form as it runs on Netlify, against a stand-in for GitHub | Passed, with the limit stated | The page was opened under the site's own address inside the test browser, with the site answered from local files and `api.github.com` answered by an in-memory stand-in. With a stored session: the form loaded 53 documents through Decap's GitHub backend; a TD with a PDF went into one commit on the previous head, with the PDF's bytes identical to the chosen file and the message `Admin: add asd3-td-07`; a second change in the same session and a removal each made one commit, the removed PDF leaving the tree in that commit; a branch moved by somebody else and an expired session were both refused with a clear message and left the branch alone. No request went to an unknown API route. This proves the code path, not GitHub: the stand-in was written from GitHub's API documentation and is not GitHub. |
+| Reading from the real GitHub API | Passed | The admin's own read code, run without a token against the public repository, returned the same head commit as `origin/main` and a catalogue identical to it. Nothing was written. |
+| Publish boundary | Passed | `node scripts/publish.cjs` exits 0 and makes 83 files: the 76 of Phase 5 and the seven admin files. `docs/published-files.md` matches the folder exactly. Served from that folder, `/docs/project-brief.md`, `/README.md`, `/scripts/doctor.cjs`, `/scripts/test-admin.cjs`, `/.claude/CLAUDE.md`, `/netlify.toml`, and `/vendor-manifest.json` answer 404. The published text files hold no local path, email address, token, or secret (the Decap bundle and its notices were not scanned; their hashes are verified instead). |
+| Student pages after the change | Passed, smoke check only | From the publish folder: the home page lists the seven modules and has no link to the admin; the ASD3 page shows its four tabs with 5, 6, 4, and 7 documents; a search returns results; a PDF answers 200 as `application/pdf`; no console error. No student file was changed in this phase, so the Phase 4 checks were not repeated. |
+| GitHub login through Netlify | Blocked | It needs the maintainer's GitHub OAuth app, installed in Netlify. On the Netlify address the page shows "Se connecter avec GitHub"; the login itself was not exercised. |
+| A real save from the published site | Blocked | Same reason. The first real save is the maintainer's test: add one document through `/admin`, then check the commit on GitHub, the Netlify build, and the document on the site. |
+| `/admin` on the live site: status, `X-Robots-Tag`, private paths | Blocked until this phase is deployed | To be checked on the public address after the push. |
+| Admin form on a phone | Failed, not fixed | Decap's editor has a minimum width of 800 pixels: at 390 pixels the page scrolls sideways. The form is a computer tool; the README says so. |
+| Keyboard, screen reader, and contrast of Decap's interface | Not checked | The scripted runs chose list values with the keyboard, which is not an audit. The notes added by this project use `role="alert"` or `role="status"` and a focusable "Fermer" button. |
+| Browsers | Chrome only | Safari and Firefox were not used. |
+
+Found and fixed while testing:
+
+1. **A second save in the same session was refused.** Decap keeps showing what was typed after a save, while the catalogue now held the new ID and PDF path. The form is now reopened after each save, so it shows what was saved.
+2. **Reopening the form asked "leave this page?" after a save with a PDF on the GitHub path.** Decap marks the form as saved a moment later there. The form is now reopened only once Decap reports no unsaved change.
+3. **The form and the save could have read the catalogue in two different ways.** Both now use the same read, so the stale-form check cannot fire on a difference between two readers.
+4. **Decap's own error message disappears after eight seconds.** Refusals, and each successful save, now leave a note at the bottom of the window until it is closed.
+
+Limits to know:
+
+- **One test request reached the live site.** In an early run of the stand-in check, the test script answered `/admin` with a redirect, and the browser followed it to the real address: one `GET /admin/`, answered by the site's 404 page. No token or data was sent. The script was corrected and the later runs stayed on this computer.
+- **Only the main Decap file is vendored.** The npm package also has 94 small files and two WebAssembly files that Decap loads on demand for features this form does not use. None was requested in any run.
+- **Saving two changes at once from two tabs** is refused for the second one (stale form), which is the intended behaviour, but the maintainer then has to redo that change.
+
 ## Phase 5 verification — 2026-10-08
 
 The detailed Phase 4 report below is a historical baseline. After the four review decisions and Netlify preparation, these checks were run against the new code:

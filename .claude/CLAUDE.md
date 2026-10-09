@@ -6,9 +6,10 @@ This is an academic PDF resource library for Licence 2 students. It is **not** a
 
 - Build L2 only: Semester S3 or S4 → Module → Cours, TD, TP, Examens, in that order. Show each module's abbreviation next to its name everywhere. Retain `level: "L2"` in records for future extension without adding routes for other levels.
 - Use plain HTML, CSS, and browser JavaScript. No framework, compilation, npm dependency, server rendering, or student login. Netlify uses a small allowlisted copy step into its publish folder.
-- The site uses `index.html`, `module.html?id=<module-id>`, `search.html?q=<words>`, `report.html`, `404.html`, `data/resources.json`, `css/`, `js/`, `assets/`, and PDFs under `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`.
+- The site uses `index.html`, `module.html?id=<module-id>`, `search.html?q=<words>`, `report.html`, `404.html`, `data/resources.json`, `css/`, `js/`, `assets/`, and PDFs under `pdfs/S3/<module-id>/` or `pdfs/S4/<module-id>/`. `admin/` holds the maintainer's form.
 - Student pages must work on Netlify static hosting. Use relative page and PDF URLs and stable module IDs; Netlify serves this project at its site root.
-- One maintainer edits the catalogue and PDFs and republishes. Use `/add-resource` for the exact content workflow. No admin dashboard, API, database, Google Drive, or in-browser upload is part of this static setup. Treat those as a separate architecture decision if later requested.
+- One maintainer keeps the catalogue by two routes, both ending in a commit on `main` that Netlify rebuilds: the admin form at `/admin`, and editing the catalogue and PDFs in the repository with `/add-resource`. Run `git pull` before a repository edit, because an admin save is a commit too.
+- The admin form (maintainer decision, 2026-10-09) is a static page running the vendored Decap CMS bundle `admin/decap-cms.js`, with GitHub login through Netlify's OAuth provider. `admin/catalogue-rules.js` applies `docs/content-model.md` on save and `admin/github-commit.js` writes one commit. Keep it to documents only; modules and semesters stay in the repository route. Do not add Netlify Identity, Git Gateway, another backend, an API, a database, or Google Drive, do not link to `/admin` from student pages, and never put an OAuth secret or token in the repository. After changing `admin/` or the doctor, run `node scripts/test-admin.cjs`.
 
 ## Workflows
 
@@ -22,7 +23,7 @@ Use `design-reviewer` and `quality-reviewer` for relevant reviews. Marketing and
 - Use clear academic labels and navigation. Search and filters must remain keyboard-usable. Distinguish missing results from a loading or file error.
 - Test browsing S3/S4, each module, search, filters, PDF viewing and downloading, mobile layout, keyboard navigation, and language direction where applicable. Record results in `docs/qa-report.md` using `templates/qa-report.md`; mark unavailable checks as blocked.
 - Start a local static HTTP server for browser checks; do not rely on opening pages with `file://` because browser fetch rules may differ.
-- State build, deployment, browser, and PDF results only when actually verified. Do not claim an admin dashboard or live backend exists.
+- State build, deployment, browser, and PDF results only when actually verified. The admin form's GitHub login and saves on the published site count as verified only once done there; a local preview of `/admin` works on a copy in the browser tab and proves nothing about GitHub.
 
 ## Configuration
 

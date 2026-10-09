@@ -1,10 +1,53 @@
 # Progress
 
-State on 2026-10-08.
+State on 2026-10-09.
 
 - Phases 0 to 4 and the eight critique fixes: done and committed on `main`.
 - Phase 4 review decisions: the normal empty-tab edge, click-only language memory, Netlify report form, and static French social previews are implemented in four separate commits. The purple visited-title colour is unchanged; no S4 jump links were added.
-- Phase 5 repository setup: Netlify configuration, a restricted publish copy, documentation, and an exact file manifest are ready. The maintainer still needs to connect the GitHub repository in Netlify and enable form notifications. No public deployment has been verified.
+- Phase 5 repository setup: Netlify configuration, a restricted publish copy, documentation, and an exact file manifest. The maintainer has since connected the repository; Netlify deploys `main` at `https://admirable-concha-bbf7df.netlify.app`.
+- Phase 6: an admin form at `/admin` (Decap CMS, GitHub login through Netlify). Built, tested locally, and pushed. The GitHub login and the first real save wait for the maintainer's OAuth app; see "Phase 6" below.
+
+## Phase 6 — admin form
+
+What was built:
+
+- **`admin/`**, seven files: the page, `admin.js` (the form and the wiring to Decap), `catalogue-rules.js` (what a save writes and refuses), `github-commit.js` (one commit for the catalogue and the PDFs), the Decap CMS 3.16.3 bundle, and its two licence files. The bundle is kept in the repository, with its hash in `vendor-manifest.json`, so the page loads no script from another site.
+- **Login.** Decap's GitHub backend with Netlify as the OAuth provider, as the current Decap and Netlify documentation describe. Git Gateway is marked deprecated in Netlify's documentation and is not used; Netlify Identity is not needed and is not used. The login asks for public repositories only, since the repository is public.
+- **The form.** A list of documents; "add" asks for the type (Cours, TD, TP, Examen) and opens that type's fields. Semestre, Module, Année universitaire, Session, and Nature de l'examen are lists built from the catalogue and the content model; chapter, sheet number, and order are number fields; "contient le corrigé" is a switch; both titles are required.
+- **On save.** The ID, `level`, an empty `order`, and the PDF's folder and name are filled in; the record goes where the site would list it and the rest of `data/resources.json` stays byte for byte the same; the catalogue and the PDFs go to GitHub in one commit. What the lists cannot prevent is refused with the reasons shown until closed: a module outside the chosen semester, a rattrapage exam in the normal session, a file that is not a PDF, a changed module or type on a published document, and a form opened before the catalogue changed elsewhere.
+- **Publication.** `scripts/publish.cjs` names the seven admin files one by one: 83 published files in all, listed in `docs/published-files.md`. `netlify.toml` sends `X-Robots-Tag: noindex, nofollow` for `/admin/`. No student page links to it.
+- **Checks.** The doctor also fails on a token or OAuth secret in a published file, on a publish folder other than the allowlisted copy, and on a missing admin file. `node scripts/test-admin.cjs` (17 tests) checks the save rules, the commit, and that the doctor accepts what the admin commits and stops 16 kinds of bad entry.
+- **Documents.** `README.md` (how to use the form, the one-time login setup), the `add-resource` skill, `docs/project-brief.md`, `docs/content-model.md`, `.claude/CLAUDE.md`, four rules, `lp-plan`, `lp-build`, `NOTICE.md`, and `docs/qa-report.md`.
+
+Three things Decap does not do by itself, and how they are done here:
+
+- It saves an uploaded file under its own name in one shared folder. The save is taken over to rename and place the PDF.
+- It keeps showing what was typed after a save. The form is reopened after each save so it shows the saved IDs and paths.
+- It removes a list item without removing its file. The save removes the PDF in the same commit, because the doctor fails on a PDF that no record uses.
+
+Choices made while building. Say so if you prefer otherwise.
+
+- **French interface.** Decap's own labels and the form's are in French, like the site's default.
+- **Documents only.** Modules and semesters stay in the repository route (`/add-resource`).
+- **50 MB per PDF.** Students download these on phones; GitHub accepts more.
+- **IDs.** `asd3-cours-ch02`, `asd3-td-03`, `asd3-tp-02`, `asd3-examen-2024-2025-emd`, with the year added to a Cours, TD, or TP that has one, and `-2` for a second document with the same facts.
+- **Order of exams inside a year, when left empty:** contrôle 1, EMD 2, examen final 3, rattrapage 4.
+- **Année universitaire list:** this year and the 24 before it, plus any year a document already uses.
+- **A published document keeps its module and type.** To move one, remove it and add it again; its address and file name come from both.
+- **The local preview does not touch GitHub.** On `localhost` the form works on a copy in the browser tab, to try it safely.
+
+Not verified, because they need the maintainer:
+
+- The GitHub login on the published site.
+- A real save: the commit on GitHub, the Netlify build, and the document on the site.
+
+Known and left as is:
+
+- The form needs a window at least 800 pixels wide. That is Decap's layout; on a phone it scrolls sideways.
+- Decap's "Media" button stays in the header. An upload or a deletion from there is refused with a message, because a PDF belongs to a document.
+- Each save is one commit and one Netlify build. Adding ten documents one by one makes ten builds; several documents can be added in one save.
+- The sample documents appear in the form like any other and can be removed there.
+- Decap offers to restore a local backup when a form was left with unsaved changes. If the catalogue changed meanwhile, the restored form is refused on save and must be redone.
 
 ## Phase 5 — Netlify preparation
 
@@ -122,4 +165,6 @@ The check on a real phone was skipped at the maintainer's request. Windows Firew
 
 ## Next
 
-Push the repository changes, then connect the repository in Netlify, enable form detection and email notifications, and verify the public site. Do not announce it as real study material while the sample PDFs remain.
+For the maintainer: create the GitHub OAuth app, install it in Netlify (`README.md`, "One-time setup of the GitHub login"), log in at `/admin/`, and add one document as a test. Then check the commit on GitHub, the Netlify build, and the document on the site.
+
+Still open from Phase 5: form detection and email notifications for "Signaler une erreur" on Netlify. Do not announce the site as real study material while the sample PDFs remain.

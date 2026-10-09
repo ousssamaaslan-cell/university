@@ -1,10 +1,19 @@
 # Netlify publish manifest
 
-Snapshot of the allowlisted output on 2026-10-08. Run `node scripts/publish.cjs` to rebuild it. The Netlify publish directory is `.netlify-publish`.
+Snapshot of the allowlisted output on 2026-10-09. Run `node scripts/publish.cjs` to rebuild it. The Netlify publish directory is `.netlify-publish`.
 
-These 76 files are the entire publish output. The 53 PDFs below are labelled sample placeholders, not real course material. No docs, templates, scripts, tests, project instructions, readme files, local paths, or maintainer email address are included.
+These 83 files are the entire publish output. The 53 PDFs below are labelled sample placeholders, not real course material. No docs, templates, scripts, tests, project instructions, readme files, local paths, or maintainer email address are included.
+
+The seven `admin/` files are the maintainer's form. They hold no credential: the GitHub login goes through Netlify, which keeps the OAuth secret, and the repository name in `admin/admin.js` is public. A document added through the form adds its PDF to this list at the next publication; this snapshot is not rewritten for each one.
 
 - `404.html`
+- `admin/admin.js`
+- `admin/catalogue-rules.js`
+- `admin/decap-cms.LICENSE.txt`
+- `admin/decap-cms.js`
+- `admin/decap-cms.js.LICENSE.txt`
+- `admin/github-commit.js`
+- `admin/index.html`
 - `assets/favicon.svg`
 - `assets/social-preview.png`
 - `css/styles.css`

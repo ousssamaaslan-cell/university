@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- The page is reached as /admin or /admin/; the files beside it are found either way. -->
+    <base href="/admin/" />
+    <title>Administration | Ressources L2 Informatique</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <style>
+      /* Notes from admin.js, above Decap's interface: the local-preview notice, and why a save was refused. */
+      .admin-notes {
+        position: fixed;
+        inset: auto 0 0 0;
+        z-index: 100000;
+        max-height: 60vh;
+        overflow: auto;
+        font: 1rem/1.5 system-ui, sans-serif;
+      }
+      .admin-note {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem 1rem;
+        padding: 0.5rem 1rem;
+        border-top: 2px solid #8a5a00;
+        background: #fff8e1;
+        color: #3d2c00;
+      }
+      .admin-note > div {
+        flex: 1 1 20rem;
+      }
+      .admin-note--problem {
+        border-color: #b3261e;
+        background: #fdecea;
+        color: #5c0f0a;
+      }
+      .admin-note--saved {
+        border-color: #1b6e3c;
+        background: #e9f6ee;
+        color: #0f3d21;
+      }
+      .admin-note p {
+        margin: 0;
+        font-weight: 600;
+      }
+      .admin-note ul {
+        margin: 0.25rem 0 0;
+        padding-inline-start: 1.25rem;
+      }
+      .admin-note button {
+        min-height: 2.75rem;
+        padding: 0 1rem;
+        border: 1px solid currentColor;
+        border-radius: 0.25rem;
+        background: #fff;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+      }
+      .admin-note button:focus-visible {
+        outline: 3px solid #1a56db;
+        outline-offset: 2px;
+      }
+      /* Arabic titles are typed right to left. */
+      input[id^="ar-field-"] {
+        direction: rtl;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-notes" data-admin-notes></div>
+    <noscript>
+      <p>L'administration a besoin de JavaScript.</p>
+    </noscript>
+    <!-- admin.js starts Decap itself, once it has read the catalogue. -->
+    <script>
+      window.CMS_MANUAL_INIT = true;
+    </script>
+    <!-- Decap CMS 3.16.3, MIT licence: decap-cms.LICENSE.txt and decap-cms.js.LICENSE.txt beside this page. -->
+    <script src="decap-cms.js"></script>
+    <script src="catalogue-rules.js"></script>
+    <script src="github-commit.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>

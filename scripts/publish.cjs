@@ -45,6 +45,12 @@ add('css/styles.css');
 add('data/resources.json');
 addAssetTree('js', ['.js']);
 addAssetTree('assets', ['.svg', '.png', '.jpg', '.jpeg', '.webp', '.ico']);
+// The admin form at /admin. Its files are named one by one, so nothing else placed in admin/ is published.
+// Nothing here is secret: the GitHub login goes through Netlify, which keeps the OAuth secret.
+for (const file of [
+  'index.html', 'admin.js', 'catalogue-rules.js', 'github-commit.js',
+  'decap-cms.js', 'decap-cms.js.LICENSE.txt', 'decap-cms.LICENSE.txt'
+]) add(`admin/${file}`);
 
 const catalogue = JSON.parse(fs.readFileSync(path.join(root, 'data', 'resources.json'), 'utf8'));
 for (const resource of catalogue.resources) {

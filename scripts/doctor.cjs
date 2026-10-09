@@ -20,7 +20,8 @@ for (const relative of [
   'AGENTS.md', '.claude/CLAUDE.md', '.claude/settings.json',
   'docs/project-brief.md', 'docs/design-system.md', 'docs/content-model.md',
   'templates/qa-report.md', 'README.md', 'NOTICE.md',
-  'data', 'pdfs/S3', 'pdfs/S4', 'css', 'js', 'assets'
+  'data', 'pdfs/S3', 'pdfs/S4', 'css', 'js', 'assets',
+  'admin/index.html', 'admin/admin.js', 'admin/catalogue-rules.js', 'admin/github-commit.js', 'admin/decap-cms.js'
 ]) if (!exists(relative)) fail(`Missing ${relative}`);
 
 if (exists('package.json')) fail('package.json exists, but this project is specified to have no site npm dependencies or build step.');
@@ -206,8 +207,35 @@ function checkLabels() {
   for (const key of ar) if (!fr.has(key)) fail(`js/i18n.js: label "${key}" has no French text`);
 }
 
+// Netlify publishes the allowlisted copy made by scripts/publish.cjs, never the repository root,
+// which also holds project documents and instructions. The admin form logs in through Netlify,
+// which keeps the GitHub OAuth secret; a secret or token pasted into a published file would be public.
+function checkPublication() {
+  const config = exists('netlify.toml') ? fs.readFileSync(path.join(root, 'netlify.toml'), 'utf8') : '';
+  if (!/^publish\s*=\s*"\.netlify-publish"\s*$/m.test(config)) fail('netlify.toml: publish must be ".netlify-publish", the allowlisted copy');
+  if (!/^command\s*=\s*"node scripts\/doctor\.cjs && node scripts\/publish\.cjs"\s*$/m.test(config)) fail('netlify.toml: the build command must run the doctor, then the publish copy');
+  const scripts = exists('js') ? fs.readdirSync(path.join(root, 'js')).filter(name => name.endsWith('.js')).map(name => `js/${name}`) : [];
+  // The vendored admin/decap-cms.js is not read here: its hash is verified against vendor-manifest.json above.
+  const published = [
+    'netlify.toml', 'index.html', 'module.html', 'search.html', 'report.html', '404.html', 'css/styles.css', 'data/resources.json',
+    'admin/index.html', 'admin/admin.js', 'admin/catalogue-rules.js', 'admin/github-commit.js', ...scripts
+  ];
+  const secrets = [
+    [/\bgh[pousr]_[A-Za-z0-9]{20,}/, 'a GitHub token'],
+    [/\bgithub_pat_[A-Za-z0-9_]{20,}/, 'a GitHub token'],
+    [/\bnfp_[A-Za-z0-9]{20,}/, 'a Netlify token'],
+    [/client[_-]?secret/i, 'an OAuth client secret']
+  ];
+  for (const relative of published) {
+    if (!exists(relative)) continue;
+    const text = fs.readFileSync(path.join(root, relative), 'utf8');
+    for (const [pattern, name] of secrets) if (pattern.test(text)) fail(`${relative}: contains what looks like ${name}; published files must hold no credential`);
+  }
+}
+
 const catalogue = checkCatalogue();
 checkLabels();
+checkPublication();
 const result = {ok: errors.length === 0, active_skills: skills.length, agents: agents.length, verified_vendor_files: verifiedVendorFiles, catalogue, errors};
 if (require.main === module) {
   console.log(JSON.stringify(result, null, 2));

@@ -1,12 +1,24 @@
 ---
 name: add-resource
-description: "Add or remove a confirmed L2 S3/S4 module or PDF in the static resource catalogue, with path validation."
+description: "Add or remove a confirmed L2 S3/S4 module or PDF in the static resource catalogue by hand, with path validation; describes the /admin form route too."
 disable-model-invocation: true
 ---
 
 # Add a module or PDF
 
-This project has one repository-based maintainer and no admin backend. Read `docs/project-brief.md`, `docs/content-model.md`, `.claude/rules/content-structure.md`, `.claude/rules/pdf-storage.md`, the current `data/resources.json` (when present), and $ARGUMENTS. Do not use the format examples in the content-model document as real data. Do not create another level or semester. This workflow is for real content; the build-phase `sample-` records and placeholder PDFs described in the brief are the only exception to its real-PDF rule, and they are removed before publication.
+One maintainer keeps the catalogue, by two routes that both end in a commit on `main`: the admin form at `/admin` (see "The admin form" below), and this workflow, which edits `data/resources.json` and `pdfs/` in the repository. Use this workflow for modules and semesters, for several documents at once, for repairs, and whenever the maintainer asks Claude to make the change. Run `git pull` first: a save in the admin form is a commit too.
+
+Read `docs/project-brief.md`, `docs/content-model.md`, `.claude/rules/content-structure.md`, `.claude/rules/pdf-storage.md`, the current `data/resources.json` (when present), and $ARGUMENTS. Do not use the format examples in the content-model document as real data. Do not create another level or semester. This workflow is for real content; the build-phase `sample-` records and placeholder PDFs described in the brief are the only exception to its real-PDF rule, and they are removed before publication.
+
+## The admin form
+
+The maintainer can add, change, or remove a document without this workflow: `/admin` on the published site, logged in with a GitHub account that has write access to the repository. `README.md` gives the steps and the one-time login setup.
+
+- The form covers documents only (Cours, TD, TP, Examen). Modules and semesters are changed here, in the repository. The form's Semestre and Module lists are read from the published catalogue, so a new module appears in the form after the next publication.
+- A save assigns the ID, `level`, an empty `order`, and the PDF's folder and name; it writes the catalogue and the PDFs in one commit named `Admin: ...`. The rules are in `admin/catalogue-rules.js` and follow `docs/content-model.md`.
+- Follow the same ID pattern by hand, so both routes agree: `<module>-cours-ch<NN>`, `<module>-td-<NN>`, `<module>-tp-<NN>`, `<module>-examen-<year>-<kind>`, with `-<year>` added to a Cours, TD, or TP that has an academic year, and `-2`, `-3` for a second document with the same facts.
+- `node scripts/doctor.cjs` runs on Netlify before every publication, whichever route made the commit. A failed build leaves the public site as it was; read the build log, repair the catalogue here, and push.
+- After changing a file in `admin/` or the doctor, run `node scripts/test-admin.cjs`.
 
 ## Add a module
 
@@ -27,7 +39,7 @@ This project has one repository-based maintainer and no admin backend. Read `doc
 3. Name the PDF after the resource ID (`asd3-td-03.pdf`) and place it in `pdfs/<semester>/<module-id>/`. Keep the original content intact; do not put a placeholder or a Drive URL there.
 4. Add one resource record to `data/resources.json` with the base fields and the type's own fields from `docs/content-model.md`. Leave out fields that do not belong to the type. Set `pdfPath` to the relative path such as `pdfs/S3/asd3/asd3-td-03.pdf`, with no leading slash. Use `hasCorrection: true` only when that PDF actually contains the correction. Draft the Arabic title if it was not supplied, and say so.
 5. Run `node scripts/doctor.cjs` to check JSON structure, IDs, relationships, per-type fields, path spelling, and PDF existence. Serve the site locally, then verify both View and Download links, the tab the resource appears under, its position in the list, and the search and filter results.
-6. Commit the JSON and PDF together and redeploy the chosen static host. A repository change alone does not update the published site.
+6. Commit the JSON and PDF together and push. Netlify rebuilds `main` and publishes only if the doctor passes; a local change that is not pushed does not update the published site.
 
 ## Remove or replace content
 
