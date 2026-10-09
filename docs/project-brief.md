@@ -4,7 +4,7 @@
 
 - Audience: Licence 2 (L2) Informatique students at **Université Mohammed Seddik Benyahia – Jijel**. The maintainer confirmed this name and styling on 2026-10-07.
 - Status: the site is run by students and is not an official university site (maintainer decision, 2026-10-07). The footer says so. It must not claim to speak for the university or the department.
-- Contact: a student reports a wrong or missing file with "Signaler une erreur", in the footer of every page and beside "Fichier indisponible". It opens an email to `ousssamaaslan@gmail.com`, the address the maintainer supplied on 2026-10-08. The address is set once, as `REPORT_EMAIL` in `js/components.js`.
+- Contact: a student reports a wrong or missing file with "Signaler une erreur", in the footer of every page and beside "Fichier indisponible". It opens a French or Arabic Netlify form with module, document, problem description, and optional reply email. A missing-file link fills in the module and document. The form has a spam honeypot; the maintainer's address is configured only in Netlify notifications, not in the site source.
 - Last update: the footer shows the date on which the server says the catalogue last changed. It is not typed by hand and is left out when the server gives no date.
 - Goal: help students find, view, and download the right course, TD, TP, or exam quickly.
 - Scope: L2 only. Show semesters S3 and S4, their confirmed modules, and resources grouped as Cours, TD, TP, and Examens, in that order. Keep `level` in the data model for future expansion; do not create other levels now.
@@ -61,7 +61,7 @@ Maintainer decision, 2026-10-07: Claude drafts all Arabic text, and the maintain
 - University name: جامعة محمد الصديق بن يحيى – جيجل
 - Module names: the "Arabic name (draft)" column above, stored in `data/resources.json`.
 - Semester labels: السداسي الثالث and السداسي الرابع, stored in `data/resources.json`.
-- Every interface label, including the type labels, session and exam-kind names, breadcrumbs, empty and error messages, the footer, the report email, and the page descriptions: the `ar` block of `js/i18n.js`.
+- Every interface label, including the type labels, session and exam-kind names, breadcrumbs, empty and error messages, the footer, the report form, and the page descriptions: the `ar` block of `js/i18n.js`.
 - The two short Arabic messages written in each of the four HTML files, for a visitor without JavaScript and for a browser too old to run the site.
 - Sample resource titles: drafted only so RTL and mixed-direction text can be tested. They are deleted with the sample data.
 

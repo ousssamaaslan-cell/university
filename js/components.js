@@ -59,31 +59,16 @@ export function actionLink({href, label}) {
   return el('a', {class: 'action-link', href}, label);
 }
 
-// The maintainer's address for "Signaler une erreur" (docs/project-brief.md). Change it here only.
-const REPORT_EMAIL = 'ousssamaaslan@gmail.com';
-
-// "Signaler une erreur": opens the reader's mail app with a message to the maintainer.
-// The message already says which page the reader was on and, for a missing PDF, which file.
+// "Signaler une erreur" opens the report form, carrying a missing document's details when known.
 // `name` completes the link's name for screen readers when it stands beside a document.
-export function reportLink({file = null, name = null} = {}) {
-  const address = () => {
-    const body = [
-      t('report.body.prompt'), '', '',
-      // Cut very long addresses: mail apps refuse a prepared message that is too long.
-      t('report.body.page', {url: location.href.slice(0, 500)}),
-      file && t('report.body.file', {path: file})
-    ].filter(line => typeof line === 'string').join('\r\n');
-    return `mailto:${REPORT_EMAIL}?subject=${encodeURIComponent(t('report.subject'))}&body=${encodeURIComponent(body)}`;
-  };
-  const link = el('a', {class: 'action-link', href: address()},
+export function reportLink({module = null, document = null, name = null} = {}) {
+  return el('a', {class: 'action-link', href: pageUrl('report.html', {
+    ...(module && {module}),
+    ...(document && {document})
+  })},
     t('report.label'),
     name && el('span', {class: 'visually-hidden'}, t('link.target', {name}))
   );
-  // Tabs and filters change the page address without a reload, so read it again at the click.
-  link.addEventListener('click', () => {
-    link.href = address();
-  });
-  return link;
 }
 
 export function emptyState({title, text}) {

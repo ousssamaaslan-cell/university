@@ -85,7 +85,7 @@ function resourceItem(resource, mixed, context) {
       download.remove();
       factList.replaceWith(el('p', {class: 'resource__missing'},
         el('span', {class: 'resource__missing-label'}, t('file.missing')),
-        reportLink({file: resource.pdfPath, name: documentName})
+        reportLink({module: resource.module.toUpperCase(), document: `${documentName} (${resource.id})`, name: documentName})
       ));
     } else if (size) {
       fileSize.size.replaceChildren(t('list.separator'), el('bdi', {}, formatFileSize(size)));

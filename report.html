@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex" />
+    <title>Signaler une erreur | Ressources L2 Informatique</title>
+    <meta name="description" content="Signalez un document manquant ou incorrect dans les ressources de Licence 2 Informatique." />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="js/lang.js"></script>
+    <script type="module" src="js/report.js"></script>
+  </head>
+  <body>
+    <header class="site-header" data-site-header></header>
+    <main id="main" class="page-width report-page" tabindex="-1">
+      <header class="page-header">
+        <h1 data-report-title>Signaler une erreur</h1>
+        <p class="lede" data-report-intro>Indiquez le module, le document et le problème rencontré.</p>
+      </header>
+      <form class="report-form" name="report-error" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="report-error" />
+        <p class="report-honeypot" aria-hidden="true">
+          <label>Ne remplissez pas ce champ : <input name="bot-field" type="text" tabindex="-1" autocomplete="off" /></label>
+        </p>
+        <div class="report-field">
+          <label for="report-module" data-report-module>Module</label>
+          <input id="report-module" name="module" type="text" maxlength="120" />
+        </div>
+        <div class="report-field">
+          <label for="report-document" data-report-document>Document</label>
+          <input id="report-document" name="document" type="text" maxlength="240" />
+        </div>
+        <div class="report-field">
+          <label for="report-problem" data-report-problem>Description du problème</label>
+          <textarea id="report-problem" name="problem" rows="5" maxlength="2000" required></textarea>
+        </div>
+        <div class="report-field">
+          <label for="report-email" data-report-email>Votre adresse e-mail (facultatif)</label>
+          <input id="report-email" name="email" type="email" maxlength="254" autocomplete="email" />
+        </div>
+        <button class="button" type="submit" data-report-submit>Envoyer le signalement</button>
+      </form>
+      <p class="report-result" role="status" aria-live="polite" hidden></p>
+    </main>
+    <footer class="site-footer" data-site-footer></footer>
+  </body>
+</html>
