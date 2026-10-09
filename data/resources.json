@@ -780,6 +780,22 @@
       "order": 1
     },
     {
+      "id": "poo1-tp-02-2026-2027",
+      "level": "L2",
+      "semester": "S3",
+      "module": "poo1",
+      "type": "tp",
+      "number": 2,
+      "academicYear": "2026-2027",
+      "title": {
+        "fr": "programmation oriente objet",
+        "ar": "سيبلاتنم"
+      },
+      "hasCorrection": false,
+      "pdfPath": "pdfs/S3/poo1/poo1-tp-02-2026-2027.pdf",
+      "order": 0
+    },
+    {
       "id": "sample-poo1-tp-02",
       "level": "L2",
       "semester": "S3",
