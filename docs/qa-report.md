@@ -21,7 +21,7 @@ Environment: Windows 10, the browser driven by Playwright, at 375 by 812 and 128
 | Exam filters | Not applicable | No exam is left in the catalogue, so there is no filter to show. |
 | Admin form with the shortened catalogue | Not checked | The form was not opened after the change. It reads the same catalogue the doctor and the 17 tests accept. |
 | Keyboard walk-through, screen reader, phone, Safari, Firefox | Not checked | No student page changed; the Phase 4 results were not repeated. |
-| Live site after the push | Not checked at the time of this commit | Before the change, on 2026-10-10, the live catalogue held 54 records (53 samples and the maintainer's document) and the document's PDF answered 200 with 210,089 bytes. |
+| Live site after the push | Passed | On `https://admirable-concha-bbf7df.netlify.app`, a few minutes after commit `ee19241` was pushed. With GET and HEAD requests: `data/resources.json` is byte for byte the repository's (2,460 bytes, one record); the kept PDF answers 200 as `application/pdf` with 210,089 bytes; all 53 removed sample PDF addresses answer 404; the home, POO1, ASD3, search, report, and `/admin/` pages answer 200. In the browser at 1280px: the home page in French and Arabic, the TP tab of POO1, the ASD3 page, and a search for "sample" show no sample notice, no "Exemple" mark, and no console error. Before the push the live catalogue held 54 records. On the live site the admin form was not opened and no download was clicked. |
 
 ## Phase 6 verification — 2026-10-09 (admin form)
 

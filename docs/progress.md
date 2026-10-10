@@ -17,7 +17,7 @@ The maintainer asked for the samples to be deleted and their own document kept. 
 - **Publish copy.** 31 files, down from 84 (83 plus the maintainer's PDF); `docs/published-files.md` lists them.
 - **Documents.** `README.md`, `docs/project-brief.md`, `docs/published-files.md`, `docs/qa-report.md`, and this file.
 
-Checked: the doctor (1 resource, 0 samples), the 17 admin tests, and the pages in Chrome through a local server, in French and Arabic at 375 and 1280px. `docs/qa-report.md` has the details.
+Checked: the doctor (1 resource, 0 samples), the 17 admin tests, and the pages in a browser through a local server, in French and Arabic at 375 and 1280px. After the push (commit `ee19241`), the published site: its catalogue is the repository's, the kept PDF answers 200, and the 53 sample PDF addresses answer 404. `docs/qa-report.md` has the details.
 
 What a student sees now: six modules say "Aucun document", POO1 has one TP, and the sample notice is gone.
 
