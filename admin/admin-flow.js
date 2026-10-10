@@ -33,8 +33,9 @@
   // A PDF starts with "%PDF-". The doctor makes the same test on every build.
   const startsLikePdf = bytes => bytes.length >= 5 && String.fromCharCode(...bytes.subarray(0, 5)) === '%PDF-';
 
-  // Makes one change, in one commit. Returns {changed, plan, commit, attempts, pdfSha}; changed is
-  // false, and nothing is committed, when the change leaves the repository as it is.
+  // Makes one change, in one commit. Returns {changed, plan, commit, attempts, pdf}; changed is
+  // false, and nothing is committed, when the change leaves the repository as it is. pdf is the
+  // file that was sent, {path, size, sha}, or null when none was.
   //   change   what catalogue-rules.js planChange takes; change.pdf is {name} when a file was chosen
   //   readPdf  gives the chosen file's bytes as a Uint8Array; it is called once
   // It throws an error with a kind: one of github-commit.js, or 'invalid', 'file', 'duplicate' or
@@ -52,7 +53,7 @@
       const files = await store.pdfFiles(current.head);
       const plan = rules.planChange(current.raw, pdf ? {...change, pdf: pdf.facts} : change, files);
       if (plan.errors.length) throw failure(plan.code, plan.errors[0], {problems: plan.errors, duplicates: plan.duplicates ?? []});
-      if (!plan.changed) return {changed: false, plan, commit: null, attempts: attempt, pdfSha: null};
+      if (!plan.changed) return {changed: false, plan, commit: null, attempts: attempt, pdf: null};
       try {
         const commit = await store.commit({
           head: current.head,
@@ -61,7 +62,8 @@
           deletes: plan.deletes,
           message: rules.commitMessage(plan)
         });
-        return {changed: true, plan, commit, attempts: attempt, pdfSha: plan.writes.length ? pdf.facts.sha : null};
+        const sent = plan.writes.length ? {path: plan.writes[0].to, size: pdf.facts.size, sha: pdf.facts.sha} : null;
+        return {changed: true, plan, commit, attempts: attempt, pdf: sent};
       } catch (error) {
         // The branch moved between the read and the commit: read it again and apply the change
         // again, once. A second time, the maintainer is told to refresh. The branch is never forced.
@@ -70,5 +72,54 @@
     }
   }
 
-  return {publish, gitBlobSha, toBase64, startsLikePdf};
+  // After a commit, the public site keeps showing the old catalogue until Netlify has rebuilt it.
+  // Builds the question "does the public site show this change yet?":
+  //   present  records the public catalogue must hold, exactly as they were saved
+  //   absent   the ids it must no longer hold
+  //   pdf      for a PDF replaced at the same address: {path, size, sha, before}, before being
+  //            {size, etag} of the public file just before the commit; null otherwise
+  // fetch and siteRoot are those of the public site: this never asks GitHub.
+  function liveCheck({fetch, siteRoot, present = [], absent = [], pdf = null}) {
+    return async function isLive() {
+      try {
+        const response = await fetch(`${siteRoot}data/resources.json`, {cache: 'no-store'});
+        if (!response.ok) return false;
+        const catalogue = await response.json();
+        const published = new Map((Array.isArray(catalogue.resources) ? catalogue.resources : []).map(resource => [resource.id, JSON.stringify(resource)]));
+        if (!present.every(record => published.get(record.id) === JSON.stringify(record))) return false;
+        if (absent.some(id => published.has(id))) return false;
+        if (!pdf) return true;
+
+        // A replaced PDF leaves the catalogue as it was, so the file itself is asked about.
+        const address = `${siteRoot}${pdf.path}`;
+        const head = await fetch(address, {method: 'HEAD', cache: 'no-store'});
+        if (!head.ok) return false;
+        const length = head.headers.get('content-length');
+        if (length !== null && Number(length) !== pdf.size) return false;
+        if (length !== null && pdf.before && pdf.before.size !== null && pdf.before.size !== pdf.size) return true;
+        // Same size as the old file: the server's own mark of the content tells them apart.
+        const etag = head.headers.get('etag');
+        if (etag && pdf.before && pdf.before.etag) return etag !== pdf.before.etag;
+        // No other sign: read the file and compare it with the one that was sent.
+        const body = await fetch(address, {cache: 'no-store'});
+        return body.ok && await gitBlobSha(new Uint8Array(await body.arrayBuffer())) === pdf.sha;
+      } catch {
+        return false;
+      }
+    };
+  }
+
+  // Asks every 15 seconds, for up to 5 minutes, whether the change is online. Resolves with
+  // 'live', with 'timeout', or with 'stopped' when signal says a newer change took over.
+  // wait(ms) is the clock, passed in so a test does not have to wait.
+  async function watchDeployment({isLive, wait, intervalMs = 15000, limitMs = 300000, signal = null}) {
+    for (let waited = 0; waited < limitMs; waited += intervalMs) {
+      await wait(intervalMs);
+      if (signal && signal.aborted) return 'stopped';
+      if (await isLive()) return signal && signal.aborted ? 'stopped' : 'live';
+    }
+    return 'timeout';
+  }
+
+  return {publish, liveCheck, watchDeployment, gitBlobSha, toBase64, startsLikePdf};
 });

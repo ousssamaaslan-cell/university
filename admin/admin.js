@@ -12,6 +12,7 @@ import {createDocumentsView} from './documents.js';
 import {createForm} from './form.js';
 
 const rules = window.L2CatalogueRules;
+const flow = window.L2AdminFlow;
 const REPOSITORY = 'ousssamaaslan-cell/university';
 const BRANCH = 'main';
 // The repository is public, so the login asks GitHub for public repositories only. It is the scope
@@ -98,14 +99,98 @@ let saving = 0;
 async function publish(change, readPdf = null) {
   saving++;
   try {
-    const result = await window.L2AdminFlow.publish({store, rules, change, readPdf});
+    // For a PDF replaced at its address: what the public site serves now, to know the new file from it later.
+    const before = !LOCAL && change.action === 'edit' && change.pdf ? await publicFile(change.base.pdfPath) : null;
+    const result = await flow.publish({store, rules, change, readPdf});
     if (result.changed) {
+      followDeployment(result, before);
       try { await reload(); } catch { result.listIsOld = true; }
     }
     return result;
   } finally {
     saving--;
   }
+}
+
+// ----- After a commit: is the change on the public site yet?
+// Netlify rebuilds the site after each commit. The public catalogue is asked every 15 seconds, for
+// up to 5 minutes; the success messages on the page follow the answer.
+//   state  'none', 'pending', 'live', 'timeout', or 'local' on a local preview, where nothing is deployed
+//   lines  the sentences on the page that show it
+const deployment = {state: 'none', watcher: null, lines: new Set()};
+
+function setDeployment(state) {
+  deployment.state = state;
+  for (const line of [...deployment.lines]) {
+    // A message that left the page no longer needs the news.
+    if (line.node.isConnected) line.draw();
+    else deployment.lines.delete(line);
+  }
+}
+
+async function publicFile(path) {
+  try {
+    const response = await fetch(`../${path}`, {method: 'HEAD', cache: 'no-store'});
+    if (!response.ok) return null;
+    const length = response.headers.get('content-length');
+    return {size: length === null ? null : Number(length), etag: response.headers.get('etag')};
+  } catch {
+    return null;
+  }
+}
+
+function followDeployment(result, before) {
+  // A newer change replaces the one being watched: its deployment publishes both.
+  deployment.watcher?.abort();
+  deployment.watcher = null;
+  if (LOCAL) {
+    setDeployment('local');
+    return;
+  }
+  const watcher = new AbortController();
+  deployment.watcher = watcher;
+  setDeployment('pending');
+  const {plan} = result;
+  const isLive = flow.liveCheck({
+    fetch: window.fetch.bind(window),
+    siteRoot: '../',
+    present: plan.removed.length ? [] : [plan.record],
+    absent: plan.removed,
+    pdf: plan.updated.length && result.pdf ? {...result.pdf, before} : null
+  });
+  flow.watchDeployment({isLive, wait: delay => new Promise(resolve => setTimeout(resolve, delay)), signal: watcher.signal}).then(state => {
+    if (state !== 'stopped') setDeployment(state);
+  });
+}
+
+// The Deploys page of the Netlify project, where a failed publication is explained.
+function netlifyDeploysUrl() {
+  const project = location.hostname.match(/^(?:.+--)?([a-z0-9-]+)\.netlify\.app$/);
+  return project ? `https://app.netlify.com/projects/${project[1]}/deploys` : 'https://app.netlify.com/';
+}
+
+// A sentence for a success message. It says `waiting` while Netlify rebuilds the site, then
+// "En ligne ✓" once the public site shows the change, or after five minutes where to look.
+function deployLine(waiting) {
+  const node = el('p', {class: 'deploy'});
+  const draw = () => {
+    if (deployment.state === 'live') {
+      node.replaceChildren(el('strong', {}, 'En ligne ✓'), ' Le site public montre la modification.');
+    } else if (deployment.state === 'timeout') {
+      node.replaceChildren(
+        el('strong', {}, 'Toujours en cours de déploiement'),
+        ' après cinq minutes. La publication a peut-être échoué. ',
+        el('a', {class: 'action-link', href: netlifyDeploysUrl(), target: '_blank', rel: 'noopener'}, 'Ouvrir les déploiements sur Netlify', el('span', {class: 'visually-hidden'}, ' (nouvel onglet)'))
+      );
+    } else if (deployment.state === 'local') {
+      node.textContent = "Aperçu local : rien n'a été envoyé à GitHub.";
+    } else {
+      node.textContent = waiting;
+    }
+  };
+  draw();
+  deployment.lines.add({node, draw});
+  return node;
 }
 
 // Leaving the page in the middle of a save could lose it: the browser asks first.
@@ -183,6 +268,7 @@ const app = {
   get snapshot() { return state.snapshot; },
   reload,
   publish,
+  deployLine,
   errorNote,
   openPdf,
   // Open the add form on a module, and open the list. Set by showDashboard.
@@ -225,6 +311,8 @@ function showLogin(options) {
   state.user = null;
   state.snapshot = null;
   redraw.length = 0;
+  deployment.watcher?.abort();
+  deployment.lines.clear();
   renderSession();
   const {view, heading} = loginView(options);
   show(view);

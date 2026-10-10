@@ -558,11 +558,11 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
       el('div', {class: 'field field--title'},
         el('label', {for: id('title-ar')}, 'Titre en arabe'),
         titleAr,
+        // The list of preferred Arabic terms is in docs/content-model.md, which GitHub shows as a page.
         el('p', {class: 'hint', id: id('title-ar-hint')},
-          el('a', {href: `https://github.com/${app.repository}/blob/main/docs/content-model.md#arabic-terminology`, target: '_blank', rel: 'noopener'},
-            'Termes recommandés', el('span', {class: 'visually-hidden'}, ' (nouvel onglet)')
-          ),
-          ' pour les titres en arabe.'
+          el('a', {class: 'action-link', href: `https://github.com/${app.repository}/blob/main/docs/content-model.md#arabic-terminology`, target: '_blank', rel: 'noopener'},
+            'Termes recommandés pour les titres en arabe', el('span', {class: 'visually-hidden'}, ' (nouvel onglet)')
+          )
         )
       )
     ),
@@ -623,7 +623,8 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
     const module = app.snapshot.catalogue.modules.find(item => item.id === saved.module);
     const done = note('ok', {
       title: 'Publié.',
-      text: app.local ? "Aperçu local : rien n'a été envoyé à GitHub." : 'Visible sur le site dans environ une minute.',
+      // This sentence becomes "En ligne ✓" once the public site shows the document.
+      text: app.deployLine('Visible sur le site dans environ une minute.'),
       lines: result.listIsOld ? ["La liste n'a pas pu être relue : cliquez sur « Rafraîchir » dans « Mes documents »."] : []
     });
     donePanel.replaceChildren(

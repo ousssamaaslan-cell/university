@@ -38,11 +38,12 @@ export function button(label, {variant = null, onClick = null, ...attributes} = 
 }
 
 // A message in a filled box: 'ok', 'warn', 'error' or 'info'. An error is read out at once by
-// screen readers; the others when the reader pauses.
+// screen readers; the others when the reader pauses. text is a sentence, a paragraph already
+// built (the line that follows a deployment, for example), or a list of those.
 export function note(kind, {title = null, text = null, lines = [], actions = []} = {}) {
   return el('div', {class: `note note--${kind}`, role: kind === 'error' ? 'alert' : 'status'},
     title && el('p', {class: 'note__title'}, title),
-    text && el('p', {}, text),
+    [text].flat().filter(Boolean).map(part => (typeof part === 'string' ? el('p', {}, part) : part)),
     lines.length > 0 && el('ul', {}, lines.map(line => el('li', {}, line))),
     actions.length > 0 && el('p', {class: 'note__actions'}, actions)
   );

@@ -649,7 +649,7 @@ test('dashboard, add on GitHub: the record and the PDF go into one commit, for e
     const files = github.filesAtHead();
     assert.equal(files[result.plan.record.pdfPath], new TextDecoder().decode(bytes));
     assert.equal(files['data/resources.json'], result.plan.raw);
-    assert.equal(result.pdfSha, await flow.gitBlobSha(bytes));
+    assert.deepEqual(result.pdf, {path: result.plan.record.pdfPath, size: bytes.length, sha: await flow.gitBlobSha(bytes)});
   }
   assert.deepEqual(github.history(), ['Admin: add ao-examen-2025-2026-final', 'Admin: add asd3-tp-01', 'Admin: add asd3-td-02', 'Admin: add asd3-cours-ch02', 'start']);
   assert.deepEqual(JSON.parse(github.filesAtHead()['data/resources.json']).resources.map(resource => resource.id),
@@ -771,7 +771,7 @@ test('dashboard, edit on GitHub: an edit, a replaced PDF and both together are e
 
   // Titles only: the catalogue changes, no file is sent.
   const titled = await publish(github, edit(start, 'asd3-td-01', {title: {fr: 'Piles et files', ar: 'المكدسات والطوابير'}}));
-  assert.deepEqual([titled.changed, titled.plan.writes, titled.pdfSha], [true, [], null]);
+  assert.deepEqual([titled.changed, titled.plan.writes, titled.pdf], [true, [], null]);
   assert.deepEqual([github.commits.get(github.state.head).parents, github.commits.get(github.state.head).message], [[before], 'Admin: edit asd3-td-01']);
   assert.equal(github.filesAtHead()['pdfs/S3/asd3/asd3-td-01.pdf'], '%PDF-old');
   assert.equal(JSON.parse(github.filesAtHead()['data/resources.json']).resources.find(resource => resource.id === 'asd3-td-01').title.ar, 'المكدسات والطوابير');
@@ -809,6 +809,113 @@ test('dashboard, edit on GitHub: an edit, a replaced PDF and both together are e
   const stale = await rejection(publish(github, edit(now, 'asd3-td-01', {title: {fr: 'Trop tard', ar: 'فات الأوان'}})));
   assert.equal(stale.kind, 'stale');
   assert.equal(JSON.parse(github.filesAtHead()['data/resources.json']).resources.find(resource => resource.id === 'asd3-td-01').title.fr, 'Piles et files');
+});
+
+// A stand-in for the public site: what it serves is set by the test, as a deployment would.
+function fakeSite(catalogue) {
+  const site = {catalogue, files: new Map(), requests: [], down: false};
+  site.fetch = async (url, options = {}) => {
+    site.requests.push({url, ...options});
+    if (site.down) throw new TypeError('Failed to fetch');
+    const path = url.replace('https://site.test/', '');
+    if (path === 'data/resources.json') return new Response(typeof site.catalogue === 'string' ? site.catalogue : serialize(site.catalogue), {status: site.catalogue === null ? 404 : 200});
+    const file = site.files.get(path);
+    if (!file) return new Response('', {status: 404});
+    const headers = {...(file.noLength ? {} : {'content-length': String(file.bytes.length)}), ...(file.etag ? {etag: file.etag} : {})};
+    return new Response(options.method === 'HEAD' ? null : file.bytes, {status: 200, headers});
+  };
+  return site;
+}
+const live = (site, expected) => flow.liveCheck({fetch: site.fetch, siteRoot: 'https://site.test/', ...expected})();
+
+test('deployment: the public catalogue says when an addition, an edit or a deletion is online', async () => {
+  const start = fixture();
+  const added = plan(start, {action: 'add', fields: asked({type: 'td', number: '2'}), pdf: chosen()});
+  const site = fakeSite(start);
+  assert.equal(await live(site, {present: [added.record]}), false);
+  site.catalogue = JSON.parse(added.raw);
+  assert.equal(await live(site, {present: [added.record]}), true);
+  // The public site is asked, never the browser's cache.
+  assert.ok(site.requests.every(request => request.cache === 'no-store' && request.url === 'https://site.test/data/resources.json'));
+
+  // An edit is online when the public record is the saved one, not merely present.
+  const edited = plan(start, edit(start, 'asd3-td-03', {title: {fr: 'Nouveau', ar: 'جديد'}}));
+  site.catalogue = start;
+  assert.equal(await live(site, {present: [edited.record]}), false);
+  site.catalogue = JSON.parse(edited.raw);
+  assert.equal(await live(site, {present: [edited.record]}), true);
+
+  // A deletion is online when none of the removed documents is listed any more.
+  site.catalogue = without(start, 'asd3-td-01');
+  assert.equal(await live(site, {absent: ['asd3-td-01', 'ao-cours-ch01']}), false);
+  site.catalogue = without(start, 'asd3-td-01', 'ao-cours-ch01');
+  assert.equal(await live(site, {absent: ['asd3-td-01', 'ao-cours-ch01']}), true);
+
+  // A site that does not answer, or answers something else, is simply not online yet.
+  site.down = true;
+  assert.equal(await live(site, {absent: ['asd3-td-01']}), false);
+  site.down = false;
+  site.catalogue = null;
+  assert.equal(await live(site, {absent: ['asd3-td-01']}), false);
+  site.catalogue = '<!doctype html><title>Page introuvable</title>';
+  assert.equal(await live(site, {absent: ['asd3-td-01']}), false);
+});
+
+test('deployment: a replaced PDF is recognised by its size, by the server\'s mark, or by its content', async () => {
+  const start = fixture();
+  const path = 'pdfs/S3/asd3/asd3-td-01.pdf';
+  const oldBytes = pdfOf('ancienne version');
+  const newBytes = pdfOf('nouvelle version, plus longue');
+  const expected = async (bytes, before) => ({present: [record(start, 'asd3-td-01')], pdf: {path, size: bytes.length, sha: await flow.gitBlobSha(bytes), before}});
+  const site = fakeSite(start);
+
+  // The catalogue is unchanged by a replacement, so it cannot be the sign: the old file is still served.
+  site.files.set(path, {bytes: oldBytes, etag: '"old"'});
+  assert.equal(await live(site, await expected(newBytes, {size: oldBytes.length, etag: '"old"'})), false);
+  site.files.set(path, {bytes: newBytes, etag: '"new"'});
+  assert.equal(await live(site, await expected(newBytes, {size: oldBytes.length, etag: '"old"'})), true);
+  // Sizes differ: a header request was enough, the file was not downloaded.
+  assert.deepEqual(site.requests.filter(request => request.url.endsWith('.pdf')).map(request => request.method), ['HEAD', 'HEAD']);
+
+  // Same size as before: the server's mark of the content tells the two files apart.
+  const sameSize = pdfOf('nouvelle version');
+  assert.equal(sameSize.length, oldBytes.length);
+  site.files.set(path, {bytes: oldBytes, etag: '"old"'});
+  assert.equal(await live(site, await expected(sameSize, {size: oldBytes.length, etag: '"old"'})), false);
+  site.files.set(path, {bytes: sameSize, etag: '"new"'});
+  assert.equal(await live(site, await expected(sameSize, {size: oldBytes.length, etag: '"old"'})), true);
+
+  // No mark and no earlier measure: the file itself is compared with the one that was sent.
+  site.files.set(path, {bytes: oldBytes});
+  assert.equal(await live(site, await expected(sameSize, null)), false);
+  site.files.set(path, {bytes: sameSize});
+  assert.equal(await live(site, await expected(sameSize, null)), true);
+  site.files.set(path, {bytes: sameSize, noLength: true});
+  assert.equal(await live(site, await expected(sameSize, {size: null, etag: null})), true);
+  // A PDF the public site does not serve yet.
+  site.files.delete(path);
+  assert.equal(await live(site, await expected(newBytes, null)), false);
+});
+
+test('deployment: the site is asked every 15 seconds, for 5 minutes at most', async () => {
+  const waits = [];
+  const wait = async delay => { waits.push(delay); };
+  // Online at the third look.
+  let looks = 0;
+  assert.equal(await flow.watchDeployment({isLive: async () => ++looks === 3, wait}), 'live');
+  assert.deepEqual([looks, waits], [3, [15000, 15000, 15000]]);
+  // Never online: twenty looks, five minutes, then it stops asking.
+  waits.length = 0;
+  looks = 0;
+  assert.equal(await flow.watchDeployment({isLive: async () => { looks++; return false; }, wait}), 'timeout');
+  assert.deepEqual([looks, waits.length, waits.reduce((sum, delay) => sum + delay, 0)], [20, 20, 300000]);
+  // A newer change took over: this watch stops without an answer, and without a further look.
+  const controller = new AbortController();
+  looks = 0;
+  const stopped = flow.watchDeployment({isLive: async () => { looks++; controller.abort(); return false; }, wait, signal: controller.signal});
+  assert.deepEqual([await stopped, looks], ['stopped', 1]);
+  const late = new AbortController();
+  assert.equal(await flow.watchDeployment({isLive: async () => { late.abort(); return true; }, wait, signal: late.signal}), 'stopped');
 });
 
 test('dashboard: a file gets the name Git gives it, and travels as base64', async () => {

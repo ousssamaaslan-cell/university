@@ -403,6 +403,13 @@ main [tabindex="-1"]:focus {
   font-size: var(--text-md);
 }
 
+/* On the narrowest phones "Examen" does not fit in a quarter of the row: two rows of two. */
+@media (max-width: 21.25rem) {
+  .choices--types {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .choices--inline {
   display: flex;
   flex-wrap: wrap;
@@ -958,9 +965,23 @@ main code {
   font-weight: 600;
 }
 
-/* Keeps a row reached with the keyboard clear of the bar above. */
+/* On a phone the count has its line and the two buttons share the next, so the bar stays low. */
+@media (max-width: 30rem) {
+  .selection-bar__count {
+    flex-basis: 100%;
+  }
+
+  .selection-bar .button {
+    flex: 1 1 auto;
+    padding-inline: var(--space-2);
+    font-size: var(--text-sm);
+  }
+}
+
+/* Keeps a row reached with the keyboard clear of the bar above, and its focus ring clear of the
+   window's lower edge. */
 html {
-  scroll-padding-block-start: 7rem;
+  scroll-padding-block: 7rem var(--space-5);
 }
 
 @media (min-width: 40rem) {

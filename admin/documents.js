@@ -59,7 +59,7 @@ export function createDocumentsView(app) {
   // wherever the ticked rows are in a long list.
   const selectionCount = el('p', {class: 'selection-bar__count', 'aria-live': 'polite'});
   const deleteSelection = button('Supprimer la sélection', {variant: 'danger'});
-  const clearSelection = button('Tout désélectionner');
+  const clearSelection = button('Désélectionner');
   const selectionBar = el('div', {class: 'selection-bar', role: 'region', 'aria-label': 'Documents sélectionnés', hidden: true}, selectionCount, deleteSelection, clearSelection);
 
   // The confirmation, a dialog inside the page: what will be removed, then the two answers.
@@ -96,9 +96,10 @@ export function createDocumentsView(app) {
       onSaved: result => closeEditor(resource.id, result.changed
         ? note('ok', {
           title: `Modifications enregistrées : ${nameOf(result.plan.record, module)}.`,
-          text: app.local
-            ? "Aperçu local : rien n'a été envoyé à GitHub."
-            : `${result.plan.writes.length ? 'Le PDF a été remplacé et sa fiche mise à jour, en un seul enregistrement.' : 'La fiche a été mise à jour.'} Le site public se met à jour dans environ une minute.`,
+          text: [
+            result.plan.writes.length ? 'Le PDF a été remplacé et sa fiche mise à jour, en un seul enregistrement.' : 'La fiche a été mise à jour.',
+            app.deployLine('Le site public se met à jour dans environ une minute.')
+          ],
           lines: result.listIsOld ? ["La liste n'a pas pu être relue : cliquez sur « Rafraîchir »."] : []
         })
         : note('info', {title: 'Rien à enregistrer.', text: 'Le fichier choisi est le même que le fichier actuel, et la fiche est inchangée.'}))
@@ -235,9 +236,10 @@ export function createDocumentsView(app) {
     draw();
     const done = note('ok', {
       title: documents.length > 1 ? `${documents.length} documents supprimés.` : `Supprimé : ${nameOf(documents[0], modules.get(documents[0].module))}.`,
-      text: app.local
-        ? "Aperçu local : rien n'a été envoyé à GitHub."
-        : `${documents.length > 1 ? 'Les PDF et leurs fiches ont été retirés' : 'Le PDF et sa fiche ont été retirés'} du dépôt en un seul enregistrement. Le site public se met à jour dans environ une minute.`,
+      text: [
+        `${documents.length > 1 ? 'Les PDF et leurs fiches ont été retirés' : 'Le PDF et sa fiche ont été retirés'}, en un seul enregistrement.`,
+        app.deployLine('Le site public se met à jour dans environ une minute.')
+      ],
       lines: result.listIsOld ? ["La liste n'a pas pu être relue : cliquez sur « Rafraîchir »."] : []
     });
     messages.replaceChildren(done);
