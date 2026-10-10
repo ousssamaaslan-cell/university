@@ -73,6 +73,19 @@
   ],
   "resources": [
     {
+      "id": "asd3-tp-01-2026-2027",
+      "level": "L2",
+      "semester": "S3",
+      "module": "asd3",
+      "type": "tp",
+      "number": 1,
+      "academicYear": "2026-2027",
+      "title": "les arbres",
+      "hasCorrection": false,
+      "pdfPath": "pdfs/S3/asd3/asd3-tp-01-2026-2027.pdf",
+      "order": 1
+    },
+    {
       "id": "poo1-tp-02-2026-2027",
       "level": "L2",
       "semester": "S3",
