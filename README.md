@@ -2,7 +2,7 @@
 
 A public resource library for Licence 2 Informatique students at Université Mohammed Seddik Benyahia – Jijel. Students pick a semester and a module, then view or download its Cours, TD, TP, and Examens as PDFs.
 
-**The site is under construction.** Built so far: the home page with both semesters, module pages with Cours, TD, TP, and Examens tabs, the year and session filters on Examens, search across modules and documents, a title that opens each PDF and a "Télécharger" button that saves it, empty and missing-file states, the report form, the 404 page, and an admin form at `/admin` for the maintainer. The quality pass is done; `docs/qa-report.md` records what was tested, found, and fixed. Netlify deploys the `main` branch at `https://admirable-concha-bbf7df.netlify.app`. The catalogue holds sample records and placeholder PDFs only; see "Sample data" below.
+**The site is under construction.** Built so far: the home page with both semesters, module pages with Cours, TD, TP, and Examens tabs, the year and session filters on Examens, search across modules and documents, a title that opens each PDF and a "Télécharger" button that saves it, empty and missing-file states, the report form, the 404 page, and an admin form at `/admin` for the maintainer. The quality pass is done; `docs/qa-report.md` records what was tested, found, and fixed. Netlify deploys the `main` branch at `https://admirable-concha-bbf7df.netlify.app`. The sample records and placeholder PDFs were removed on 2026-10-10; the catalogue holds one document, added by the maintainer through the admin form. See "Sample data" below.
 
 ## What is confirmed
 
@@ -39,10 +39,10 @@ Then open `http://<the computer's IP address>:8000/` on the phone (`ipconfig` sh
 
 ## Sample data
 
-Until the real PDFs are added, every resource in `data/resources.json` has an `id` starting with `sample-` and points to a generated placeholder PDF. The site shows a notice while any sample record exists.
+The 53 build-phase sample records and their placeholder PDFs were removed on 2026-10-10, at the maintainer's request. The catalogue now holds only documents the maintainer adds.
 
-- `node scripts/make-sample-pdfs.cjs` regenerates the placeholder PDFs from the catalogue.
-- Remove every `sample-` record and placeholder PDF before the site is announced to students.
+- A record whose `id` starts with `sample-` is still treated as a sample: the site shows a notice while one exists, and the doctor counts them. None should be added again.
+- `node scripts/make-sample-pdfs.cjs` writes a placeholder PDF for each `sample-` record. With none in the catalogue it writes nothing.
 
 ## Add a document with the admin form
 
@@ -95,7 +95,7 @@ Run `git pull` before editing by hand when the admin form has been used: its sav
 
 Import `ousssamaaslan-cell/university` from GitHub with `main` as the production branch. Set the base directory to the repository root, the build command to `node scripts/doctor.cjs && node scripts/publish.cjs`, and the publish directory to `.netlify-publish`. These values are also in `netlify.toml`.
 
-The copy step contains only the five HTML pages, `css/styles.css`, `data/resources.json`, browser JavaScript, supported image assets, PDFs named in the catalogue, and the seven files of the admin form, named one by one. It excludes `assets/README.md` and every repository document, template, test, project instruction, and script. `docs/published-files.md` records the exact current 83-file output. `/admin/` is sent with `X-Robots-Tag: noindex, nofollow`, and no student page links to it.
+The copy step contains only the five HTML pages, `css/styles.css`, `data/resources.json`, browser JavaScript, supported image assets, PDFs named in the catalogue, and the seven files of the admin form, named one by one. It excludes `assets/README.md` and every repository document, template, test, project instruction, and script. `docs/published-files.md` records the 31-file output of 2026-10-10. `/admin/` is sent with `X-Robots-Tag: noindex, nofollow`, and no student page links to it.
 
 After the first deploy, open **Forms**, enable form detection if needed, and verify that `report-error` appears. In **Forms → Submission notifications**, add an email notification for `report-error` and enter the maintainer address there. Test one submission on the live site. The address is never embedded in the published files.
 

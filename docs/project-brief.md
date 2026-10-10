@@ -27,7 +27,7 @@ One maintainer adds, changes, or removes content. Maintainer decision, 2026-10-0
 - **Repository route.** Editing `data/resources.json` and `pdfs/` by hand or with the `/add-resource` skill. It is the only route for modules and semesters.
 - Both routes pass `node scripts/doctor.cjs` on Netlify before anything is published.
 - No student page links to `/admin`, and the page is marked `noindex`. There is no server of our own, no database, no Google Drive integration, and no account for students.
-- Not verified yet: the GitHub login and a real save on the published site. They need the maintainer's OAuth app. Until then the save has been tested in a browser against a stand-in for GitHub only.
+- First real save: the maintainer added `poo1-tp-02-2026-2027` through the form on 2026-10-09 (commit `1f9efb9`, written by the form). On 2026-10-10 its record was in the live catalogue and its PDF answered 200 on the published site. Changing or removing a document through the form on the published site has not been done yet.
 
 ## Semester modules
 
@@ -69,19 +69,18 @@ Maintainer decision, 2026-10-07: Claude drafts all Arabic text, and the maintain
 - Semester labels: السداسي الثالث and السداسي الرابع, stored in `data/resources.json`.
 - Every interface label, including the type labels, session and exam-kind names, breadcrumbs, empty and error messages, the footer, the report form, and the page descriptions: the `ar` block of `js/i18n.js`.
 - The two short Arabic messages written in each of the four HTML files, for a visitor without JavaScript and for a browser too old to run the site.
-- Sample resource titles: drafted only so RTL and mixed-direction text can be tested. They are deleted with the sample data.
 
 When the maintainer has reviewed a group, remove it from this list.
 
-## Development sample data (build phase only)
+## Development sample data (removed)
 
-Maintainer decision, 2026-10-07: real PDFs are added only after the site is finished. Until then the catalogue holds sample resources that point to generated placeholder PDFs, so lists, filters, search, and PDF viewing can be built and tested. Do not search for or download real documents.
+Maintainer decision, 2026-10-07: real PDFs are added only after the site is finished. During the build the catalogue held 53 sample resources that pointed to generated placeholder PDFs, so lists, filters, search, and PDF viewing could be built and tested.
 
-- Every sample resource `id` and PDF filename starts with `sample-`, and each placeholder PDF states on its page that it is a placeholder. `node scripts/make-sample-pdfs.cjs` regenerates the placeholder PDFs from the catalogue.
-- Sample records cover all four types, long and short titles, several academic years, both sessions, and resources with and without a correction.
-- The modules are deliberately uneven so empty and partial states can be tested: ASD3 has many resources of every type; MN has Cours, TD, and TP but no Examens; PS1 has Examens but no Cours; AO and SI have no TP; POO1 has no TD; GP has nothing at all.
-- While any `sample-` record exists, the site shows a visible sample-data notice, marks each sample resource, and `node scripts/doctor.cjs` reports the sample count.
-- Sample data is never real university content. Remove every `sample-` record and placeholder PDF before the site is announced to students.
+Maintainer decision, 2026-10-10: the sample data is removed. All 53 `sample-` records and their placeholder PDFs were deleted from the repository in one commit. The catalogue now holds one document, `poo1-tp-02-2026-2027`, which the maintainer added through the admin form; the six other modules show their empty state.
+
+- Do not add sample records again, and do not search for or download real documents. The maintainer supplies every document.
+- The code that handled samples is still there and is idle: a record whose `id` starts with `sample-` would bring back the sample-data notice and the "Exemple" mark, `node scripts/doctor.cjs` reports the sample count (now 0), and `node scripts/make-sample-pdfs.cjs` writes nothing without such a record.
+- The maintainer's document has a French title without accents and an Arabic title that is not a word. Whether it is a test to remove or a real document to retitle is the maintainer's call.
 
 ## Success criteria
 
@@ -95,9 +94,8 @@ Maintainer decision, 2026-10-07: real PDFs are added only after the site is fini
 
 - The Arabic text listed above needs the maintainer's review.
 - S4 modules have not been supplied.
-- Real PDFs replace the sample data after the site is finished.
+- Real PDFs: the sample data is gone and the maintainer adds the real documents. One document is in the catalogue so far, and it may be a test (see "Development sample data").
 - The public address is the one Netlify generated. Whether it is the final address, or will be renamed or given a domain, is not decided. Sitemap and canonical links wait for that.
-- The admin form's GitHub login needs the maintainer's OAuth app, and its first real save has not been made.
 - No university logo, colours, or fonts were supplied, and no style reference site. The style stays neutral; `docs/design-system.md` records the values chosen.
 
-**[ARABIC DRAFTS, S4 MODULES, REAL PDFS, FINAL PUBLIC ADDRESS, AND ADMIN LOGIN — TO CONFIRM]**
+**[ARABIC DRAFTS, S4 MODULES, REAL PDFS, AND FINAL PUBLIC ADDRESS — TO CONFIRM]**

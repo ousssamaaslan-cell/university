@@ -1,8 +1,8 @@
 # Netlify publish manifest
 
-Snapshot of the allowlisted output on 2026-10-09. Run `node scripts/publish.cjs` to rebuild it. The Netlify publish directory is `.netlify-publish`.
+Snapshot of the allowlisted output on 2026-10-10, after the sample data was removed. Run `node scripts/publish.cjs` to rebuild it. The Netlify publish directory is `.netlify-publish`.
 
-These 83 files are the entire publish output. The 53 PDFs below are labelled sample placeholders, not real course material. No docs, templates, scripts, tests, project instructions, readme files, local paths, or maintainer email address are included.
+These 31 files are the entire publish output. The one PDF is the document the maintainer added through the admin form on 2026-10-09; the 53 sample placeholder PDFs are gone. No docs, templates, scripts, tests, project instructions, readme files, local paths, or maintainer email address are included.
 
 The seven `admin/` files are the maintainer's form. They hold no credential: the GitHub login goes through Netlify, which keeps the OAuth secret, and the repository name in `admin/admin.js` is public. A document added through the form adds its PDF to this list at the next publication; this snapshot is not rewritten for each one.
 
@@ -34,58 +34,6 @@ The seven `admin/` files are the maintainer's form. They hold no credential: the
 - `js/search.js`
 - `js/tabs.js`
 - `module.html`
-- `pdfs/S3/ao/sample-ao-cours-ch01.pdf`
-- `pdfs/S3/ao/sample-ao-cours-ch02.pdf`
-- `pdfs/S3/ao/sample-ao-cours-ch03.pdf`
-- `pdfs/S3/ao/sample-ao-examen-2023-2024-emd.pdf`
-- `pdfs/S3/ao/sample-ao-examen-2024-2025-final.pdf`
-- `pdfs/S3/ao/sample-ao-td-01.pdf`
-- `pdfs/S3/ao/sample-ao-td-02.pdf`
-- `pdfs/S3/asd3/sample-asd3-cours-ch01.pdf`
-- `pdfs/S3/asd3/sample-asd3-cours-ch02.pdf`
-- `pdfs/S3/asd3/sample-asd3-cours-ch03.pdf`
-- `pdfs/S3/asd3/sample-asd3-cours-ch04.pdf`
-- `pdfs/S3/asd3/sample-asd3-cours-ch05.pdf`
-- `pdfs/S3/asd3/sample-asd3-examen-2022-2023-emd.pdf`
-- `pdfs/S3/asd3/sample-asd3-examen-2022-2023-rattrapage.pdf`
-- `pdfs/S3/asd3/sample-asd3-examen-2023-2024-emd.pdf`
-- `pdfs/S3/asd3/sample-asd3-examen-2023-2024-rattrapage.pdf`
-- `pdfs/S3/asd3/sample-asd3-examen-2024-2025-controle-1.pdf`
-- `pdfs/S3/asd3/sample-asd3-examen-2024-2025-emd.pdf`
-- `pdfs/S3/asd3/sample-asd3-examen-2024-2025-rattrapage.pdf`
-- `pdfs/S3/asd3/sample-asd3-td-01.pdf`
-- `pdfs/S3/asd3/sample-asd3-td-02.pdf`
-- `pdfs/S3/asd3/sample-asd3-td-03.pdf`
-- `pdfs/S3/asd3/sample-asd3-td-04.pdf`
-- `pdfs/S3/asd3/sample-asd3-td-05.pdf`
-- `pdfs/S3/asd3/sample-asd3-td-06.pdf`
-- `pdfs/S3/asd3/sample-asd3-tp-01.pdf`
-- `pdfs/S3/asd3/sample-asd3-tp-02.pdf`
-- `pdfs/S3/asd3/sample-asd3-tp-03.pdf`
-- `pdfs/S3/asd3/sample-asd3-tp-04.pdf`
-- `pdfs/S3/mn/sample-mn-cours-ch01.pdf`
-- `pdfs/S3/mn/sample-mn-cours-ch02.pdf`
-- `pdfs/S3/mn/sample-mn-cours-ch03.pdf`
-- `pdfs/S3/mn/sample-mn-cours-ch04.pdf`
-- `pdfs/S3/mn/sample-mn-td-01.pdf`
-- `pdfs/S3/mn/sample-mn-td-02.pdf`
-- `pdfs/S3/mn/sample-mn-tp-01.pdf`
-- `pdfs/S3/poo1/sample-poo1-cours-ch01.pdf`
-- `pdfs/S3/poo1/sample-poo1-cours-ch02.pdf`
-- `pdfs/S3/poo1/sample-poo1-examen-2023-2024-rattrapage.pdf`
-- `pdfs/S3/poo1/sample-poo1-examen-2024-2025-emd.pdf`
-- `pdfs/S3/poo1/sample-poo1-tp-01.pdf`
-- `pdfs/S3/poo1/sample-poo1-tp-02.pdf`
-- `pdfs/S3/poo1/sample-poo1-tp-03.pdf`
-- `pdfs/S3/ps1/sample-ps1-examen-2022-2023-emd.pdf`
-- `pdfs/S3/ps1/sample-ps1-examen-2023-2024-emd.pdf`
-- `pdfs/S3/ps1/sample-ps1-examen-2023-2024-rattrapage.pdf`
-- `pdfs/S3/ps1/sample-ps1-td-01.pdf`
-- `pdfs/S3/si/sample-si-cours-ch01.pdf`
-- `pdfs/S3/si/sample-si-cours-ch02.pdf`
-- `pdfs/S3/si/sample-si-examen-2024-2025-emd.pdf`
-- `pdfs/S3/si/sample-si-td-01.pdf`
-- `pdfs/S3/si/sample-si-td-02.pdf`
-- `pdfs/S3/si/sample-si-td-03.pdf`
+- `pdfs/S3/poo1/poo1-tp-02-2026-2027.pdf`
 - `report.html`
 - `search.html`

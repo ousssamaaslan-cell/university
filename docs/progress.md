@@ -1,11 +1,29 @@
 # Progress
 
-State on 2026-10-09.
+State on 2026-10-10.
 
+- Sample data: removed on 2026-10-10 at the maintainer's request. The catalogue holds one document, the one the maintainer added through the admin form; see "Sample data removed" below.
 - Phases 0 to 4 and the eight critique fixes: done and committed on `main`.
 - Phase 4 review decisions: the normal empty-tab edge, click-only language memory, Netlify report form, and static French social previews are implemented in four separate commits. The purple visited-title colour is unchanged; no S4 jump links were added.
 - Phase 5 repository setup: Netlify configuration, a restricted publish copy, documentation, and an exact file manifest. The maintainer has since connected the repository; Netlify deploys `main` at `https://admirable-concha-bbf7df.netlify.app`.
-- Phase 6: an admin form at `/admin` (Decap CMS, GitHub login through Netlify). Built, tested locally, and pushed. The GitHub login and the first real save wait for the maintainer's OAuth app; see "Phase 6" below.
+- Phase 6: an admin form at `/admin` (Decap CMS, GitHub login through Netlify). Built, tested locally, and pushed. The maintainer made the first real save on 2026-10-09 (commit `1f9efb9`); see "Phase 6" below.
+
+## Sample data removed — 2026-10-10
+
+The maintainer asked for the samples to be deleted and their own document kept. Done in the repository, in one commit:
+
+- **Catalogue.** The 53 `sample-` records are out of `data/resources.json`. What is left is byte for byte the old file without them: 2 semesters, 7 modules, and `poo1-tp-02-2026-2027`.
+- **PDFs.** The 53 placeholder PDFs are deleted. `pdfs/` holds `S3/poo1/poo1-tp-02-2026-2027.pdf` and `S4/.gitkeep`.
+- **Publish copy.** 31 files, down from 84 (83 plus the maintainer's PDF); `docs/published-files.md` lists them.
+- **Documents.** `README.md`, `docs/project-brief.md`, `docs/published-files.md`, `docs/qa-report.md`, and this file.
+
+Checked: the doctor (1 resource, 0 samples), the 17 admin tests, and the pages in Chrome through a local server, in French and Arabic at 375 and 1280px. `docs/qa-report.md` has the details.
+
+What a student sees now: six modules say "Aucun document", POO1 has one TP, and the sample notice is gone.
+
+Left in place on purpose: the sample notice and the "Exemple" mark in the scripts, the doctor's sample count, and `scripts/make-sample-pdfs.cjs`. They do nothing without a `sample-` record. The rules and `docs/content-model.md` still describe the sample exception; they can be shortened once the maintainer says samples will not come back.
+
+To decide: the kept document has the French title "programmation oriente objet" and the Arabic title "سيبلاتنم", which is not a word. If it was a test, remove it in the admin form; if it is real, correct both titles there.
 
 ## Phase 6 — admin form
 
@@ -38,10 +56,9 @@ Choices made while building. Say so if you prefer otherwise.
 
 Verified on the published site after the push (commit `43c45a0`): `/admin/` answers with `X-Robots-Tag: noindex, nofollow` and shows Decap's "Se connecter avec GitHub" screen, `/admin` redirects to it, every admin file is byte for byte the repository's, and the repository's documents, scripts, and instructions answer 404. `docs/qa-report.md` has the details.
 
-Not verified, because they need the maintainer:
+The first real save, by the maintainer on 2026-10-09: commit `1f9efb9`, "Admin: add poo1-tp-02-2026-2027", with the record and a 210,089-byte PDF. On 2026-10-10, before the samples were removed, the published catalogue listed that document and its PDF answered 200 as `application/pdf` with the same size.
 
-- The GitHub login on the published site.
-- A real save: the commit on GitHub, the Netlify build, and the document on the site.
+Not done yet on the published site: changing a document and removing one through the form.
 
 Seen on the published site, not changed: Netlify adds a "Powered by Netlify" badge, through a script of its own, to every page it serves. The admin's notes were moved to the bottom left so the badge does not cover them.
 
@@ -169,6 +186,6 @@ The check on a real phone was skipped at the maintainer's request. Windows Firew
 
 ## Next
 
-For the maintainer: create the GitHub OAuth app, install it in Netlify (`README.md`, "One-time setup of the GitHub login"), log in at `/admin/`, and add one document as a test. Then check the commit on GitHub, the Netlify build, and the document on the site.
+For the maintainer: decide what `poo1-tp-02-2026-2027` is (a test to remove, or a real document to retitle), then add the real documents through `/admin/`. Several documents can go in one save.
 
-Still open from Phase 5: form detection and email notifications for "Signaler une erreur" on Netlify. Do not announce the site as real study material while the sample PDFs remain.
+Still open: form detection and email notifications for "Signaler une erreur" on Netlify, the review of the Arabic drafts, the S4 modules, and the final public address. Do not announce the site to students before real documents are in it.

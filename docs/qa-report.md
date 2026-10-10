@@ -1,5 +1,28 @@
 # QA report — L2 study resources
 
+## Sample data removal — 2026-10-10
+
+The 53 `sample-` records and their placeholder PDFs were removed from the repository. One document stays: `poo1-tp-02-2026-2027`, added by the maintainer through the admin form. The sections below this one describe the site while it still held the samples.
+
+Environment: Windows 10, the browser driven by Playwright, at 375 by 812 and 1280 by 812. The pages were served from `.netlify-publish` by a small local static server, stopped afterward. The check scripts were temporary and are not in the repository.
+
+| Check | Status | Evidence and limit |
+| --- | --- | --- |
+| Only the samples left the catalogue | Passed | The new `data/resources.json` is byte for byte the committed one without the records whose `id` starts with `sample-`: 54 records before, 53 removed, 1 kept. The 53 removed `pdfPath` values match the 53 tracked `sample-` PDFs one to one. |
+| Catalogue and project doctor | Passed | `node scripts/doctor.cjs` returned `ok: true`: 2 semesters, 7 modules, 1 resource, 0 samples, 48 vendored files verified. |
+| Admin save rules | Passed | `node scripts/test-admin.cjs`: 17 tests pass. No file in `admin/` changed. |
+| Publish boundary | Passed | `node scripts/publish.cjs` makes 31 files: the 30 site and admin files and one PDF. `docs/published-files.md` lists them. |
+| Pages without the samples | Passed | 21 addresses, each in French and Arabic at both widths: the home page, the seven modules, the four tabs of POO1, the Examens tab of ASD3, six searches, and the report page. Every page had the right language and direction, no sample notice, no "Exemple" mark, no link to a `sample-` PDF, no horizontal overflow, and nothing left loading. No console error or warning. |
+| Empty states | Passed | The home page shows "Aucun document" for six modules and "1 document" for POO1. A module without documents says "Ce module n'a pas encore de document." The three empty tabs of POO1 each say so. Searches for "asd3 td 3" and "sample" answer "Aucun résultat". |
+| The kept document | Passed | POO1, TP tab: "TP 2, programmation oriente objet, 2026-2027, Sans corrigé, PDF, 210 ko". The title link comes before "Télécharger". The PDF answers 200 as `application/pdf`, 210,089 bytes, starting `%PDF-` and ending `%%EOF`. A click on "Télécharger" saved `poo1-tp-02-2026-2027.pdf`. Searches for "poo1", "programmation", and "tp 2" find it. |
+| Removed files | Passed | Locally, `pdfs/S3/asd3/sample-asd3-cours-ch01.pdf` answers 404, and an unknown address shows the 404 page. |
+| Request log | Passed, with a note | The only entries were the header requests for the kept PDF. Playwright logs each one as `net::ERR_ABORTED` one millisecond after its 200 response; the page's own request succeeded and the row shows the size, not "Fichier indisponible". Whether the same log line appears against Netlify was not looked at. |
+| Screenshots | Viewed | The home page in French at 1280px and in Arabic at 375px, and the TP tab of POO1 at 1280px. Nothing clipped or misplaced. |
+| Exam filters | Not applicable | No exam is left in the catalogue, so there is no filter to show. |
+| Admin form with the shortened catalogue | Not checked | The form was not opened after the change. It reads the same catalogue the doctor and the 17 tests accept. |
+| Keyboard walk-through, screen reader, phone, Safari, Firefox | Not checked | No student page changed; the Phase 4 results were not repeated. |
+| Live site after the push | Not checked at the time of this commit | Before the change, on 2026-10-10, the live catalogue held 54 records (53 samples and the maintainer's document) and the document's PDF answered 200 with 210,089 bytes. |
+
 ## Phase 6 verification — 2026-10-09 (admin form)
 
 Environment: Windows 10, Node 24.11, Chrome driven by Playwright at 1280 by 800. The pages were served by a small local static server; the published copy was served from `.netlify-publish`. The test scripts were temporary and are not in the repository, except `scripts/test-admin.cjs`.
