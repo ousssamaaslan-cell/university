@@ -42,7 +42,7 @@ Choices made while building. Say so if you prefer otherwise.
 
 Verified on the published site after the push (commit `0b05e18`), with requests that only read: `/admin/` and `/admin/decap/` answer with `noindex`, the 14 admin scripts, stylesheet, and licence files are byte for byte the repository's, the bundle's old address and the repository's documents answer 404, and the home page does not mention the admin.
 
-That look found one defect, fixed in a follow-up commit: Netlify sends PDFs compressed, so the length a browser is given is not the file's size, and the dashboard would never have said "En ligne ✓" after a replaced PDF. It now goes by the server's mark of the content and by the file itself.
+That look found one defect, fixed in a follow-up commit (`9b02f33`, also confirmed on the published site): Netlify sends PDFs compressed, so the length a browser is given is not the file's size, and the dashboard would never have said "En ligne ✓" after a replaced PDF. It now goes by the server's mark of the content and by the file itself.
 
 To decide, on the student side (not changed in this phase): on the published site the module page shows "PDF" without a size, for the same reason. On a local preview it shows "PDF, 210 ko".
 
