@@ -1,19 +1,28 @@
 # Netlify publish manifest
 
-Snapshot of the allowlisted output on 2026-10-10, after the sample data was removed. Run `node scripts/publish.cjs` to rebuild it. The Netlify publish directory is `.netlify-publish`.
+Snapshot of the allowlisted output on 2026-10-10, after the admin dashboard of Phase 7 was added. Run `node scripts/publish.cjs` to rebuild it. The Netlify publish directory is `.netlify-publish`.
 
-These 31 files are the entire publish output. The one PDF is the document the maintainer added through the admin form on 2026-10-09; the 53 sample placeholder PDFs are gone. No docs, templates, scripts, tests, project instructions, readme files, local paths, or maintainer email address are included.
+These 40 files are the entire publish output. The one PDF is the document the maintainer added through the admin on 2026-10-09. No docs, templates, scripts, tests, project instructions, readme files, local paths, or maintainer email address are included.
 
-The seven `admin/` files are the maintainer's form. They hold no credential: the GitHub login goes through Netlify, which keeps the OAuth secret, and the repository name in `admin/admin.js` is public. A document added through the form adds its PDF to this list at the next publication; this snapshot is not rewritten for each one.
+The sixteen `admin/` files are the maintainer's dashboard (eleven files) and the former Decap form kept as a temporary backup in `admin/decap/` (five files). They hold no credential: the GitHub login goes through Netlify, which keeps the OAuth secret, and the repository name in `admin/admin.js` is public. A document added through the admin adds its PDF to this list at the next publication; this snapshot is not rewritten for each one.
 
 - `404.html`
+- `admin/admin-flow.js`
+- `admin/admin.css`
 - `admin/admin.js`
 - `admin/catalogue-rules.js`
-- `admin/decap-cms.LICENSE.txt`
-- `admin/decap-cms.js`
-- `admin/decap-cms.js.LICENSE.txt`
+- `admin/decap/admin.js`
+- `admin/decap/decap-cms.LICENSE.txt`
+- `admin/decap/decap-cms.js`
+- `admin/decap/decap-cms.js.LICENSE.txt`
+- `admin/decap/index.html`
+- `admin/documents.js`
+- `admin/form.js`
 - `admin/github-commit.js`
 - `admin/index.html`
+- `admin/local-preview.js`
+- `admin/netlify-auth.js`
+- `admin/ui.js`
 - `assets/favicon.svg`
 - `assets/social-preview.png`
 - `css/styles.css`

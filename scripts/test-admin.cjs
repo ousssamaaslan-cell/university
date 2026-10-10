@@ -1114,6 +1114,43 @@ test('the doctor stops a credential in a published file and a publish folder oth
   assert.match(project.doctor().errors.join('\n'), /Missing admin\/decap\/decap-cms\.js/);
 });
 
+test('the doctor accepts everything the dashboard commits: each type added, an edit, a replaced PDF, a deletion, several deletions', t => {
+  const project = projectCopy(t);
+  const original = project.read('data/resources.json');
+  const module = JSON.parse(original).modules[0];
+  const fields = more => ({semester: module.semester, module: module.id, title: {fr: 'Document de test', ar: 'وثيقة اختبار'}, ...more});
+  const current = () => JSON.parse(project.read('data/resources.json'));
+  // One change of the dashboard: planned on the catalogue as it is, written to disk as the commit would write it, then checked.
+  const commit = change => {
+    const made = rules.planChange(project.read('data/resources.json'), change);
+    assert.deepEqual(made.errors, []);
+    for (const path of [...made.writes.map(write => write.to), ...made.deletes]) assert.equal(gitHubStore.isPdfPath(path), true, path);
+    project.apply(made);
+    const checked = project.doctor();
+    assert.deepEqual([checked.errors, checked.exitCode], [[], 0], rules.commitMessage(made));
+    return made;
+  };
+
+  const cours = commit({action: 'add', fields: fields({type: 'cours', chapter: '12'}), pdf: chosen()}).record;
+  const td = commit({action: 'add', fields: fields({type: 'td', number: '12', hasCorrection: true}), pdf: chosen()}).record;
+  const tp = commit({action: 'add', fields: fields({type: 'tp', number: '12', academicYear: '2024-2025'}), pdf: chosen()}).record;
+  const examen = commit({action: 'add', fields: fields({type: 'examen', academicYear: '2025-2026', session: 'rattrapage', examKind: 'rattrapage'}), pdf: chosen()}).record;
+  // A second TD 12, accepted beside the first.
+  const twin = commit({action: 'add', fields: fields({type: 'td', number: '12'}), pdf: chosen(), acknowledged: [td.id]}).record;
+  assert.deepEqual([cours.id, td.id, tp.id, examen.id, twin.id], [`${module.id}-cours-ch12`, `${module.id}-td-12`, `${module.id}-tp-12-2024-2025`, `${module.id}-examen-2025-2026-rattrapage`, `${module.id}-td-12-2`]);
+  assert.equal(project.doctor().catalogue.resources, JSON.parse(original).resources.length + 5);
+
+  // An edit that changes a title and a number, then a PDF replaced at its path.
+  assert.deepEqual(commit(edit(current(), td.id, {title: {fr: 'Titre corrigé', ar: 'عنوان مصحح'}, number: '13'})).updated, [td.id]);
+  assert.deepEqual(commit(edit(current(), cours.id, {}, {pdf: chosen()})).writes, [{to: cours.pdfPath}]);
+
+  // One deletion, then the rest together: the catalogue and pdfs/ are back to what they were.
+  const now = id => record(current(), id);
+  assert.deepEqual(commit({action: 'delete', documents: [now(tp.id)]}).deletes, [tp.pdfPath]);
+  assert.equal(commit({action: 'delete', documents: [cours.id, td.id, examen.id, twin.id].map(now)}).removed.length, 4);
+  assert.equal(project.read('data/resources.json'), original);
+});
+
 test('the doctor keeps the admin out of the student pages and out of search engines', t => {
   const project = projectCopy(t);
   assert.deepEqual(project.doctor().errors, []);

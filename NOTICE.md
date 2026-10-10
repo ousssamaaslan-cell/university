@@ -16,11 +16,18 @@ Web Quality Skills: Addy Osmani, MIT.
 Vercel Agent Skills: Vercel, MIT as declared in the upstream README.
 Decap CMS: Netlify and the Decap CMS contributors, MIT.
 
-The admin form runs Decap CMS 3.16.3. `admin/decap-cms.js` is the browser bundle
-from the npm package `decap-cms@3.16.3`, unchanged; the package's checksum, the
-file's hash, and the release commit are in `vendor-manifest.json`. Its licence is
-`admin/decap-cms.LICENSE.txt`, and the notices of the libraries built into the
-bundle are in `admin/decap-cms.js.LICENSE.txt`. Both are published beside it.
+The former admin form, kept at `/admin/decap` as a temporary backup, runs Decap
+CMS 3.16.3. `admin/decap/decap-cms.js` is the browser bundle from the npm package
+`decap-cms@3.16.3`, unchanged; the package's checksum, the file's hash, and the
+release commit are in `vendor-manifest.json`. Its licence is
+`admin/decap/decap-cms.LICENSE.txt`, and the notices of the libraries built into
+the bundle are in `admin/decap/decap-cms.js.LICENSE.txt`. Both are published
+beside it.
+
+The admin dashboard at `/admin` is this project's own code and includes no
+library. Its login in `admin/netlify-auth.js` follows the exchange of Netlify's
+`netlify-auth-providers` library (MIT), which Netlify's documentation names and
+which Decap CMS carries; no code was copied from it.
 
 The `lp-*` workflows, reviewer definitions, rules, hooks, doctor script, project
 documents, and templates are adapted for this university project. Marketing and

@@ -4,9 +4,11 @@
 
 Adding a document means two things only: drop the PDF in `pdfs/<semester>/<module-id>/` and add one record to `resources`. The pages render from the catalogue, so no HTML is edited.
 
-The admin form at `/admin` does those two things for the maintainer. It asks for the type, the semester, the module, both titles, the fields of the type, and the PDF; on save it fills in `id`, `level`, an empty `order`, and `pdfPath`, and commits the record and the file together. Its rules are `admin/catalogue-rules.js`, which follows this document: when the model changes here, change that file, `scripts/doctor.cjs`, and `scripts/test-admin.cjs` with it. Semesters and modules are not in the form.
+The admin dashboard at `/admin` does those two things for the maintainer. It asks for the semester, the module, the type, the fields of the type, both titles, and the PDF; on save it fills in `id`, `level`, `order`, and `pdfPath`, and commits the record and the file together. It also changes a document, replaces its PDF at the same path, and deletes a document with its PDF. Its rules are `admin/catalogue-rules.js`, which follows this document: when the model changes here, change that file, `scripts/doctor.cjs`, and `scripts/test-admin.cjs` with it. Semesters and modules are not in the dashboard.
 
-An ID assigned by the form is `<module>-cours-ch<NN>`, `<module>-td-<NN>`, `<module>-tp-<NN>`, or `<module>-examen-<academicYear>-<examKind>`, with two digits for the number. A Cours, TD, or TP that has an `academicYear` gets `-<academicYear>` at the end, and a second document with the same facts gets `-2`, then `-3`. When `order` is left empty, the form writes the chapter or sheet number, and for an exam 1 for a contrôle, 2 for an EMD, 3 for an examen final, and 4 for a rattrapage.
+An ID assigned by the dashboard is `<module>-cours-ch<NN>`, `<module>-td-<NN>`, `<module>-tp-<NN>`, or `<module>-examen-<academicYear>-<examKind>`, with two digits for the number. A Cours, TD, or TP that has an `academicYear` gets `-<academicYear>` at the end, and a second document with the same facts gets `-2`, then `-3`. `order` is the chapter or sheet number, and for an exam 1 for a contrôle, 2 for an EMD, 3 for an examen final, and 4 for a rattrapage. An edit keeps the `id` and the `pdfPath` even when the number or the year changes; `order` follows the new number unless it had been set by hand.
+
+Before adding a document, the dashboard looks for one already at the same place: the same module, type, and chapter or sheet number, whatever the academic year, or for an exam the same academic year, session, and exam kind. It shows that document's title and asks before publishing beside it.
 
 ## Modules
 

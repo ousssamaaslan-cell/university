@@ -1,25 +1,27 @@
 ---
 name: add-resource
-description: "Add or remove a confirmed L2 S3/S4 module or PDF in the static resource catalogue by hand, with path validation; describes the /admin form route too."
+description: "Add or remove a confirmed L2 S3/S4 module or PDF in the static resource catalogue by hand, with path validation; describes the /admin dashboard route too."
 disable-model-invocation: true
 ---
 
 # Add a module or PDF
 
-One maintainer keeps the catalogue, by two routes that both end in a commit on `main`: the admin form at `/admin` (see "The admin form" below), and this workflow, which edits `data/resources.json` and `pdfs/` in the repository. Use this workflow for modules and semesters, for several documents at once, for repairs, and whenever the maintainer asks Claude to make the change. Run `git pull` first: a save in the admin form is a commit too.
+One maintainer keeps the catalogue, by two routes that both end in a commit on `main`: the admin dashboard at `/admin` (see "The admin dashboard" below), and this workflow, which edits `data/resources.json` and `pdfs/` in the repository. Use this workflow for modules and semesters, for many documents at once, for repairs, and whenever the maintainer asks Claude to make the change. Run `git pull` first: a save in the admin dashboard is a commit too.
 
 Read `docs/project-brief.md`, `docs/content-model.md`, `.claude/rules/content-structure.md`, `.claude/rules/pdf-storage.md`, the current `data/resources.json` (when present), and $ARGUMENTS. Do not use the format examples in the content-model document as real data. Do not create another level or semester. This workflow is for real content; the build-phase `sample-` records and placeholder PDFs described in the brief are the only exception to its real-PDF rule, and they are removed before publication.
 
 When drafting an Arabic module or resource title, use the preferred terms and rattrapage title format in the "Arabic terminology" section of `docs/content-model.md`.
 
-## The admin form
+## The admin dashboard
 
-The maintainer can add, change, or remove a document without this workflow: `/admin` on the published site, logged in with a GitHub account that has write access to the repository. `README.md` gives the steps and the one-time login setup.
+The maintainer can add, change, or remove a document without this workflow: `/admin` on the published site, logged in with a GitHub account that has write access to the repository. `README.md` gives the steps (add in three, delete in three) and the one-time login setup.
 
-- The form covers documents only (Cours, TD, TP, Examen). Modules and semesters are changed here, in the repository. The form's Semestre and Module lists are read from the published catalogue, so a new module appears in the form after the next publication.
-- A save assigns the ID, `level`, an empty `order`, and the PDF's folder and name; it writes the catalogue and the PDFs in one commit named `Admin: ...`. The rules are in `admin/catalogue-rules.js` and follow `docs/content-model.md`.
+- The dashboard covers documents only (Cours, TD, TP, Examen): add, edit, replace the PDF, delete one or several. Modules and semesters are changed here, in the repository. The dashboard reads the catalogue from GitHub, so a new module appears in it as soon as the commit is on `main`.
+- Each action is one commit holding the catalogue and the PDF change together, named `Admin: add ...`, `Admin: edit ...`, or `Admin: delete ...`. A new document gets its ID, `level`, `order`, and the PDF's folder and name; an edited one keeps its ID and its PDF path. The rules are in `admin/catalogue-rules.js` and follow `docs/content-model.md`.
 - Follow the same ID pattern by hand, so both routes agree: `<module>-cours-ch<NN>`, `<module>-td-<NN>`, `<module>-tp-<NN>`, `<module>-examen-<year>-<kind>`, with `-<year>` added to a Cours, TD, or TP that has an academic year, and `-2`, `-3` for a second document with the same facts.
-- `node scripts/doctor.cjs` runs on Netlify before every publication, whichever route made the commit. A failed build leaves the public site as it was; read the build log, repair the catalogue here, and push.
+- The dashboard warns before adding a document where one already is: same module, type, and chapter or sheet number, or for an exam the same year, session, and kind. Check for that by hand too.
+- `node scripts/doctor.cjs` runs on Netlify before every publication, whichever route made the commit. A failed build leaves the public site as it was, and the dashboard then reports "Toujours en cours de déploiement"; read the build log, repair the catalogue here, and push.
+- The former Decap CMS form is kept at `/admin/decap` as a temporary backup and saves through the same rules. Remove `admin/decap/` only when the maintainer asks.
 - After changing a file in `admin/` or the doctor, run `node scripts/test-admin.cjs`.
 
 ## Add a module

@@ -7,6 +7,48 @@ State on 2026-10-10.
 - Phase 4 review decisions: the normal empty-tab edge, click-only language memory, Netlify report form, and static French social previews are implemented in four separate commits. The purple visited-title colour is unchanged; no S4 jump links were added.
 - Phase 5 repository setup: Netlify configuration, a restricted publish copy, documentation, and an exact file manifest. The maintainer has since connected the repository; Netlify deploys `main` at `https://admirable-concha-bbf7df.netlify.app`.
 - Phase 6: an admin form at `/admin` (Decap CMS, GitHub login through Netlify). Built, tested locally, and pushed. The maintainer made the first real save on 2026-10-09 (commit `1f9efb9`); see "Phase 6" below.
+- Phase 7: a custom admin dashboard at `/admin`, in plain HTML, CSS, and JavaScript, with the Decap form moved to `/admin/decap` as a temporary backup. Built and tested on this computer, in seven commits. The GitHub login and a real save on the published site are the maintainer's test; see "Phase 7" below.
+
+## Phase 7 — admin dashboard — 2026-10-10
+
+What was built:
+
+- **`admin/`**, eleven files of our own, no library: the page and its stylesheet, `admin.js` (session, login screen, header, tabs), `form.js` (add and edit), `documents.js` (the list, the confirmation), `ui.js` (labels and messages), `local-preview.js`, and four files that run without a browser so the tests can run them: `catalogue-rules.js` (what a change may write), `github-commit.js` (the commit), `admin-flow.js` (read, apply, commit, retry; the watch on the public site), and `netlify-auth.js` (the login).
+- **Login.** The same exchange as Decap's: the same Netlify address, `site_id`, and scope `public_repo`. Nothing changes on GitHub or Netlify. Checked against Netlify's current documentation, which names the `netlify-auth-providers` library, and against the copy of that library inside the Decap bundle. The token is kept in the tab's session storage only.
+- **Ajouter un document.** Seven steps on one page: semester (S4 disabled, with a note), module buttons with code, name and count, four type buttons, the fields of the type, the two titles, the PDF zone, and a preview with the ID, the PDF path, and the row in French and Arabic. A document already at the same place is shown with its title and a box to tick. "Publier" stays disabled while anything is missing, and says what. After a publication: "Publié. Visible sur le site dans environ une minute.", a link to the module page, and "Ajouter un autre document dans ce module". The last semester, module, and type are remembered in the browser.
+- **Mes documents.** Every document read from GitHub, by semester, module (each one folds), and type with counts, in the site's order. A search box (title in either language, module, number, year), a type filter, "Rafraîchir". Each row: both titles, the facts, the size, the ID, and "Voir", "Modifier", "Supprimer". Ticked rows are deleted together. A module without documents offers to add one.
+- **Saving.** Each action is one commit with the catalogue and the PDF change: `Admin: add …`, `Admin: edit …`, `Admin: delete …`. The catalogue is read from GitHub again before every save. If `main` moved during the save, one more read and one more try; then it stops and asks to refresh. Never forced. Only `data/resources.json` and `pdfs/<semester>/<module>/<id>.pdf` can be written or removed.
+- **After a commit.** The public `data/resources.json` is asked every 15 seconds for up to 5 minutes. The message becomes "En ligne ✓", or "Toujours en cours de déploiement" with a link to the project's Deploys page on Netlify.
+- **Decap backup.** The Phase 6 form is at `/admin/decap/`, its bundle moved byte for byte (`vendor-manifest.json` and `.gitattributes` follow). It uses the same login and the same save rules. The dashboard's footer links to it. `README.md` says it is temporary.
+- **Publication.** `scripts/publish.cjs` names the sixteen admin files one by one: 40 published files in all, listed in `docs/published-files.md`. No student page was changed in this phase.
+- **Checks.** The doctor now reads every page, script, and stylesheet under `admin/` for credentials, and fails if a student page mentions the admin or if `/admin` loses its `noindex`. `node scripts/test-admin.cjs` has 42 tests (17 before). `docs/qa-report.md` has the browser checks.
+- **Documents.** `README.md` (add in three steps, delete in three steps, the Decap backup), the `add-resource` skill, `docs/project-brief.md`, `docs/content-model.md`, `docs/design-system.md`, `docs/published-files.md`, `NOTICE.md`, `.claude/CLAUDE.md`, four rules, `lp-plan`, `lp-build`, and `docs/qa-report.md`.
+
+Choices made while building. Say so if you prefer otherwise.
+
+- **The login is written in project code,** about sixty lines, following the exchange of Netlify's library. That library is a 2017 alpha; vendoring it would have added a second prebuilt script for the same result.
+- **An academic year stays possible on a Cours, TD, or TP,** as an optional list, because the content model allows it and the one published document has one. Your list of fields did not name it.
+- **The duplicate warning ignores the year** for a Cours, TD, or TP: same module, type, and number is enough, as you wrote it. The warning then suggests choosing the year when it is another year's version.
+- **"Voir" opens the PDF from GitHub,** not from the public site, so a file added or replaced a minute ago can be checked at once.
+- **"Se déconnecter" also ends Decap's login,** which Decap keeps in the browser's local storage. Otherwise a GitHub token would stay in the browser after logging out.
+- **No "ordre d'affichage" field.** A new document's order is its number (for an exam: contrôle 1, EMD 2, examen final 3, rattrapage 4). An order typed by hand in the Decap form is kept on an edit.
+- **An edit keeps the ID and the file name** even when the number or the year changes, and the preview says so.
+- **An edit of a document that changed elsewhere is refused,** not merged: the form asks to go back to the list.
+- **Each row shows the document's ID,** which is also its file name, to match a row with a commit or a file on GitHub.
+- **50 MB means 50,000,000 bytes,** as in the Decap form. The warning starts above 10,000,000.
+- **Deleting several documents at once** was built: the rules already handled a list.
+- **"Termes recommandés" opens `docs/content-model.md` on GitHub,** because the repository's documents are not published on the site.
+- **The project instructions were updated** (`.claude/CLAUDE.md` and the rules) where they still described Decap as the admin.
+
+Not verified, because it can only be done on the published site with your GitHub account: the login, a real addition, edit, replacement and deletion, and "En ligne ✓" against the real Netlify. The checklist is in the last message of the session and in `docs/qa-report.md`.
+
+Known and left as is:
+
+- A 50 MB PDF is sent to GitHub as text about a third larger. On a slow connection this takes minutes; the page says to keep it open. No large file was sent to the real GitHub.
+- What a phone does with "Voir" was not seen. A phone browser that cannot show PDFs will offer to download the file.
+- Each action is one commit and one Netlify build.
+- The Decap backup still keeps its own login in local storage while it is in use.
+- The dashboard does not create modules or semesters, and does not move a document to another module or type.
 
 ## Sample data removed — 2026-10-10
 
@@ -26,6 +68,8 @@ Left in place on purpose: the sample notice and the "Exemple" mark in the script
 To decide: the kept document has the French title "programmation oriente objet" and the Arabic title "سيبلاتنم", which is not a word. If it was a test, remove it in the admin form; if it is real, correct both titles there.
 
 ## Phase 6 — admin form
+
+This form is now the temporary backup at `/admin/decap/`; Phase 7 above replaced it at `/admin/`. The record below describes it as it was built, when its files were directly in `admin/`.
 
 What was built:
 
@@ -186,6 +230,11 @@ The check on a real phone was skipped at the maintainer's request. Windows Firew
 
 ## Next
 
-For the maintainer: decide what `poo1-tp-02-2026-2027` is (a test to remove, or a real document to retitle), then add the real documents through `/admin/`. Several documents can go in one save.
+For the maintainer:
+
+1. Test the new dashboard on the published site: log in, add one document of each type, edit one, delete them, and confirm on the site and on GitHub that the PDFs are gone.
+2. Decide what `poo1-tp-02-2026-2027` is (a test to remove, or a real document to retitle); both can now be done in **Mes documents**.
+3. Add the real documents through `/admin/`.
+4. When the dashboard has been used for a while, ask for the Decap backup at `/admin/decap/` to be removed.
 
 Still open: form detection and email notifications for "Signaler une erreur" on Netlify, the review of the Arabic drafts, the S4 modules, and the final public address. Do not announce the site to students before real documents are in it.

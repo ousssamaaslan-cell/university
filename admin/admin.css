@@ -177,6 +177,14 @@ main [tabindex="-1"]:focus {
   cursor: not-allowed;
 }
 
+/* The filled buttons change colour at once: fading the fill while the text has already changed
+   would leave light text on a light fill for an instant when "Publier" becomes available. */
+.button--primary,
+.button--danger,
+.button:disabled {
+  transition: none;
+}
+
 /* ---------- Messages ---------- */
 
 /* What happened and what to do next. The fill marks the message; the transparent edge shows only

@@ -110,6 +110,24 @@ French puts a space before `?`, `!`, `:`, `;` and `»`, and after `«` and `n°`
 - **While typing.** On the results page the list updates after a short pause in typing. The words typed are shown back in the order they were typed, also inside an Arabic sentence.
 - **States.** Nothing typed, fewer than two characters, no match (with ways to widen the search and a link to all modules), and a load error are four different messages. At most 30 documents are listed; beyond that the page asks for one more word.
 
+## The admin dashboard
+
+The maintainer's page at `/admin` uses the same tokens, type, spacing, buttons, tabs, and module code as the student pages (`css/styles.css`), and adds its own components in `admin/admin.css`. Its interface is in French only. It is built for a 375px phone and a 1280px window, and holds at 320px.
+
+- **Marked as the admin.** The header is the page's colours reversed: a band in the text colour, with the site name, the word "Administration" as a light label, the logged-in account, "Voir le site", and "Se déconnecter". The student header is the page colour, so the two sides of the site are never mistaken for each other. On the band the focus ring takes the light colour.
+- **Two tabs,** drawn as the module page's tabs: "Ajouter un document" and "Mes documents", the second with its count. Both panels stay in the page, so what was typed in the form survives a look at the list.
+- **A choice is a large button.** Semester, module, type, and session are radio buttons drawn as outlined buttons at least 44px tall; the chosen one is marked like the open tab, by a fill, a heavier edge, and a bar. A module's button shows its code, its name, and its number of documents. The four types share one row, and two rows of two under 340px. A semester without modules is disabled, with a note beside it.
+- **Fixed values are never typed.** Numbers are number fields, years and exam kinds are lists, the correction is a switch whose knob changes side.
+- **The Arabic title** is typed right to left in a field marked `lang="ar"`. In the list it sits under the French title, smaller and muted, aligned to the same edge.
+- **The PDF zone** has a dashed edge, the one place a dashed line is used: it means "put something here". A refused file is explained in an error message under it; a large file gets a notice and can still be published.
+- **The preview** is a quiet panel (`--color-surface`) holding the ID, the PDF path, and the row drawn with the student pages' own classes, in French and in Arabic. It is a picture: nothing in it can be pressed.
+- **What is missing** is listed above "Publier", which stays disabled until the list is empty. Each line leads to its field.
+- **Two filled buttons** exist only here: the main action of a screen in `--color-link` ("Se connecter", "Publier"), and an irreversible deletion in `--color-error-text` ("Supprimer définitivement"). "Supprimer" on a row is an ordinary outlined button with red text.
+- **Messages** are filled boxes in the notice, ok, error, and accent colours. Each says what happened and what to do, and an error offers its remedy as a button ("Se reconnecter", "Réessayer"). After a save, one sentence follows the deployment: "Visible sur le site dans environ une minute.", then "En ligne ✓".
+- **Mes documents** groups documents by semester, then by module in a line that folds, then by type with its count. A row gives the French title, the Arabic title, the facts as on the module page, and three buttons. Ticked rows bring a bar that stays at the top of the window.
+- **The confirmation** before a deletion is a dialog inside the page, with the dimmed page behind it and no shadow. "Annuler" has the focus when it opens.
+- Lowest text contrast among the 27 pairs measured on the dashboard: 5.48:1 in light mode and 6.37:1 in dark mode (the document count on a chosen module button).
+
 ## Language and direction
 
 The site is complete in French and Arabic. French is the default. The language switch is in the header on every page and names each language in its own script ("Français", "العربية"). The choice is kept in the URL (`?lang=ar`). It is remembered in the browser only after the reader clicks the switch; opening a shared `?lang=` link does not change the saved choice.
