@@ -286,7 +286,8 @@
     if (!/\.pdf$/i.test(file.name)) return refuse(`« ${file.name} » n'est pas un fichier PDF : son nom ne se termine pas par .pdf.`);
     if (file.size === 0) return refuse(`« ${file.name} » est vide.`);
     if (!file.isPdf) return refuse(`« ${file.name} » n'est pas un vrai PDF : son contenu ne commence pas par %PDF.`);
-    if (file.size > MAX_PDF_BYTES) return refuse(`« ${file.name} » pèse ${megabytes(file.size)} Mo. La limite est de ${MAX_PDF_BYTES / 1e6} Mo : compressez le PDF, puis choisissez-le de nouveau.`);
+    // Rounded up, so a file just over the limit is never said to weigh exactly the limit.
+    if (file.size > MAX_PDF_BYTES) return refuse(`« ${file.name} » pèse ${megabytes(Math.ceil(file.size / 1e5) * 1e5)} Mo. La limite est de ${MAX_PDF_BYTES / 1e6} Mo : compressez le PDF, puis choisissez-le de nouveau.`);
     if (file.size > LARGE_PDF_BYTES) {
       return {error: null, warning: `Ce PDF pèse ${megabytes(file.size)} Mo. Les étudiants téléchargent souvent sur téléphone : compressez-le si vous le pouvez. Vous pouvez aussi le publier tel quel.`};
     }
@@ -307,19 +308,39 @@
     return catalogue.resources.filter(resource => resource.id !== exceptId && sameFacts(resource, fields));
   }
 
-  // The ID and the PDF path a new document would get, as soon as its module, its type and its
-  // number (for an exam, its year and kind) are known; null before that. For the form's preview.
-  function draftId(catalogue, source) {
+  // What places a document, read from a form that may still be half filled: its module, its type
+  // and its number, or for an exam its year and kind (and its session, once chosen).
+  // null while one of them is missing.
+  function placeOf(catalogue, source) {
     const module = catalogue.modules.find(item => item.id === source.module);
     if (!module || !TYPES.includes(source.type)) return null;
     const fields = {type: source.type, module: module.id, semester: module.semester};
     if (source.type === 'cours') fields.chapter = integer(source.chapter, 0);
     if (source.type === 'td' || source.type === 'tp') fields.number = integer(source.number, 1);
     if (isAcademicYear(source.academicYear)) fields.academicYear = source.academicYear;
-    if (source.type === 'examen') fields.examKind = EXAM_KINDS.includes(source.examKind) ? source.examKind : null;
-    if (fields.chapter === null || fields.number === null || (source.type === 'examen' && (!fields.academicYear || !fields.examKind))) return null;
+    if (source.type === 'examen') {
+      fields.examKind = EXAM_KINDS.includes(source.examKind) ? source.examKind : null;
+      fields.session = SESSIONS.includes(source.session) ? source.session : null;
+    }
+    const missing = fields.chapter === null || fields.number === null || (source.type === 'examen' && (!fields.academicYear || !fields.examKind));
+    return missing ? null : fields;
+  }
+
+  // The ID and the PDF path a new document would get, as soon as its place is known; null before
+  // that. For the form's preview.
+  function draftId(catalogue, source) {
+    const fields = placeOf(catalogue, source);
+    if (!fields) return null;
     const id = newId(fields, new Set(catalogue.resources.map(resource => resource.id)), new Set(catalogue.resources.map(resource => resource.pdfPath)));
     return {id, pdfPath: pdfPathOf(fields, id)};
+  }
+
+  // The documents to warn about before a save: those already at the place the form describes.
+  // previous is the record being edited; an edit that leaves it at its place has nothing to warn about.
+  function similarDocuments(catalogue, source, previous = null) {
+    const fields = placeOf(catalogue, source);
+    if (!fields || (fields.type === 'examen' && !fields.session)) return [];
+    return previous && sameFacts(previous, fields) ? [] : duplicatesOf(catalogue, fields, previous ? previous.id : null);
   }
 
   // Stands, for readItem, for a PDF chosen in the dashboard: the save gives it its real path.
@@ -409,7 +430,7 @@
     if (result.problems.length) return refused('invalid', result.problems.map(sentence));
 
     // A new document at a place already held, or an edited one that moves onto another's place.
-    plan.duplicates = previous && sameFacts(previous, result.fields) ? [] : duplicatesOf(current, result.fields, previous?.id);
+    plan.duplicates = previous && sameFacts(previous, result.fields) ? [] : duplicatesOf(current, result.fields, previous ? previous.id : null);
     const acknowledged = change.acknowledged ?? [];
     if (plan.duplicates.some(duplicate => !acknowledged.includes(duplicate.id))) {
       return refused('duplicate', ['Un document semblable existe déjà dans le catalogue. Confirmez que vous voulez publier celui-ci aussi.'], {duplicates: plan.duplicates});
@@ -449,6 +470,6 @@
   return {
     CATALOGUE_PATH, TYPES, SESSIONS, EXAM_KINDS, MAX_PDF_BYTES, LARGE_PDF_BYTES,
     academicYearOf, academicYears, modulesInOrder, sortedResources, fingerprint, forForm, prepareSave,
-    checkPdf, duplicatesOf, draftId, planChange, commitMessage
+    checkPdf, draftId, similarDocuments, planChange, commitMessage
   };
 });

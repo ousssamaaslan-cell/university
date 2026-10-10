@@ -508,6 +508,180 @@ test('dashboard, delete: a list that is out of date is refused, and nothing is p
   assert.equal(plan(start, {action: 'rename'}).code, 'invalid');
 });
 
+// What the form holds for a new document, and a chosen PDF as the form describes it.
+const asked = fields => ({semester: 'S3', module: 'asd3', title: {fr: ' Titre ', ar: ' عنوان '}, ...fields});
+const chosen = (more = {}) => ({name: 'Série N°2 (corrigé).PDF', size: 1200, isPdf: true, ...more});
+const pdfOf = text => new TextEncoder().encode(`%PDF-1.4\n% ${text}\n%%EOF\n`);
+
+test('dashboard, add: each of the four types gets its ID, its fields and its place', () => {
+  const start = fixture();
+  const cours = plan(start, {action: 'add', fields: asked({type: 'cours', chapter: '2'}), pdf: chosen()});
+  assert.deepEqual([cours.errors, cours.added, cours.writes, cours.deletes, cours.changed], [[], ['asd3-cours-ch02'], [{to: 'pdfs/S3/asd3/asd3-cours-ch02.pdf'}], [], true]);
+  assert.deepEqual(cours.record, {id: 'asd3-cours-ch02', level: 'L2', semester: 'S3', module: 'asd3', type: 'cours', chapter: 2, title: {fr: 'Titre', ar: 'عنوان'}, pdfPath: 'pdfs/S3/asd3/asd3-cours-ch02.pdf', order: 2});
+  assert.equal(rules.commitMessage(cours), 'Admin: add asd3-cours-ch02');
+
+  const td = plan(start, {action: 'add', fields: asked({type: 'td', number: '2', hasCorrection: true}), pdf: chosen()});
+  assert.deepEqual(td.record, {id: 'asd3-td-02', level: 'L2', semester: 'S3', module: 'asd3', type: 'td', number: 2, title: {fr: 'Titre', ar: 'عنوان'}, hasCorrection: true, pdfPath: 'pdfs/S3/asd3/asd3-td-02.pdf', order: 2});
+  // It lands between TD 1 and TD 3, and every other record is exactly as it was.
+  assert.deepEqual(JSON.parse(td.raw).resources.map(resource => resource.id), ['asd3-cours-ch01', 'asd3-td-01', 'asd3-td-02', 'asd3-td-03', 'asd3-examen-2024-2025-emd', 'ao-cours-ch01']);
+  assert.equal(td.raw, serialize({...start, resources: [start.resources[0], start.resources[1], td.record, ...start.resources.slice(2)]}));
+
+  const tp = plan(start, {action: 'add', fields: asked({type: 'tp', number: 4, academicYear: '2023-2024'}), pdf: chosen()});
+  assert.deepEqual(tp.record, {id: 'asd3-tp-04-2023-2024', level: 'L2', semester: 'S3', module: 'asd3', type: 'tp', number: 4, academicYear: '2023-2024', title: {fr: 'Titre', ar: 'عنوان'}, hasCorrection: false, pdfPath: 'pdfs/S3/asd3/asd3-tp-04-2023-2024.pdf', order: 4});
+
+  const examen = plan(start, {action: 'add', fields: asked({module: 'ao', type: 'examen', academicYear: '2025-2026', session: 'rattrapage', examKind: 'rattrapage', hasCorrection: true, number: '7', chapter: '3'}), pdf: chosen()});
+  assert.deepEqual(examen.record, {id: 'ao-examen-2025-2026-rattrapage', level: 'L2', semester: 'S3', module: 'ao', type: 'examen', academicYear: '2025-2026', session: 'rattrapage', examKind: 'rattrapage', title: {fr: 'Titre', ar: 'عنوان'}, hasCorrection: true, pdfPath: 'pdfs/S3/ao/ao-examen-2025-2026-rattrapage.pdf', order: 4});
+  // The PDF is named after the ID whatever the file was called, and stays inside the module's folder.
+  for (const made of [cours, td, tp, examen]) assert.equal(gitHubStore.isPdfPath(made.writes[0].to), true);
+});
+
+test('dashboard, add: what the form cannot prevent is refused, and nothing is planned', () => {
+  const start = fixture();
+  const refusal = (fields, pdf = chosen()) => plan(start, {action: 'add', fields: asked(fields), pdf});
+  const said = (fields, pdf) => refusal(fields, pdf).errors.join(' ');
+  assert.match(said({type: 'td', number: '2'}, null), /Choisissez le fichier PDF/);
+  assert.match(said({type: 'td', number: '0'}), /Le numéro de la série doit être un nombre entier, à partir de 1\./);
+  assert.match(said({type: 'td', number: '2.5'}), /Le numéro de la série/);
+  assert.match(said({type: 'cours', chapter: ''}), /Le numéro du chapitre/);
+  assert.match(said({type: 'td', number: '2', title: {fr: '  ', ar: 'عنوان'}}), /Le titre en français est vide\./);
+  assert.match(said({type: 'td', number: '2', title: {fr: 'Titre', ar: ''}}), /Le titre en arabe est vide\./);
+  assert.match(said({type: 'td', number: '2', semester: 'S4'}), /Le module ASD3 appartient au semestre S3/);
+  assert.match(said({type: 'td', number: '2', module: 'inconnu'}), /Choisissez un module\./);
+  assert.match(said({type: 'quiz', number: '2'}), /Le type du document est inconnu\./);
+  assert.match(said({type: 'examen', session: 'normal', examKind: 'emd'}), /Choisissez l'année universitaire\./);
+  assert.match(said({type: 'examen', academicYear: '2024-2026', session: 'normal', examKind: 'emd'}), /Choisissez l'année universitaire\./);
+  assert.match(said({type: 'examen', academicYear: '2023-2024', session: 'normal', examKind: 'rattrapage'}), /Un examen de rattrapage appartient à la session de rattrapage\./);
+  assert.match(said({type: 'examen', academicYear: '2023-2024', session: 'été', examKind: 'partiel'}), /Choisissez la session\..*Choisissez la nature de l'examen\./);
+  for (const refused of [refusal({type: 'td', number: '0'}), refusal({type: 'td', number: '2'}, null)]) {
+    assert.deepEqual([refused.code, Object.keys(refused).sort()], ['invalid', ['code', 'errors']]);
+  }
+});
+
+test('dashboard, files: a file that is not a PDF and a file over 50 MB are refused; over 10 MB is a warning', () => {
+  const verdict = more => rules.checkPdf(chosen(more));
+  assert.deepEqual(verdict(), {error: null, warning: null});
+  // Both tests must pass: the name's ending, and the first bytes.
+  assert.match(verdict({name: 'notes.docx'}).error, /« notes\.docx » n'est pas un fichier PDF : son nom ne se termine pas par \.pdf/);
+  assert.match(verdict({name: 'photo.pdf.jpg'}).error, /ne se termine pas par \.pdf/);
+  assert.match(verdict({name: 'renomme.pdf', isPdf: false}).error, /« renomme\.pdf » n'est pas un vrai PDF : son contenu ne commence pas par %PDF/);
+  assert.match(verdict({name: 'vide.pdf', size: 0, isPdf: false}).error, /« vide\.pdf » est vide/);
+  assert.equal(verdict({name: 'MAJUSCULES.PDF'}).error, null);
+  // 50 MB is the limit, as for the Decap form; 10 MB is where the advice starts.
+  assert.equal(verdict({size: rules.MAX_PDF_BYTES}).error, null);
+  assert.match(verdict({size: rules.MAX_PDF_BYTES + 1}).error, /pèse 50,1 Mo\. La limite est de 50 Mo : compressez le PDF/);
+  assert.match(verdict({size: 63.4e6}).error, /pèse 63,4 Mo/);
+  assert.deepEqual([verdict({size: rules.LARGE_PDF_BYTES}).error, verdict({size: rules.LARGE_PDF_BYTES}).warning], [null, null]);
+  assert.match(verdict({size: 12.5e6}).warning, /Ce PDF pèse 12,5 Mo.*compressez-le si vous le pouvez.*publier tel quel/);
+  assert.equal(verdict({size: 12.5e6}).error, null);
+  assert.equal(rules.MAX_PDF_BYTES, 50e6);
+  assert.equal(rules.LARGE_PDF_BYTES, 10e6);
+
+  // The save rules refuse the same files, whatever the form let through.
+  const start = fixture();
+  for (const [bad, expected] of [[{name: 'notes.docx'}, /ne se termine pas par \.pdf/], [{isPdf: false}, /ne commence pas par %PDF/], [{size: 50e6 + 1}, /La limite est de 50 Mo/]]) {
+    const refused = plan(start, {action: 'add', fields: asked({type: 'td', number: '2'}), pdf: chosen(bad)});
+    assert.equal(refused.code, 'file');
+    assert.match(refused.errors[0], expected);
+    assert.equal('raw' in refused, false);
+  }
+  const large = plan(start, {action: 'add', fields: asked({type: 'td', number: '2'}), pdf: chosen({size: 12.5e6})});
+  assert.deepEqual([large.errors, large.added], [[], ['asd3-td-02']]);
+});
+
+test('dashboard, duplicates: a document already at that place is shown before the save, and must be accepted', () => {
+  const start = fixture();
+  const again = {action: 'add', fields: asked({type: 'td', number: '3'}), pdf: chosen()};
+  const warned = plan(start, again);
+  assert.equal(warned.code, 'duplicate');
+  assert.deepEqual(warned.duplicates.map(duplicate => [duplicate.id, duplicate.title.fr]), [['asd3-td-03', 'Titre']]);
+  assert.equal('raw' in warned, false);
+  // Accepted: it is published beside the first one, under the next ID.
+  const accepted = plan(start, {...again, acknowledged: ['asd3-td-03']});
+  assert.deepEqual([accepted.errors, accepted.added, accepted.writes], [[], ['asd3-td-03-2'], [{to: 'pdfs/S3/asd3/asd3-td-03-2.pdf'}]]);
+  // Accepting one document does not accept another that appeared meanwhile.
+  const grown = fixture();
+  grown.resources.push({...record(start, 'asd3-td-03'), id: 'asd3-td-03-2', pdfPath: 'pdfs/S3/asd3/asd3-td-03-2.pdf'});
+  const surprised = plan(grown, {...again, acknowledged: ['asd3-td-03']});
+  assert.deepEqual([surprised.code, surprised.duplicates.map(duplicate => duplicate.id)], ['duplicate', ['asd3-td-03', 'asd3-td-03-2']]);
+
+  // Same module, type and number, whatever the year: the year then tells the two versions apart.
+  const otherYear = plan(start, {action: 'add', fields: asked({type: 'td', number: '3', academicYear: '2022-2023'}), pdf: chosen(), acknowledged: ['asd3-td-03']});
+  assert.deepEqual(otherYear.added, ['asd3-td-03-2022-2023']);
+  // A chapter, and an exam by year, session and kind.
+  assert.deepEqual(plan(start, {action: 'add', fields: asked({type: 'cours', chapter: '1'}), pdf: chosen()}).duplicates.map(duplicate => duplicate.id), ['asd3-cours-ch01']);
+  const exam = fields => plan(start, {action: 'add', fields: asked({type: 'examen', academicYear: '2024-2025', session: 'normal', examKind: 'emd', ...fields}), pdf: chosen()});
+  assert.deepEqual([exam({}).code, exam({}).duplicates.map(duplicate => duplicate.id)], ['duplicate', ['asd3-examen-2024-2025-emd']]);
+  assert.deepEqual(exam({examKind: 'controle'}).added, ['asd3-examen-2024-2025-controle']);
+  assert.deepEqual(exam({academicYear: '2023-2024'}).added, ['asd3-examen-2023-2024-emd']);
+  assert.deepEqual(exam({module: 'ao'}).added, ['ao-examen-2024-2025-emd']);
+  // Another module or another type with the same number is not a duplicate.
+  assert.deepEqual(plan(start, {action: 'add', fields: asked({type: 'tp', number: '3'}), pdf: chosen()}).added, ['asd3-tp-03']);
+  assert.deepEqual(plan(start, {action: 'add', fields: asked({module: 'ao', type: 'td', number: '3'}), pdf: chosen()}).added, ['ao-td-03']);
+
+  // What the form shows while it is being filled in.
+  const catalogue = fixture();
+  assert.equal(rules.draftId(catalogue, asked({type: 'td'})), null);
+  assert.deepEqual(rules.draftId(catalogue, asked({type: 'td', number: '7'})), {id: 'asd3-td-07', pdfPath: 'pdfs/S3/asd3/asd3-td-07.pdf'});
+  assert.deepEqual(rules.draftId(catalogue, asked({type: 'td', number: '3'})), {id: 'asd3-td-03-2', pdfPath: 'pdfs/S3/asd3/asd3-td-03-2.pdf'});
+  assert.equal(rules.draftId(catalogue, asked({type: 'examen', academicYear: '2024-2025'})), null);
+  assert.deepEqual(rules.similarDocuments(catalogue, asked({type: 'td', number: '3'})).map(item => item.id), ['asd3-td-03']);
+  assert.deepEqual(rules.similarDocuments(catalogue, asked({type: 'td', number: ''})), []);
+  assert.deepEqual(rules.similarDocuments(catalogue, asked({type: 'examen', academicYear: '2024-2025', examKind: 'emd'})), []);
+  assert.deepEqual(rules.similarDocuments(catalogue, asked({type: 'examen', academicYear: '2024-2025', examKind: 'emd', session: 'normal'})).map(item => item.id), ['asd3-examen-2024-2025-emd']);
+});
+
+test('dashboard, add on GitHub: the record and the PDF go into one commit, for each of the four types', async () => {
+  const github = fakeGitHub(startFiles());
+  const additions = [
+    [asked({type: 'cours', chapter: '2'}), 'asd3-cours-ch02'],
+    [asked({type: 'td', number: '2', hasCorrection: true}), 'asd3-td-02'],
+    [asked({type: 'tp', number: '1'}), 'asd3-tp-01'],
+    [asked({module: 'ao', type: 'examen', academicYear: '2025-2026', session: 'normal', examKind: 'final'}), 'ao-examen-2025-2026-final']
+  ];
+  for (const [fields, id] of additions) {
+    const before = github.state.head;
+    const bytes = pdfOf(id);
+    let reads = 0;
+    const result = await publish(github, {action: 'add', fields, pdf: {name: 'scan.pdf'}}, async () => { reads++; return bytes; });
+    assert.deepEqual([result.changed, result.attempts, result.plan.added, reads], [true, 1, [id], 1]);
+    const commit = github.commits.get(github.state.head);
+    assert.deepEqual([commit.parents, commit.message], [[before], `Admin: add ${id}`]);
+    const files = github.filesAtHead();
+    assert.equal(files[result.plan.record.pdfPath], new TextDecoder().decode(bytes));
+    assert.equal(files['data/resources.json'], result.plan.raw);
+    assert.equal(result.pdfSha, await flow.gitBlobSha(bytes));
+  }
+  assert.deepEqual(github.history(), ['Admin: add ao-examen-2025-2026-final', 'Admin: add asd3-tp-01', 'Admin: add asd3-td-02', 'Admin: add asd3-cours-ch02', 'start']);
+  assert.deepEqual(JSON.parse(github.filesAtHead()['data/resources.json']).resources.map(resource => resource.id),
+    ['asd3-cours-ch01', 'asd3-cours-ch02', 'asd3-td-01', 'asd3-td-02', 'asd3-td-03', 'asd3-tp-01', 'asd3-examen-2024-2025-emd', 'ao-cours-ch01', 'ao-examen-2025-2026-final']);
+  assert.equal(github.filesAtHead()['README.md'], 'readme');
+});
+
+test('dashboard, add on GitHub: the bytes are checked again at the save, and a refusal commits nothing', async () => {
+  const github = fakeGitHub(startFiles());
+  const start = github.state.head;
+  const add = (fields, bytes, more = {}) => rejection(publish(github, {action: 'add', fields: asked(fields), pdf: {name: 'scan.pdf'}, ...more}, async () => bytes));
+  // A file whose content is not a PDF, whatever the form believed about it.
+  const text = await add({type: 'td', number: '2'}, new TextEncoder().encode('ceci est du texte'));
+  assert.deepEqual([text.kind, github.state.head], ['file', start]);
+  assert.match(text.problems[0], /ne commence pas par %PDF/);
+  const empty = await add({type: 'td', number: '2'}, new Uint8Array());
+  assert.match(empty.problems[0], /est vide/);
+  // A document already at that place, added by somebody else since the page was loaded: stop and show it.
+  const duplicate = await add({type: 'td', number: '3'}, pdfOf('td 3'));
+  assert.deepEqual([duplicate.kind, duplicate.duplicates.map(item => item.id), github.state.head], ['duplicate', ['asd3-td-03'], start]);
+  const invalid = await add({type: 'td', number: '0'}, pdfOf('td 0'));
+  assert.deepEqual([invalid.kind, github.state.head], ['invalid', start]);
+  assert.equal(github.requests.some(request => request.method !== 'GET'), false);
+
+  // During a retry the PDF is not read a second time, and the new ID follows the branch as it then is.
+  let reads = 0;
+  github.before('PATCH /git/refs/heads/main', () => github.commitElsewhere(catalogue => { catalogue.resources.splice(2, 0, {...catalogue.resources[1], id: 'asd3-td-02', number: 2, pdfPath: 'pdfs/S3/asd3/asd3-td-02.pdf', order: 2}); }));
+  const raced = await rejection(publish(github, {action: 'add', fields: asked({type: 'td', number: '2'}), pdf: {name: 'scan.pdf'}}, async () => { reads++; return pdfOf('td 2'); }));
+  assert.deepEqual([raced.kind, raced.duplicates.map(item => item.id), reads], ['duplicate', ['asd3-td-02'], 1]);
+  assert.deepEqual(github.history(), ['another change', 'start']);
+});
+
 test('dashboard: a file gets the name Git gives it, and travels as base64', async () => {
   assert.equal(await flow.gitBlobSha(new Uint8Array()), 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391');
   assert.equal(await flow.gitBlobSha(new TextEncoder().encode('hello\n')), 'ce013625030ba8dba906f756967f9e9ca394464a');

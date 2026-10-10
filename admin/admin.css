@@ -254,6 +254,482 @@ main [tabindex="-1"]:focus {
   opacity: 1;
 }
 
+.field__error {
+  color: var(--color-error-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.field__error:empty {
+  display: none;
+}
+
+.field input[aria-invalid="true"] {
+  border-width: 2px;
+  border-color: var(--color-error-text);
+}
+
+/* A title needs more room than a number or a year. */
+.field--title {
+  max-inline-size: 36rem;
+  margin-block-end: var(--space-4);
+}
+
+/* ---------- The form ---------- */
+
+.step {
+  min-inline-size: 0;
+  margin: 0;
+  margin-block-end: var(--space-6);
+  padding: 0;
+  border: 0;
+}
+
+.step__title {
+  margin-block-end: var(--space-3);
+  padding: 0;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: var(--line-tight);
+}
+
+/* One choice among a few, as large buttons. A radio button lies over each one, unseen: it takes
+   the click, the arrow keys and the focus. */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  max-inline-size: 28rem;
+}
+
+.choice {
+  position: relative;
+  display: block;
+}
+
+.choice__input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.choice__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: var(--space-2);
+  block-size: 100%;
+  min-block-size: 3.25rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.choice:hover .choice__body {
+  background: var(--color-surface);
+}
+
+/* The chosen one is marked like the open tab: a fill, a heavier edge and a bar, not colour alone. */
+.choice__input:checked + .choice__body {
+  border-color: var(--color-link);
+  background: var(--color-accent-surface);
+  box-shadow: inset 0 -3px 0 var(--color-link);
+}
+
+.choice__input:focus-visible + .choice__body {
+  outline: 3px solid var(--color-link);
+  outline-offset: 2px;
+}
+
+.choice__input:disabled {
+  cursor: not-allowed;
+}
+
+.choice__input:disabled + .choice__body {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.choice__detail {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 400;
+}
+
+/* A module: its code, its name, and under the name how many documents it has. */
+.choices--modules {
+  grid-template-columns: minmax(0, 1fr);
+  max-inline-size: none;
+}
+
+.choice--module .choice__body {
+  display: grid;
+  grid-template-columns: minmax(var(--code-column), auto) minmax(0, 1fr);
+  justify-items: start;
+  column-gap: var(--space-3);
+  text-align: start;
+}
+
+.choice--module .module-code {
+  grid-row: 1 / span 2;
+  justify-self: stretch;
+}
+
+.choice--module .choice__name,
+.choice--module .choice__detail {
+  grid-column: 2;
+}
+
+/* The four types in one row, as on the module pages. */
+.choices--types {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-inline-size: 36rem;
+}
+
+.choice--type .choice__body {
+  min-block-size: 3.75rem;
+  padding-inline: var(--space-1);
+  font-size: var(--text-md);
+}
+
+.choices--inline {
+  display: flex;
+  flex-wrap: wrap;
+  max-inline-size: none;
+}
+
+.choices--inline .choice__body {
+  min-block-size: var(--tap);
+  padding-inline: var(--space-4);
+}
+
+/* The fields of the chosen type, side by side where there is room. */
+.detail-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.option-group {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.option-group__label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: var(--line-tight);
+}
+
+/* "Le PDF contient le corrigé": a switch. The knob's side says the state, not the colour alone. */
+.switch {
+  position: relative;
+  display: flex;
+  flex: 1 1 100%;
+  align-items: center;
+  gap: var(--space-3);
+  min-block-size: var(--tap);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.switch__input {
+  position: absolute;
+  inline-size: 2.75rem;
+  block-size: 1.5rem;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch__track {
+  position: relative;
+  flex: none;
+  inline-size: 2.75rem;
+  block-size: 1.5rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 1.5rem;
+  background: var(--color-bg);
+}
+
+.switch__track::after {
+  position: absolute;
+  inset-block-start: 0.1875rem;
+  inset-inline-start: 0.1875rem;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+  content: "";
+}
+
+.switch__input:checked + .switch__track {
+  border-color: var(--color-link);
+  background: var(--color-link);
+}
+
+.switch__input:checked + .switch__track::after {
+  inset-inline-start: calc(100% - 1.1875rem);
+  background: var(--color-bg);
+}
+
+.switch__input:focus-visible + .switch__track {
+  outline: 3px solid var(--color-link);
+  outline-offset: 2px;
+}
+
+/* A box to tick, with its sentence. */
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.check input {
+  flex: none;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin: 0;
+  accent-color: var(--color-link);
+}
+
+/* Where the PDF is dropped. The dashed edge says "put something here". */
+.dropzone {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  max-inline-size: 36rem;
+  padding: var(--space-5) var(--space-4);
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.dropzone--over {
+  border-color: var(--color-link);
+  background: var(--color-accent-surface);
+}
+
+.dropzone__text {
+  font-weight: 600;
+}
+
+.file-box {
+  display: grid;
+  gap: var(--space-2);
+  max-inline-size: 36rem;
+  margin-block-start: var(--space-3);
+}
+
+.file-box .note {
+  margin-block-end: 0;
+}
+
+.file-line__name {
+  overflow-wrap: anywhere;
+}
+
+.file-line .button {
+  margin-block-start: var(--space-2);
+}
+
+/* What will be published: a quiet panel, with the row drawn as the module page draws it. */
+.preview {
+  max-inline-size: 44rem;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.preview__facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+}
+
+.preview__facts dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.75;
+}
+
+.preview__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+main code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  font-size: 0.9375em;
+}
+
+.preview .hint {
+  margin-block-start: var(--space-2);
+}
+
+.preview__caption {
+  margin-block: var(--space-4) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.preview__page {
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+}
+
+.preview__page + .preview__page {
+  margin-block-start: var(--space-2);
+}
+
+.preview__page[lang="ar"] {
+  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", "Geeza Pro", Tahoma, Arial, sans-serif;
+  line-height: 1.8;
+}
+
+.preview__page .resource {
+  border-block-end: 0;
+}
+
+.preview__page .year-group__title {
+  margin-block-end: 0;
+  padding-block-start: var(--space-2);
+}
+
+/* On the real page the title is a link and "Télécharger" a button. Here they are a picture of them. */
+.preview__page .resource__title {
+  color: var(--color-link);
+}
+
+.preview__page .button,
+.preview__page .button:hover {
+  background: var(--color-bg);
+  color: var(--color-link);
+  cursor: default;
+}
+
+/* The end of the form: what is still missing, then the button. */
+.publish {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.publish .note {
+  margin-block-end: 0;
+}
+
+.publish__missing {
+  color: var(--color-text-muted);
+}
+
+/* One line per missing thing, without bullets: most lines are links to their field. */
+.publish__missing ul {
+  padding: 0;
+  list-style: none;
+}
+
+.publish__ready {
+  color: var(--color-ok-text);
+  font-weight: 600;
+}
+
+.publish__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* A line of the missing list: a press goes to the field it names. Tall enough for a thumb. */
+.link-button {
+  min-block-size: var(--tap);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  text-align: start;
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--color-link-hover);
+}
+
+/* While a save is on its way, the fields cannot be changed. */
+.steps[inert] {
+  opacity: 0.6;
+}
+
+/* On an edit: where the document is, and why that part cannot be changed. */
+.form-locked {
+  display: grid;
+  gap: var(--space-1);
+  max-inline-size: var(--measure);
+  margin-block-end: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.form-done {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+
+.form-done .note {
+  margin-block-end: 0;
+}
+
+@media (min-width: 40rem) {
+  .choices--modules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Windows high contrast removes fills: the chosen button gets a thick edge, the switch its system colours. */
+@media (forced-colors: active) {
+  .choice__input:checked + .choice__body {
+    border: 3px solid Highlight;
+  }
+
+  .switch__track::after {
+    background: CanvasText;
+  }
+
+  .switch__input:checked + .switch__track {
+    background: Highlight;
+  }
+
+  .switch__input:checked + .switch__track::after {
+    background: HighlightText;
+  }
+}
+
 /* ---------- Mes documents ---------- */
 
 .doc-tools {

@@ -9,6 +9,7 @@ import {el} from '../js/dom.js';
 import {button, note, explain, focusOn, countLabel} from './ui.js';
 import {LOCAL, createLocalStore} from './local-preview.js';
 import {createDocumentsView} from './documents.js';
+import {createForm} from './form.js';
 
 const rules = window.L2CatalogueRules;
 const REPOSITORY = 'ousssamaaslan-cell/university';
@@ -184,8 +185,9 @@ const app = {
   publish,
   errorNote,
   openPdf,
-  // Opens the add form on a module. Set by showDashboard.
-  startAdding: () => {}
+  // Open the add form on a module, and open the list. Set by showDashboard.
+  startAdding: () => {},
+  openList: () => {}
 };
 
 // The header's right side: the account, the link to the public site, and the way out.
@@ -326,13 +328,18 @@ function showDashboard() {
     open(tabs[moves[event.key]].dataset.tab, {focus: true});
   });
 
+  const form = createForm(app);
   const documents = createDocumentsView(app);
-  panels.get('add').append(el('h2', {}, 'Ajouter un document'));
+  panels.get('add').append(el('h2', {}, 'Ajouter un document'), form.node);
   panels.get('list').append(el('h2', {}, 'Mes documents'), documents.node);
-  app.startAdding = () => open('add', {focus: true});
+  app.startAdding = module => {
+    open('add');
+    form.startIn(module);
+  };
+  app.openList = () => open('list', {focus: true});
 
   redraw.length = 0;
-  redraw.push(documents.draw, () => {
+  redraw.push(form.draw, documents.draw, () => {
     const total = state.snapshot.catalogue.resources.length;
     count.textContent = String(total);
     countSpoken.textContent = `, ${countLabel(total)}`;
@@ -346,6 +353,14 @@ function showDashboard() {
     ...panels.values()
   );
   open(state.tab);
+}
+
+// A file dropped beside the form's drop zone would replace this page with the file, and what was
+// typed would be lost. Outside the zone, a dropped file does nothing.
+for (const type of ['dragover', 'drop']) {
+  window.addEventListener(type, event => {
+    if (event.dataTransfer?.types.includes('Files')) event.preventDefault();
+  });
 }
 
 // Moves focus by script: the page sets a <base>, and a plain "#main" link would go to /admin/#main.
