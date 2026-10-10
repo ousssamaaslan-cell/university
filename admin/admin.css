@@ -234,3 +234,212 @@ main [tabindex="-1"]:focus {
 .admin-login .note {
   margin-block-end: 0;
 }
+
+/* ---------- Fields ---------- */
+
+/* Text, number and search fields look like the site's selects. */
+.field input:not([type="checkbox"], [type="radio"], [type="file"]) {
+  inline-size: 100%;
+  min-block-size: var(--tap);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.field input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+/* ---------- Mes documents ---------- */
+
+.doc-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+  margin-block-end: var(--space-3);
+}
+
+.doc-tools__search {
+  flex: 2 1 14rem;
+  max-inline-size: 26rem;
+}
+
+.doc-status {
+  margin-block-end: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.semester-group + .semester-group {
+  margin-block-start: var(--space-6);
+}
+
+.semester-group__title {
+  margin-block-end: var(--space-2);
+  font-size: var(--text-lg);
+}
+
+/* One module: a line that opens and closes its documents. */
+.module-group {
+  border-block-start: 1px solid var(--color-border-strong);
+}
+
+.module-group:last-child {
+  border-block-end: 1px solid var(--color-border-strong);
+}
+
+/* The arrow, the code and the name; the number of documents sits under the name on a phone and
+   at the end of the line from a tablet up. */
+.module-group__head {
+  display: grid;
+  grid-template-columns: auto minmax(var(--code-column), auto) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-3);
+  min-block-size: 3.25rem;
+  padding-block: var(--space-2);
+  cursor: pointer;
+  list-style: none;
+}
+
+.module-group__head::-webkit-details-marker {
+  display: none;
+}
+
+/* The arrow: it points to the side while the module is closed, and down while it is open. */
+.module-group__head::before {
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  margin-inline: var(--space-1);
+  border-block-end: 2px solid var(--color-link);
+  border-inline-end: 2px solid var(--color-link);
+  content: "";
+  transform: rotate(-45deg);
+}
+
+.module-group[open] > .module-group__head::before {
+  transform: rotate(45deg);
+}
+
+.module-group__head:hover {
+  background: var(--color-surface);
+}
+
+.module-group__head:focus-visible {
+  outline-offset: -3px;
+}
+
+.module-group__title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.module-group__count {
+  grid-column: 3;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.module-group__empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding-block-end: var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.type-group {
+  padding-block-end: var(--space-3);
+}
+
+.type-group__title {
+  margin-block: var(--space-2) var(--space-1);
+  font-size: var(--text-base);
+}
+
+.type-group__count {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.doc-list {
+  border-block-start: 1px solid var(--color-border);
+}
+
+/* One document: its titles and facts, then its buttons, under them on a phone and beside them
+   from a tablet up. */
+.doc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-3);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.type-group:last-child .doc:last-child {
+  border-block-end: 0;
+}
+
+.doc__title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+
+/* The Arabic title is written right to left, but stays under the French one: "end" is the left
+   side of a right-to-left line. */
+.doc__title-ar {
+  color: var(--color-text-muted);
+  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", "Geeza Pro", Tahoma, Arial, sans-serif;
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  text-align: end;
+}
+
+.doc .facts {
+  margin-block-start: var(--space-1);
+}
+
+.doc__missing {
+  color: var(--color-error-text);
+  font-weight: 600;
+}
+
+.doc__id {
+  overflow-wrap: anywhere;
+}
+
+.doc__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .module-group__head {
+    grid-template-columns: auto minmax(var(--code-column), auto) minmax(0, 1fr) auto;
+  }
+
+  .module-group__count {
+    grid-column: 4;
+  }
+
+  .doc {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .module-group__head::before {
+    transition: transform 120ms;
+  }
+}

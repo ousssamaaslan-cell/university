@@ -61,18 +61,25 @@
       .sort((a, b) => byOrder(a, b) || a.title.fr.localeCompare(b.title.fr, 'fr')));
   }
 
-  // The order of documents in the file: by module, by type, then as js/catalogue.js lists them.
+  // The display order of each type, the same as in js/catalogue.js and docs/content-model.md.
+  const byTitle = (a, b) => a.title.fr.localeCompare(b.title.fr, 'fr');
+  const newestYearFirst = (a, b) => (b.academicYear ?? '').localeCompare(a.academicYear ?? '');
+  const bySheetNumber = (a, b) => a.number - b.number || newestYearFirst(a, b) || byOrder(a, b) || byTitle(a, b);
+  const displayOrder = {
+    cours: (a, b) => a.chapter - b.chapter || byOrder(a, b) || byTitle(a, b),
+    td: bySheetNumber,
+    tp: bySheetNumber,
+    examen: (a, b) => newestYearFirst(a, b) || byOrder(a, b) || byTitle(a, b)
+  };
+
+  // The documents of one type in a module, in the order the module page lists them.
+  function sortedResources(catalogue, moduleId, type) {
+    return catalogue.resources.filter(resource => resource.module === moduleId && resource.type === type).sort(displayOrder[type]);
+  }
+
+  // The order of documents in the file: by module, by type, then as the module page lists them.
   function catalogueOrder(catalogue) {
     const moduleRank = new Map(modulesInOrder(catalogue).map((module, index) => [module.id, index]));
-    const byTitle = (a, b) => a.title.fr.localeCompare(b.title.fr, 'fr');
-    const newestYearFirst = (a, b) => (b.academicYear ?? '').localeCompare(a.academicYear ?? '');
-    const bySheetNumber = (a, b) => a.number - b.number || newestYearFirst(a, b) || byOrder(a, b) || byTitle(a, b);
-    const displayOrder = {
-      cours: (a, b) => a.chapter - b.chapter || byOrder(a, b) || byTitle(a, b),
-      td: bySheetNumber,
-      tp: bySheetNumber,
-      examen: (a, b) => newestYearFirst(a, b) || byOrder(a, b) || byTitle(a, b)
-    };
     return (a, b) => moduleRank.get(a.module) - moduleRank.get(b.module) ||
       TYPES.indexOf(a.type) - TYPES.indexOf(b.type) || displayOrder[a.type](a, b);
   }
@@ -274,6 +281,6 @@
 
   return {
     CATALOGUE_PATH, TYPES, SESSIONS, EXAM_KINDS, MAX_PDF_BYTES,
-    academicYearOf, academicYears, modulesInOrder, fingerprint, forForm, prepareSave, commitMessage
+    academicYearOf, academicYears, modulesInOrder, sortedResources, fingerprint, forForm, prepareSave, commitMessage
   };
 });

@@ -1,5 +1,34 @@
-// Pieces the dashboard's screens share: buttons, messages, and what to say when something fails.
+// Pieces the dashboard's screens share: labels, buttons, messages, and what to say when something fails.
 import {el} from '../js/dom.js';
+import {t, formatFileSize} from '../js/i18n.js';
+
+// The type of one document, and the heading of a group of them, as the site names its tabs.
+export const TYPE_LABELS = {cours: 'Cours', td: 'TD', tp: 'TP', examen: 'Examen'};
+export const TYPE_GROUP_LABELS = {cours: 'Cours', td: 'TD', tp: 'TP', examen: 'Examens'};
+export const KIND_LABELS = {controle: 'Contrôle', emd: 'EMD', final: 'Examen final', rattrapage: 'Rattrapage'};
+export const SESSION_LABELS = {normal: 'Session normale', rattrapage: 'Session de rattrapage'};
+
+// "Chapitre 2", "TD 3" or "TP 1", in the site's own words. An exam has no number.
+export function markerOf(resource) {
+  if (resource.type === 'cours') return t('marker.cours', {n: resource.chapter});
+  if (resource.type === 'td' || resource.type === 'tp') return t(`marker.${resource.type}`, {n: resource.number});
+  return null;
+}
+
+// A document named in full, for a message or a screen reader: "ASD3, TD 3, Parcours des graphes".
+export function nameOf(resource, module) {
+  return [module?.abbr, markerOf(resource) ?? `Examen ${resource.academicYear}`, resource.title.fr].filter(Boolean).join(', ');
+}
+
+// "PDF, 210 ko", as on the module pages.
+export function sizeLabel(bytes) {
+  return `PDF, ${formatFileSize(bytes)}`;
+}
+
+// "3 documents", "1 document", "Aucun document".
+export function countLabel(count) {
+  return count === 0 ? 'Aucun document' : count === 1 ? '1 document' : `${count} documents`;
+}
 
 // variant: 'primary' for the main action of a screen, 'danger' for a deletion that cannot be undone.
 export function button(label, {variant = null, onClick = null, ...attributes} = {}) {
@@ -46,6 +75,12 @@ export function explain(error, {saving = false} = {}) {
       return {title: 'GitHub limite le nombre de demandes pour le moment.', text: `${unsaved}Réessayez dans quelques minutes.`};
     case 'path':
       return {title: 'Chemin de fichier refusé.', text: `${unsaved}${error.message}`};
+    case 'catalogue':
+      return {title: 'Le catalogue du dépôt est illisible.', text: error.message};
+    case 'missing':
+      return {title: 'Introuvable.', text: `${unsaved}${error.message}`};
+    case 'github':
+      return {title: 'GitHub a refusé la demande.', text: `${unsaved}${error.message}`};
     case 'stale':
     case 'duplicate':
     case 'file':

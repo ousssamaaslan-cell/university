@@ -3,11 +3,14 @@
 // It is a static page. The maintainer logs in with GitHub through Netlify (netlify-auth.js), and
 // every change is written to the repository with GitHub's API (github-commit.js), after
 // catalogue-rules.js has checked it. Netlify then rebuilds the public site.
-// This file starts the page: the session, the login screen, the header and the two tabs.
+// This file starts the page: the session, the login screen, the header, the two tabs, and the
+// copy of the catalogue the two tabs work on.
 import {el} from '../js/dom.js';
-import {button, note, explain, focusOn} from './ui.js';
+import {button, note, explain, focusOn, countLabel} from './ui.js';
 import {LOCAL, createLocalStore} from './local-preview.js';
+import {createDocumentsView} from './documents.js';
 
+const rules = window.L2CatalogueRules;
 const REPOSITORY = 'ousssamaaslan-cell/university';
 const BRANCH = 'main';
 // The repository is public, so the login asks GitHub for public repositories only. It is the scope
@@ -52,8 +55,14 @@ const state = {
   // {login} once the maintainer is logged in.
   user: null,
   // The tab that is open: 'add' or 'list'.
-  tab: 'add'
+  tab: 'add',
+  // The repository as it was last read: {head, raw, catalogue, files, readAt}.
+  // files is a Map of PDF path -> {sha, size}.
+  snapshot: null
 };
+
+// Called after each read of the repository, to draw what depends on it.
+const redraw = [];
 
 // A part that does not apply is written as `condition && node`; it is left out here.
 const present = nodes => nodes.filter(node => node !== null && node !== undefined && node !== false);
@@ -61,6 +70,97 @@ const present = nodes => nodes.filter(node => node !== null && node !== undefine
 function show(...nodes) {
   root.replaceChildren(...present(nodes));
 }
+
+// Reads the catalogue and the list of PDFs from GitHub, never from the published site, so the
+// dashboard shows a change made a minute ago.
+async function readRepository() {
+  const current = await store.read();
+  let catalogue;
+  try {
+    catalogue = JSON.parse(current.raw);
+    for (const key of ['semesters', 'modules', 'resources']) if (!Array.isArray(catalogue[key])) throw new Error(key);
+  } catch {
+    throw Object.assign(new Error('Le fichier data/resources.json du dépôt est illisible. Corrigez-le dans le dépôt, puis rafraîchissez.'), {kind: 'catalogue'});
+  }
+  return {head: current.head, raw: current.raw, catalogue, files: await store.pdfFiles(current.head), readAt: new Date()};
+}
+
+async function reload() {
+  state.snapshot = await readRepository();
+  for (const draw of redraw) draw();
+}
+
+// An error, as a message with the button that helps: "Se reconnecter" when the session expired,
+// or "Réessayer" when the caller gives a way to try again.
+function errorNote(error, {saving = false, retry = null} = {}) {
+  const message = explain(error, {saving});
+  const loginProblem = ['session', 'blocked', 'cancelled', 'refused'].includes(error?.kind);
+  let box;
+  const actions = [];
+  if (loginProblem && !LOCAL) {
+    // The login window opens from this click. The page is not reloaded, so nothing typed is lost.
+    actions.push(button('Se reconnecter', {variant: 'primary', onClick: async () => {
+      try {
+        session.keep(await auth.login({scope: SCOPE}));
+        const done = note('ok', {title: 'Vous êtes reconnecté.', text: 'Vous pouvez recommencer.'});
+        box.replaceWith(done);
+        focusOn(done);
+      } catch (failure) {
+        const again = errorNote(failure);
+        box.replaceWith(again);
+        focusOn(again);
+      }
+    }}));
+  } else if (retry) {
+    actions.push(button('Réessayer', {onClick: retry}));
+  }
+  box = note('error', {...message, actions});
+  return box;
+}
+
+// Opens a document's PDF in a new tab, as the repository holds it now: a PDF added a minute ago,
+// or just replaced, is not on the public site yet. `messages` is where to say what went wrong.
+const openedPdfs = new Map();
+async function openPdf(resource, messages) {
+  const file = state.snapshot.files.get(resource.pdfPath);
+  if (!file) return;
+  // The tab is opened in the click itself, or the browser would block it. The PDF goes in once read.
+  const tab = window.open('', '_blank');
+  if (tab) {
+    tab.document.title = `${resource.id}.pdf`;
+    tab.document.body.textContent = 'Chargement du PDF…';
+  }
+  try {
+    if (!openedPdfs.has(file.sha)) {
+      const bytes = await store.fileContent(file.sha);
+      openedPdfs.set(file.sha, URL.createObjectURL(new Blob([bytes], {type: 'application/pdf'})));
+    }
+    if (tab) tab.location.replace(openedPdfs.get(file.sha));
+    else {
+      const blocked = note('warn', {title: "Le navigateur a bloqué l'ouverture du nouvel onglet.", actions: [el('a', {class: 'button', href: openedPdfs.get(file.sha), target: '_blank'}, `Ouvrir ${resource.id}.pdf`)]});
+      messages.replaceChildren(blocked);
+      focusOn(blocked);
+    }
+  } catch (error) {
+    if (tab) tab.close();
+    const problem = errorNote(error);
+    messages.replaceChildren(problem);
+    focusOn(problem);
+  }
+}
+
+// What the two tabs are given to work with.
+const app = {
+  local: LOCAL,
+  repository: REPOSITORY,
+  rules,
+  get snapshot() { return state.snapshot; },
+  reload,
+  errorNote,
+  openPdf,
+  // Opens the add form on a module. Set by showDashboard.
+  startAdding: () => {}
+};
 
 // The header's right side: the account, the link to the public site, and the way out.
 function renderSession() {
@@ -95,6 +195,8 @@ function loginView({problem = null, notice = null} = {}) {
 
 function showLogin(options) {
   state.user = null;
+  state.snapshot = null;
+  redraw.length = 0;
   renderSession();
   const {view, heading} = loginView(options);
   show(view);
@@ -123,9 +225,10 @@ function logOut() {
   focusOn(showLogin({notice: 'Vous êtes déconnecté.'}));
 }
 
-// After a login, and on a reload in the same tab: who is logged in, and may they write?
+// After a login, and on a reload in the same tab: who is logged in, may they write, and what
+// does the repository hold?
 async function enter() {
-  show(waitingView('Vérification de la connexion…'));
+  show(waitingView(LOCAL ? 'Lecture du catalogue…' : 'Lecture du catalogue sur GitHub…'));
   try {
     const [user, canWrite] = await Promise.all([store.user(), store.canWrite()]);
     if (!canWrite) {
@@ -137,6 +240,8 @@ async function enter() {
       return;
     }
     state.user = user;
+    renderSession();
+    state.snapshot = await readRepository();
   } catch (error) {
     if (error.kind === 'session') {
       session.end();
@@ -144,12 +249,11 @@ async function enter() {
       return;
     }
     // The session may still be good (GitHub unreachable, for example): keep it and offer to try again.
-    const message = note('error', {...explain(error), actions: [button('Réessayer', {onClick: enter})]});
-    show(el('h1', {}, 'Administration'), message);
+    const message = errorNote(error, {retry: enter});
+    show(el('h1', {}, 'Administration des documents'), message);
     focusOn(message);
     return;
   }
-  renderSession();
   showDashboard();
 }
 
@@ -165,6 +269,10 @@ function showDashboard() {
     el('span', {class: 'tab__label'}, section.label)
   ));
   const tablist = el('div', {class: 'tabs admin-tabs', role: 'tablist', 'aria-label': "Sections de l'administration"}, tabs);
+  // "Mes documents" shows how many there are: the bare number for the eye, with its unit for screen readers.
+  const count = el('span', {class: 'tab__count', 'aria-hidden': 'true'});
+  const countSpoken = el('span', {class: 'visually-hidden'});
+  tabs[1].append(count, countSpoken);
 
   function open(id, {focus = false} = {}) {
     state.tab = id;
@@ -192,8 +300,18 @@ function showDashboard() {
     open(tabs[moves[event.key]].dataset.tab, {focus: true});
   });
 
+  const documents = createDocumentsView(app);
   panels.get('add').append(el('h2', {}, 'Ajouter un document'));
-  panels.get('list').append(el('h2', {}, 'Mes documents'));
+  panels.get('list').append(el('h2', {}, 'Mes documents'), documents.node);
+  app.startAdding = () => open('add', {focus: true});
+
+  redraw.length = 0;
+  redraw.push(documents.draw, () => {
+    const total = state.snapshot.catalogue.resources.length;
+    count.textContent = String(total);
+    countSpoken.textContent = `, ${countLabel(total)}`;
+  });
+  for (const draw of redraw) draw();
 
   show(
     el('h1', {}, 'Administration des documents'),

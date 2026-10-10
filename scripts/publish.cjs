@@ -49,7 +49,7 @@ addAssetTree('assets', ['.svg', '.png', '.jpg', '.jpeg', '.webp', '.ico']);
 // The files are named one by one, so nothing else placed in admin/ is published.
 // Nothing here is secret: the GitHub login goes through Netlify, which keeps the OAuth secret.
 for (const file of [
-  'index.html', 'admin.css', 'admin.js', 'ui.js', 'local-preview.js',
+  'index.html', 'admin.css', 'admin.js', 'ui.js', 'documents.js', 'local-preview.js',
   'catalogue-rules.js', 'github-commit.js', 'netlify-auth.js',
   'decap/index.html', 'decap/admin.js',
   'decap/decap-cms.js', 'decap/decap-cms.js.LICENSE.txt', 'decap/decap-cms.LICENSE.txt'

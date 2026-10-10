@@ -18,7 +18,7 @@ const readJson = relative => {
 
 // The admin dashboard at /admin, and the former Decap form kept at /admin/decap as a temporary backup.
 const adminFiles = [
-  'admin/index.html', 'admin/admin.css', 'admin/admin.js', 'admin/ui.js', 'admin/local-preview.js',
+  'admin/index.html', 'admin/admin.css', 'admin/admin.js', 'admin/ui.js', 'admin/documents.js', 'admin/local-preview.js',
   'admin/catalogue-rules.js', 'admin/github-commit.js', 'admin/netlify-auth.js',
   'admin/decap/index.html', 'admin/decap/admin.js', 'admin/decap/decap-cms.js'
 ];
