@@ -11,12 +11,14 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const {spawnSync} = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
 const rules = require('../admin/catalogue-rules.js');
 const gitHubStore = require('../admin/github-commit.js');
 const netlifyAuth = require('../admin/netlify-auth.js');
+const flow = require('../admin/admin-flow.js');
 
 const text = {fr: 'Titre', ar: 'عنوان'};
 const serialize = catalogue => JSON.stringify(catalogue, null, 2) + '\n';
@@ -201,11 +203,13 @@ test('the form receives the documents and a fingerprint of the file it was loade
 // that may only read, removing a file that is not there, and moving the branch to a commit that
 // does not descend from it. Two accounts exist: "secret-token" may write, "reader-token" may not.
 function fakeGitHub(files) {
-  const blobs = new Map(), trees = new Map(), commits = new Map(), folders = new Map(), requests = [];
+  const blobs = new Map(), trees = new Map(), commits = new Map(), folders = new Map(), requests = [], hooks = [];
   const accounts = {'token secret-token': {login: 'responsable', push: true}, 'token reader-token': {login: 'lecteur', push: false}};
   let counter = 0;
   const sha = () => (++counter).toString(16).padStart(40, '0');
-  const store = (map, value) => { const id = sha(); map.set(id, value); return id; };
+  // A file's content gets the name Git gives it; trees and commits get a number.
+  const gitSha = bytes => crypto.createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+  const store = (map, value) => { const id = map === blobs ? gitSha(value) : sha(); map.set(id, value); return id; };
   const firstTree = new Map(Object.entries(files).map(([file, content]) => [file, store(blobs, Buffer.from(content))]));
   const state = {head: store(commits, {tree: store(trees, firstTree), parents: [], message: 'start'})};
   const answer = (status, body) => new Response(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body), {status});
@@ -223,6 +227,9 @@ function fakeGitHub(files) {
     if (!account) return answer(401, {message: 'Bad credentials'});
     const route = `${options.method} ${url.replace('https://api.github.test', '').replace('/repos/owner/site', '')}`;
     const body = options.body ? JSON.parse(options.body) : null;
+    // Something a test wants to happen just before one request is answered, once.
+    const hook = hooks.findIndex(item => item.route === route);
+    if (hook !== -1) hooks.splice(hook, 1)[0].run();
     let match;
     if (route === 'GET /user') return answer(200, {login: account.login});
     if (route === 'GET ') return answer(200, {full_name: 'owner/site', permissions: {pull: true, push: account.push}});
@@ -269,7 +276,21 @@ function fakeGitHub(files) {
   }
 
   const filesAtHead = () => Object.fromEntries([...trees.get(commits.get(state.head).tree)].map(([file, blob]) => [file, blobs.get(blob).toString('utf8')]));
-  return {fetch, requests, filesAtHead, state, commits, moveBranchElsewhere: () => { state.head = store(commits, {tree: commits.get(state.head).tree, parents: [state.head], message: 'another change'}); }};
+  // Somebody else's commit: edit receives the catalogue and may change it.
+  const commitElsewhere = (edit = () => {}) => {
+    const tree = new Map(trees.get(commits.get(state.head).tree));
+    const catalogue = JSON.parse(blobs.get(tree.get('data/resources.json')).toString('utf8'));
+    edit(catalogue);
+    tree.set('data/resources.json', store(blobs, Buffer.from(serialize(catalogue))));
+    state.head = store(commits, {tree: store(trees, tree), parents: [state.head], message: 'another change'});
+    return state.head;
+  };
+  return {
+    fetch, requests, filesAtHead, state, commits, commitElsewhere,
+    moveBranchElsewhere: () => { state.head = store(commits, {tree: commits.get(state.head).tree, parents: [state.head], message: 'another change'}); },
+    before: (route, run) => hooks.push({route, run}),
+    history: () => { const list = []; for (let id = state.head; id; id = commits.get(id).parents[0]) list.push(commits.get(id).message.split('\n')[0]); return list; }
+  };
 }
 
 const connect = (github, token = 'secret-token') => gitHubStore.create({fetch: github.fetch, apiRoot: 'https://api.github.test', repo: 'owner/site', branch: 'main', getToken: async () => token});
@@ -443,6 +464,127 @@ test('login: a blocked window, a refusal and a closed window are told apart', as
   closed.runTimers();
   assert.equal((await rejection(login)).kind, 'cancelled');
   assert.equal(closed.listeners.size, 0);
+});
+
+// The dashboard asks for one change at a time: planChange turns it into what to commit, and
+// admin-flow.js commits it on the branch as it is at that moment.
+const plan = (catalogue, change, files = null) => rules.planChange(serialize(catalogue), change, files);
+const record = (catalogue, id) => catalogue.resources.find(resource => resource.id === id);
+const without = (catalogue, ...ids) => ({...catalogue, resources: catalogue.resources.filter(resource => !ids.includes(resource.id))});
+const publish = (github, change, readPdf = null) => flow.publish({store: connect(github), rules, change, readPdf});
+
+test('dashboard, delete: the record and its PDF leave together, and nothing else in the file moves', () => {
+  const start = fixture();
+  const one = plan(start, {action: 'delete', documents: [record(start, 'asd3-td-01')]});
+  assert.deepEqual([one.errors, one.removed, one.deletes, one.writes, one.added, one.updated, one.changed], [[], ['asd3-td-01'], ['pdfs/S3/asd3/asd3-td-01.pdf'], [], [], [], true]);
+  assert.equal(one.raw, serialize(without(start, 'asd3-td-01')));
+  assert.equal(rules.commitMessage(one), 'Admin: delete asd3-td-01');
+
+  // Several at once: one change, named in the order of the catalogue whatever the order of the ticks.
+  const several = plan(start, {action: 'delete', documents: [record(start, 'ao-cours-ch01'), record(start, 'asd3-examen-2024-2025-emd'), record(start, 'asd3-cours-ch01')]});
+  assert.deepEqual(several.removed, ['asd3-cours-ch01', 'asd3-examen-2024-2025-emd', 'ao-cours-ch01']);
+  assert.deepEqual(several.deletes, ['pdfs/S3/asd3/asd3-cours-ch01.pdf', 'pdfs/S3/asd3/asd3-examen-2024-2025-emd.pdf', 'pdfs/S3/ao/ao-cours-ch01.pdf']);
+  assert.equal(several.raw, serialize(without(start, 'ao-cours-ch01', 'asd3-examen-2024-2025-emd', 'asd3-cours-ch01')));
+  assert.equal(rules.commitMessage(several), 'Admin: delete 3 documents\n\n- asd3-cours-ch01\n- asd3-examen-2024-2025-emd\n- ao-cours-ch01');
+
+  // A record whose PDF the repository does not hold is still removed; there is no file to remove.
+  const known = new Map([['pdfs/S3/asd3/asd3-td-01.pdf', {sha: 'a'}]]);
+  const repair = plan(start, {action: 'delete', documents: [record(start, 'asd3-td-01'), record(start, 'asd3-td-03')]}, known);
+  assert.deepEqual([repair.removed, repair.deletes], [['asd3-td-01', 'asd3-td-03'], ['pdfs/S3/asd3/asd3-td-01.pdf']]);
+});
+
+test('dashboard, delete: a list that is out of date is refused, and nothing is planned', () => {
+  const start = fixture();
+  const shown = record(start, 'asd3-td-01');
+  const gone = plan(without(start, 'asd3-td-01'), {action: 'delete', documents: [shown]});
+  assert.deepEqual([gone.code, Object.keys(gone).sort()], ['stale', ['code', 'errors']]);
+  assert.match(gone.errors[0], /asd3-td-01 n'est plus dans le catalogue/);
+  const retitled = fixture();
+  record(retitled, 'asd3-td-01').title = {fr: 'Autre titre', ar: 'عنوان آخر'};
+  const moved = plan(retitled, {action: 'delete', documents: [shown]});
+  assert.equal(moved.code, 'stale');
+  assert.match(moved.errors[0], /asd3-td-01 a été modifié ailleurs/);
+  assert.equal(plan(start, {action: 'delete', documents: []}).code, 'invalid');
+  assert.equal(plan(start, {action: 'rename'}).code, 'invalid');
+});
+
+test('dashboard: a file gets the name Git gives it, and travels as base64', async () => {
+  assert.equal(await flow.gitBlobSha(new Uint8Array()), 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391');
+  assert.equal(await flow.gitBlobSha(new TextEncoder().encode('hello\n')), 'ce013625030ba8dba906f756967f9e9ca394464a');
+  const bytes = crypto.randomBytes(100003);
+  assert.equal(flow.toBase64(new Uint8Array(bytes)), bytes.toString('base64'));
+  assert.equal(flow.startsLikePdf(new TextEncoder().encode('%PDF-1.7')), true);
+  assert.equal(flow.startsLikePdf(new TextEncoder().encode(' %PDF-1.7')), false);
+  assert.equal(flow.startsLikePdf(new TextEncoder().encode('%PDF')), false);
+});
+
+test('dashboard, delete on GitHub: one commit removes the records and their PDFs', async () => {
+  const github = fakeGitHub(startFiles());
+  const start = fixture();
+  const before = github.state.head;
+  const result = await publish(github, {action: 'delete', documents: [record(start, 'ao-cours-ch01'), record(start, 'asd3-td-01'), record(start, 'asd3-td-03')]});
+  assert.deepEqual([result.changed, result.attempts], [true, 1]);
+  const files = github.filesAtHead();
+  // asd3-td-03 had no PDF in this repository: its record goes, and no removal is asked for a file that is not there.
+  assert.deepEqual(Object.keys(files).sort(), ['README.md', 'data/resources.json']);
+  assert.equal(files['data/resources.json'], serialize(without(start, 'ao-cours-ch01', 'asd3-td-01', 'asd3-td-03')));
+  assert.deepEqual(github.commits.get(github.state.head).parents, [before]);
+  assert.equal(github.commits.get(github.state.head).message, 'Admin: delete 3 documents\n\n- asd3-td-01\n- asd3-td-03\n- ao-cours-ch01');
+  assert.equal(result.commit, github.state.head);
+});
+
+test('dashboard: when the branch moved, the change is read again, applied again and committed once more', async () => {
+  // Before the save: somebody else committed after the page was loaded. The save starts from the branch as it is now.
+  const earlier = fakeGitHub(startFiles());
+  const start = fixture();
+  earlier.commitElsewhere(catalogue => { catalogue.resources = catalogue.resources.filter(resource => resource.id !== 'asd3-cours-ch01'); });
+  const first = await publish(earlier, {action: 'delete', documents: [record(start, 'asd3-td-01')]});
+  assert.equal(first.attempts, 1);
+  assert.equal(earlier.filesAtHead()['data/resources.json'], serialize(without(start, 'asd3-cours-ch01', 'asd3-td-01')));
+
+  // During the save: the branch moves between the read and the commit. One more try, on the new branch.
+  const github = fakeGitHub(startFiles());
+  let theirs;
+  github.before('PATCH /git/refs/heads/main', () => { theirs = github.commitElsewhere(catalogue => { catalogue.resources = catalogue.resources.filter(resource => resource.id !== 'ao-cours-ch01'); }); });
+  const result = await publish(github, {action: 'delete', documents: [record(start, 'asd3-td-01')]});
+  assert.deepEqual([result.changed, result.attempts], [true, 2]);
+  // Both changes are there, ours on top of theirs, and theirs was not overwritten.
+  assert.equal(github.filesAtHead()['data/resources.json'], serialize(without(start, 'ao-cours-ch01', 'asd3-td-01')));
+  assert.deepEqual(github.commits.get(github.state.head).parents, [theirs]);
+  assert.deepEqual(github.history(), ['Admin: delete asd3-td-01', 'another change', 'start']);
+  assert.equal(github.requests.filter(request => request.method === 'PATCH').length, 2);
+  assert.ok(github.requests.filter(request => request.method === 'PATCH').every(request => JSON.parse(request.body).force === false));
+});
+
+test('dashboard: a branch that moves twice stops the save, and a change that no longer applies is not forced', async () => {
+  const start = fixture();
+  const github = fakeGitHub(startFiles());
+  github.before('PATCH /git/refs/heads/main', () => github.commitElsewhere());
+  github.before('PATCH /git/refs/heads/main', () => github.commitElsewhere());
+  const twice = await rejection(publish(github, {action: 'delete', documents: [record(start, 'asd3-td-01')]}));
+  assert.equal(twice.kind, 'conflict');
+  assert.deepEqual(github.history(), ['another change', 'another change', 'start']);
+  assert.equal(github.filesAtHead()['data/resources.json'], serialize(start));
+  assert.equal(github.filesAtHead()['pdfs/S3/asd3/asd3-td-01.pdf'], '%PDF-old');
+
+  // The other commit removed the very document being deleted: the second try finds nothing to do and says so.
+  const other = fakeGitHub(startFiles());
+  other.before('PATCH /git/refs/heads/main', () => other.commitElsewhere(catalogue => { catalogue.resources = catalogue.resources.filter(resource => resource.id !== 'asd3-td-01'); }));
+  const stale = await rejection(publish(other, {action: 'delete', documents: [record(start, 'asd3-td-01')]}));
+  assert.equal(stale.kind, 'stale');
+  assert.match(stale.problems[0], /n'est plus dans le catalogue/);
+  assert.deepEqual(other.history(), ['another change', 'start']);
+
+  // A lost connection on the very last request leaves the outcome unknown, and the error says so.
+  const cut = fakeGitHub(startFiles());
+  const store = gitHubStore.create({
+    fetch: (url, options) => (options.method === 'PATCH' ? Promise.reject(new TypeError('Failed to fetch')) : cut.fetch(url, options)),
+    apiRoot: 'https://api.github.test', repo: 'owner/site', branch: 'main', getToken: async () => 'secret-token'
+  });
+  const lost = await rejection(flow.publish({store, rules, change: {action: 'delete', documents: [record(start, 'asd3-td-01')]}}));
+  assert.deepEqual([lost.kind, lost.uncertain], ['network', true]);
+  const early = await rejection(connect(cut, 'expired').read());
+  assert.equal(early.uncertain, undefined);
 });
 
 // The doctor reads the project folder it lives in, so it is run on a throwaway copy of the project.

@@ -1,7 +1,8 @@
 // "Mes documents": every document of the catalogue as GitHub holds it now, grouped by semester,
 // by module and by type, in the order the site lists them, with a search box and a type filter.
+// A document is removed from here, alone or with others, after a confirmation inside the page.
 import {el} from '../js/dom.js';
-import {button, markerOf, nameOf, sizeLabel, countLabel, TYPE_GROUP_LABELS, KIND_LABELS, SESSION_LABELS} from './ui.js';
+import {button, note, focusOn, markerOf, nameOf, sizeLabel, countLabel, TYPE_LABELS, TYPE_GROUP_LABELS, KIND_LABELS, SESSION_LABELS} from './ui.js';
 
 // Lower case and without accents, so "algebre" finds "Algèbre".
 const fold = text => String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -39,6 +40,8 @@ export function createDocumentsView(app) {
   const filters = {query: '', type: ''};
   // The modules the maintainer folded. Kept here so they stay folded when the list is drawn again.
   const folded = new Set();
+  // The IDs of the documents ticked for a deletion together.
+  const selected = new Set();
 
   const search = el('input', {id: 'doc-search', type: 'search', placeholder: 'Titre, module, numéro ou année', autocomplete: 'off', enterkeyhint: 'search'});
   const type = el('select', {id: 'doc-type'},
@@ -49,6 +52,28 @@ export function createDocumentsView(app) {
   const status = el('p', {class: 'doc-status', role: 'status'});
   const messages = el('div', {class: 'doc-messages'});
   const groups = el('div', {class: 'doc-groups'});
+
+  // Shown while documents are ticked. It stays at the top of the window, so it is at hand
+  // wherever the ticked rows are in a long list.
+  const selectionCount = el('p', {class: 'selection-bar__count', 'aria-live': 'polite'});
+  const deleteSelection = button('Supprimer la sélection', {variant: 'danger'});
+  const clearSelection = button('Tout désélectionner');
+  const selectionBar = el('div', {class: 'selection-bar', role: 'region', 'aria-label': 'Documents sélectionnés', hidden: true}, selectionCount, deleteSelection, clearSelection);
+
+  // The confirmation, a dialog inside the page: what will be removed, then the two answers.
+  const confirmTitle = el('h2', {class: 'confirm__title', id: 'confirm-title'});
+  const confirmList = el('ul', {class: 'confirm__list', role: 'list'});
+  const confirmText = el('p', {id: 'confirm-text'});
+  const confirmProblem = el('div', {});
+  const cancel = button('Annuler');
+  const confirm = button('Supprimer définitivement', {variant: 'danger'});
+  const dialog = el('dialog', {class: 'confirm', 'aria-labelledby': 'confirm-title', 'aria-describedby': 'confirm-text'},
+    confirmTitle, confirmList, confirmText, confirmProblem, el('div', {class: 'confirm__actions'}, cancel, confirm)
+  );
+  // The deletion being confirmed: {documents, opener}, opener being the button to go back to.
+  let asked = null;
+  let deleting = false;
+
   const node = el('div', {class: 'documents'},
     messages,
     el('div', {class: 'doc-tools'},
@@ -57,7 +82,9 @@ export function createDocumentsView(app) {
       refresh
     ),
     status,
-    groups
+    selectionBar,
+    groups,
+    dialog
   );
 
   search.addEventListener('input', () => { filters.query = search.value; draw(); });
@@ -84,6 +111,96 @@ export function createDocumentsView(app) {
     search.focus();
   }
 
+  function drawSelection() {
+    selectionBar.hidden = selected.size === 0;
+    selectionCount.textContent = selected.size === 1 ? '1 document sélectionné' : `${selected.size} documents sélectionnés`;
+  }
+
+  clearSelection.addEventListener('click', () => {
+    selected.clear();
+    draw();
+    search.focus();
+  });
+  deleteSelection.addEventListener('click', () => {
+    // In the order of the list, whatever the order of the ticks.
+    askToDelete(app.snapshot.catalogue.resources.filter(resource => selected.has(resource.id)), deleteSelection);
+  });
+
+  // Opens the confirmation for one document or several.
+  function askToDelete(documents, opener) {
+    const modules = new Map(app.snapshot.catalogue.modules.map(module => [module.id, module]));
+    const several = documents.length > 1;
+    asked = {documents, opener};
+    confirmTitle.textContent = several ? `Supprimer ces ${documents.length} documents ?` : 'Supprimer ce document ?';
+    confirmList.replaceChildren(...documents.map(resource => {
+      const module = modules.get(resource.module);
+      return el('li', {},
+        el('strong', {}, [markerOf(resource), resource.title.fr].filter(Boolean).join(' — ')),
+        el('span', {}, `Module : ${module ? `${module.abbr}, ${module.title.fr}` : resource.module}`),
+        el('span', {}, `Type : ${TYPE_LABELS[resource.type]}${resource.academicYear ? `, ${resource.academicYear}` : ''}`)
+      );
+    }));
+    confirmText.textContent = several
+      ? 'Chaque PDF et sa fiche dans le catalogue seront supprimés, en un seul enregistrement. Ces documents disparaîtront du site. Cette suppression ne peut pas être annulée depuis cette page.'
+      : 'Le PDF et sa fiche dans le catalogue seront supprimés tous les deux. Le document disparaîtra du site. Cette suppression ne peut pas être annulée depuis cette page.';
+    confirmProblem.replaceChildren();
+    confirm.disabled = false;
+    dialog.showModal();
+    // The safe answer has the focus: Enter does not delete.
+    cancel.focus();
+  }
+
+  cancel.addEventListener('click', () => dialog.close());
+  // Escape closes the dialog, except while the deletion is being saved.
+  dialog.addEventListener('cancel', event => { if (deleting) event.preventDefault(); });
+  dialog.addEventListener('close', () => {
+    const opener = asked?.opener;
+    asked = null;
+    if (opener?.isConnected && !opener.closest('[hidden]')) opener.focus();
+  });
+
+  confirm.addEventListener('click', async () => {
+    const {documents} = asked;
+    const modules = new Map(app.snapshot.catalogue.modules.map(module => [module.id, module]));
+    deleting = true;
+    confirm.disabled = true;
+    cancel.disabled = true;
+    confirm.textContent = 'Suppression en cours…';
+    confirmProblem.replaceChildren();
+    let result = null;
+    let outdated = false;
+    try {
+      result = await app.publish({action: 'delete', documents});
+    } catch (error) {
+      const problem = app.errorNote(error, {saving: true});
+      confirmProblem.replaceChildren(problem);
+      focusOn(problem);
+      // The list on screen no longer matches the repository: read it again behind the dialog.
+      // What the dialog shows is then out of date too, so it can only be closed.
+      outdated = error.kind === 'stale';
+      if (outdated) app.reload().catch(() => {});
+    }
+    deleting = false;
+    cancel.disabled = false;
+    confirm.textContent = 'Supprimer définitivement';
+    confirm.disabled = outdated;
+    if (result === null) return;
+
+    for (const resource of documents) selected.delete(resource.id);
+    asked.opener = null;
+    dialog.close();
+    draw();
+    const done = note('ok', {
+      title: documents.length > 1 ? `${documents.length} documents supprimés.` : `Supprimé : ${nameOf(documents[0], modules.get(documents[0].module))}.`,
+      text: app.local
+        ? "Aperçu local : rien n'a été envoyé à GitHub."
+        : `${documents.length > 1 ? 'Les PDF et leurs fiches ont été retirés' : 'Le PDF et sa fiche ont été retirés'} du dépôt en un seul enregistrement. Le site public se met à jour dans environ une minute.`,
+      lines: result.listIsOld ? ["La liste n'a pas pu être relue : cliquez sur « Rafraîchir »."] : []
+    });
+    messages.replaceChildren(done);
+    focusOn(done);
+  });
+
   // The facts under a title: year, exam kind and session, the correction badge, the file size, the ID.
   function factsOf(resource, file) {
     const facts = [];
@@ -103,21 +220,32 @@ export function createDocumentsView(app) {
     const name = nameOf(resource, module);
     // Several rows have the same buttons, so screen readers also hear which document each one acts on.
     const about = () => el('span', {class: 'visually-hidden'}, ` : ${name}`);
+    const tick = el('input', {type: 'checkbox', checked: selected.has(resource.id), 'aria-label': `Sélectionner ${name}`});
+    tick.addEventListener('change', () => {
+      if (tick.checked) selected.add(resource.id);
+      else selected.delete(resource.id);
+      drawSelection();
+    });
     const view = button(['Voir', about()], {disabled: !file});
     view.addEventListener('click', () => app.openPdf(resource, messages));
+    const remove = button(['Supprimer', about()], {class: 'button button--remove'});
+    remove.addEventListener('click', () => askToDelete([resource], remove));
     return el('li', {class: 'doc', 'data-id': resource.id},
+      el('label', {class: 'doc__select'}, tick),
       el('div', {class: 'doc__text'},
         el('p', {class: 'doc__title'}, marker && el('span', {class: 'resource__marker'}, marker), marker && ' ', resource.title.fr),
         el('p', {class: 'doc__title-ar', lang: 'ar', dir: 'rtl'}, resource.title.ar),
         el('ul', {class: 'facts', role: 'list'}, factsOf(resource, file).map(fact => el('li', {class: 'fact'}, fact)))
       ),
-      el('div', {class: 'doc__actions'}, view)
+      el('div', {class: 'doc__actions'}, view, remove)
     );
   }
 
   function draw() {
     const {catalogue, files, readAt} = app.snapshot;
     const modulesById = new Map(catalogue.modules.map(module => [module.id, module]));
+    const ids = new Set(catalogue.resources.map(resource => resource.id));
+    for (const id of [...selected]) if (!ids.has(id)) selected.delete(id);
     const found = matcherFor(filters.query);
     const filtering = filters.query.trim() !== '' || filters.type !== '';
     const matches = resource => (!filters.type || resource.type === filters.type) && found(resource, modulesById.get(resource.module));
@@ -174,6 +302,7 @@ export function createDocumentsView(app) {
         el('p', {}, button('Effacer la recherche et le filtre', {onClick: clearFilters}))
       )]
       : sections));
+    drawSelection();
   }
 
   return {node, draw};

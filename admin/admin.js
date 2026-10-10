@@ -90,6 +90,31 @@ async function reload() {
   for (const draw of redraw) draw();
 }
 
+// Makes one change (an addition, an edit or a deletion) in one commit, then reads the repository
+// again so both tabs show the result. readPdf gives the bytes of the file chosen in the form.
+// Returns admin-flow.js's result; listIsOld is set when the commit went through but the new read did not.
+let saving = 0;
+async function publish(change, readPdf = null) {
+  saving++;
+  try {
+    const result = await window.L2AdminFlow.publish({store, rules, change, readPdf});
+    if (result.changed) {
+      try { await reload(); } catch { result.listIsOld = true; }
+    }
+    return result;
+  } finally {
+    saving--;
+  }
+}
+
+// Leaving the page in the middle of a save could lose it: the browser asks first.
+window.addEventListener('beforeunload', event => {
+  if (saving === 0) return;
+  event.preventDefault();
+  // Older browsers ask only when this is set.
+  event.returnValue = '';
+});
+
 // An error, as a message with the button that helps: "Se reconnecter" when the session expired,
 // or "Réessayer" when the caller gives a way to try again.
 function errorNote(error, {saving = false, retry = null} = {}) {
@@ -156,6 +181,7 @@ const app = {
   rules,
   get snapshot() { return state.snapshot; },
   reload,
+  publish,
   errorNote,
   openPdf,
   // Opens the add form on a module. Set by showDashboard.

@@ -372,14 +372,34 @@ main [tabindex="-1"]:focus {
   border-block-start: 1px solid var(--color-border);
 }
 
-/* One document: its titles and facts, then its buttons, under them on a phone and beside them
-   from a tablet up. */
+/* One document: a box to tick, its titles and facts, then its buttons, under the text on a phone
+   and beside it from a tablet up. */
 .doc {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-2) var(--space-4);
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2) var(--space-2);
   padding-block: var(--space-3);
   border-block-end: 1px solid var(--color-border);
+}
+
+/* The label around the box makes the whole square a target for a thumb. */
+.doc__select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--tap);
+  block-size: var(--tap);
+  /* Pulls the box to the edge of the list, so it lines up with the headings above. */
+  margin-inline-start: calc(var(--space-3) * -1);
+  cursor: pointer;
+}
+
+.doc__select input {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin: 0;
+  accent-color: var(--color-link);
+  cursor: pointer;
 }
 
 .type-group:last-child .doc:last-child {
@@ -419,8 +439,41 @@ main [tabindex="-1"]:focus {
 .doc__actions {
   display: flex;
   flex-wrap: wrap;
+  grid-column: 2;
   align-items: center;
   gap: var(--space-2);
+}
+
+/* "Supprimer" in a row: an ordinary button, in the colour of a deletion. */
+.button--remove,
+.button--remove:hover {
+  color: var(--color-error-text);
+}
+
+/* The documents ticked for a deletion together. It stays at the top of the window while the list scrolls. */
+.selection-bar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-block-end: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-link);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-surface);
+}
+
+.selection-bar__count {
+  flex: 1 1 auto;
+  font-weight: 600;
+}
+
+/* Keeps a row reached with the keyboard clear of the bar above. */
+html {
+  scroll-padding-block-start: 7rem;
 }
 
 @media (min-width: 40rem) {
@@ -433,8 +486,70 @@ main [tabindex="-1"]:focus {
   }
 
   .doc {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
+  }
+
+  .doc__actions {
+    grid-column: 3;
+  }
+}
+
+/* ---------- Confirmation ---------- */
+
+/* Asked inside the page before a deletion. No shadow: the dimmed page behind sets it apart. */
+.confirm {
+  inline-size: min(34rem, calc(100vw - 2 * var(--space-4)));
+  max-block-size: calc(100dvh - 2 * var(--space-4));
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  overflow: auto;
+}
+
+.confirm::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
+
+.confirm__title {
+  margin-block-end: var(--space-3);
+}
+
+.confirm__list {
+  margin-block-end: var(--space-3);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.confirm__list li {
+  display: grid;
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.confirm__list span {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.confirm .note {
+  margin-block: var(--space-4) 0;
+}
+
+/* The two answers, "Annuler" first: side by side at the end of the dialog, and one full-width
+   button per line on a phone. */
+.confirm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-block-start: var(--space-5);
+}
+
+@media (max-width: 30rem) {
+  .confirm__actions .button {
+    flex: 1 1 100%;
   }
 }
 

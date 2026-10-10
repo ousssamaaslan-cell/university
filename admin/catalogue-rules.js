@@ -138,6 +138,9 @@
     return id;
   }
 
+  // The order a document gets when none was typed: its chapter or sheet number, or for an exam the order exams are sat in.
+  const usualOrder = fields => (fields.type === 'cours' ? fields.chapter : fields.type === 'examen' ? EXAM_KIND_ORDER[fields.examKind] : fields.number);
+
   // Reads one document of the form. Returns its checked fields, or the list of what is wrong.
   function readItem(item, context) {
     const {modules, existing, uploads, seenIds, usedUploads} = context;
@@ -184,7 +187,7 @@
     }
     if (type && type !== 'cours') fields.hasCorrection = source.hasCorrection === true;
 
-    if (blank(source.order)) fields.order = type === 'cours' ? fields.chapter : type === 'examen' ? EXAM_KIND_ORDER[fields.examKind] : fields.number;
+    if (blank(source.order)) fields.order = usualOrder(fields);
     else {
       fields.order = integer(source.order, 0);
       if (fields.order === null) problems.push("l'ordre d'affichage doit être un nombre entier, à partir de 0");
@@ -269,6 +272,170 @@
     return plan;
   }
 
+  // ---------- One change asked from the dashboard at /admin ----------
+
+  // Above this size a PDF is accepted with a word of advice: students often download on a phone.
+  const LARGE_PDF_BYTES = 10 * 1000 * 1000;
+  const megabytes = bytes => (bytes / 1e6).toLocaleString('fr-FR', {maximumFractionDigits: 1});
+
+  // A file chosen for a document: {name, size, isPdf}, isPdf meaning "its first bytes are %PDF-",
+  // the test the doctor makes on every build. Returns {error, warning}: an error refuses the file,
+  // a warning is only said.
+  function checkPdf(file) {
+    const refuse = error => ({error, warning: null});
+    if (!/\.pdf$/i.test(file.name)) return refuse(`« ${file.name} » n'est pas un fichier PDF : son nom ne se termine pas par .pdf.`);
+    if (file.size === 0) return refuse(`« ${file.name} » est vide.`);
+    if (!file.isPdf) return refuse(`« ${file.name} » n'est pas un vrai PDF : son contenu ne commence pas par %PDF.`);
+    if (file.size > MAX_PDF_BYTES) return refuse(`« ${file.name} » pèse ${megabytes(file.size)} Mo. La limite est de ${MAX_PDF_BYTES / 1e6} Mo : compressez le PDF, puis choisissez-le de nouveau.`);
+    if (file.size > LARGE_PDF_BYTES) {
+      return {error: null, warning: `Ce PDF pèse ${megabytes(file.size)} Mo. Les étudiants téléchargent souvent sur téléphone : compressez-le si vous le pouvez. Vous pouvez aussi le publier tel quel.`};
+    }
+    return {error: null, warning: null};
+  }
+
+  // Two documents hold the same place when they share module, type and chapter or sheet number,
+  // or for exams the year, the session and the kind.
+  function sameFacts(a, b) {
+    if (a.module !== b.module || a.type !== b.type) return false;
+    if (a.type === 'cours') return a.chapter === b.chapter;
+    if (a.type === 'examen') return a.academicYear === b.academicYear && a.session === b.session && a.examKind === b.examKind;
+    return a.number === b.number;
+  }
+
+  // The documents already in the catalogue at the place `fields` describes. exceptId leaves out the document being edited.
+  function duplicatesOf(catalogue, fields, exceptId = null) {
+    return catalogue.resources.filter(resource => resource.id !== exceptId && sameFacts(resource, fields));
+  }
+
+  // The ID and the PDF path a new document would get, as soon as its module, its type and its
+  // number (for an exam, its year and kind) are known; null before that. For the form's preview.
+  function draftId(catalogue, source) {
+    const module = catalogue.modules.find(item => item.id === source.module);
+    if (!module || !TYPES.includes(source.type)) return null;
+    const fields = {type: source.type, module: module.id, semester: module.semester};
+    if (source.type === 'cours') fields.chapter = integer(source.chapter, 0);
+    if (source.type === 'td' || source.type === 'tp') fields.number = integer(source.number, 1);
+    if (isAcademicYear(source.academicYear)) fields.academicYear = source.academicYear;
+    if (source.type === 'examen') fields.examKind = EXAM_KINDS.includes(source.examKind) ? source.examKind : null;
+    if (fields.chapter === null || fields.number === null || (source.type === 'examen' && (!fields.academicYear || !fields.examKind))) return null;
+    const id = newId(fields, new Set(catalogue.resources.map(resource => resource.id)), new Set(catalogue.resources.map(resource => resource.pdfPath)));
+    return {id, pdfPath: pdfPathOf(fields, id)};
+  }
+
+  // Stands, for readItem, for a PDF chosen in the dashboard: the save gives it its real path.
+  const CHOSEN_PDF = 'pdfs/fichier-choisi.pdf';
+  const sentence = text => `${text.charAt(0).toUpperCase()}${text.slice(1)}.`;
+  const refused = (code, errors, more = {}) => ({errors, code, ...more});
+  const sameRecord = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+  // Turns one change asked from the dashboard into what must be committed.
+  //   currentRaw  the catalogue file as it is in the repository now
+  //   change      {action: 'add', fields, pdf, acknowledged}
+  //               {action: 'edit', id, base, fields, pdf, acknowledged}
+  //               {action: 'delete', documents}
+  //     fields        what the form holds: semester, module, type, title {fr, ar} and the fields of the type
+  //     pdf           {name, size, isPdf, sha} for a chosen file; null on an edit that keeps the current PDF
+  //     base          the record as the form showed it when it was opened
+  //     documents     the records to remove, as the list showed them
+  //     acknowledged  the ids of the documents already at that place, which the maintainer agreed to add beside
+  //   files       the repository's PDFs when known, as a Map of path -> {sha}
+  // Returns {errors, code} when nothing may be committed. code is 'invalid', 'file', 'duplicate'
+  // (with duplicates, the documents already at that place) or 'stale' (the catalogue changed elsewhere).
+  // Otherwise: raw (the new file), writes [{to}] for the chosen PDF, deletes [path], the ids added,
+  // updated and removed, record (the document as saved), duplicates, and changed.
+  // Every record the change does not name stays exactly as it is in the file.
+  function planChange(currentRaw, change, files = null) {
+    const current = JSON.parse(currentRaw);
+    const existing = new Map(current.resources.map(resource => [resource.id, resource]));
+    const plan = {errors: [], writes: [], deletes: [], added: [], updated: [], removed: [], duplicates: [], record: null};
+    const finish = resources => {
+      plan.changed = plan.added.length + plan.updated.length + plan.removed.length > 0;
+      plan.raw = plan.changed ? JSON.stringify({semesters: current.semesters, modules: current.modules, resources}, null, 2) + '\n' : currentRaw;
+      return plan;
+    };
+    const gone = id => refused('stale', [`Le document ${id} n'est plus dans le catalogue : il a été supprimé ailleurs. Rafraîchissez la liste.`]);
+    const moved = id => refused('stale', [`Le document ${id} a été modifié ailleurs entre-temps. Rafraîchissez la liste, puis recommencez.`]);
+
+    if (change.action === 'delete') {
+      const asked = change.documents ?? [];
+      if (asked.length === 0) return refused('invalid', ['Aucun document à supprimer.']);
+      for (const seen of asked) {
+        if (!existing.has(seen.id)) return gone(seen.id);
+        if (!sameRecord(existing.get(seen.id), seen)) return moved(seen.id);
+      }
+      const ids = new Set(asked.map(seen => seen.id));
+      const kept = current.resources.filter(resource => !ids.has(resource.id));
+      const stillUsed = new Set(kept.map(resource => resource.pdfPath));
+      for (const resource of current.resources) {
+        if (!ids.has(resource.id)) continue;
+        plan.removed.push(resource.id);
+        // The PDF leaves with its record. A file the repository does not hold cannot be removed from it.
+        const removable = !stillUsed.has(resource.pdfPath) && !plan.deletes.includes(resource.pdfPath) && (!files || files.has(resource.pdfPath));
+        if (removable) plan.deletes.push(resource.pdfPath);
+      }
+      return finish(kept);
+    }
+
+    if (change.action !== 'add' && change.action !== 'edit') return refused('invalid', ['Demande inconnue.']);
+    const pdf = change.pdf ?? null;
+    if (pdf) {
+      const verdict = checkPdf(pdf);
+      if (verdict.error) return refused('file', [verdict.error]);
+    }
+    const previous = change.action === 'edit' ? existing.get(change.id) ?? null : null;
+    if (change.action === 'edit') {
+      if (!previous) return gone(change.id);
+      if (change.base && !sameRecord(change.base, previous)) return moved(change.id);
+    } else if (!pdf) {
+      return refused('invalid', ['Choisissez le fichier PDF.']);
+    }
+
+    // Choosing again the very file the repository already holds replaces nothing.
+    const sameFile = Boolean(previous && pdf && files && pdf.sha && files.get(previous.pdfPath)?.sha === pdf.sha);
+    const incoming = pdf && !sameFile ? pdf : null;
+    const result = readItem({
+      ...change.fields,
+      id: previous ? previous.id : undefined,
+      // An order typed by hand is kept; otherwise the order follows the number.
+      order: previous && previous.order !== usualOrder(previous) ? previous.order : undefined,
+      pdfPath: incoming ? CHOSEN_PDF : previous.pdfPath
+    }, {
+      modules: new Map(current.modules.map(module => [module.id, module])),
+      existing,
+      uploads: new Map(incoming ? [[CHOSEN_PDF, incoming]] : []),
+      seenIds: new Set(),
+      usedUploads: new Set()
+    });
+    if (result.problems.length) return refused('invalid', result.problems.map(sentence));
+
+    // A new document at a place already held, or an edited one that moves onto another's place.
+    plan.duplicates = previous && sameFacts(previous, result.fields) ? [] : duplicatesOf(current, result.fields, previous?.id);
+    const acknowledged = change.acknowledged ?? [];
+    if (plan.duplicates.some(duplicate => !acknowledged.includes(duplicate.id))) {
+      return refused('duplicate', ['Un document semblable existe déjà dans le catalogue. Confirmez que vous voulez publier celui-ci aussi.'], {duplicates: plan.duplicates});
+    }
+
+    if (previous) {
+      // A published document keeps its ID, its place in the file and its PDF path.
+      const record = assemble(previous.id, previous.pdfPath, result.fields);
+      if (incoming) plan.writes.push({to: previous.pdfPath});
+      if (incoming || !sameRecord(record, previous)) plan.updated.push(previous.id);
+      plan.record = record;
+      return finish(current.resources.map(resource => (resource.id === previous.id ? record : resource)));
+    }
+    const id = newId(result.fields, new Set(existing.keys()), new Set(current.resources.map(resource => resource.pdfPath)));
+    const record = assemble(id, pdfPathOf(result.fields, id), result.fields);
+    // A new document goes where the site would list it among those of its module and type.
+    const resources = [...current.resources];
+    const inOrder = catalogueOrder(current);
+    const after = resources.findIndex(other => inOrder(record, other) < 0);
+    resources.splice(after === -1 ? resources.length : after, 0, record);
+    plan.writes.push({to: record.pdfPath});
+    plan.added.push(id);
+    plan.record = record;
+    return finish(resources);
+  }
+
   // "Admin: add asd3-td-03", "Admin: edit ...", "Admin: delete ...", or a count and one line per
   // document when several changed.
   function commitMessage(plan) {
@@ -280,7 +447,8 @@
   }
 
   return {
-    CATALOGUE_PATH, TYPES, SESSIONS, EXAM_KINDS, MAX_PDF_BYTES,
-    academicYearOf, academicYears, modulesInOrder, sortedResources, fingerprint, forForm, prepareSave, commitMessage
+    CATALOGUE_PATH, TYPES, SESSIONS, EXAM_KINDS, MAX_PDF_BYTES, LARGE_PDF_BYTES,
+    academicYearOf, academicYears, modulesInOrder, sortedResources, fingerprint, forForm, prepareSave,
+    checkPdf, duplicatesOf, draftId, planChange, commitMessage
   };
 });

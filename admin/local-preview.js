@@ -46,9 +46,21 @@ export function createLocalStore() {
     return response.blob();
   }
 
+  // The same commit as github-commit.js, applied to the tab's copy only.
+  async function commit({raw: next, files, deletes}) {
+    for (const path of [...files.map(file => file.path), ...deletes]) {
+      if (!window.L2GitHubStore.isPdfPath(path)) throw failure('path', `Chemin refusé : « ${path} ».`);
+    }
+    for (const file of files) chosen.set(file.path, new Blob([Uint8Array.from(atob(file.base64), character => character.charCodeAt(0))], {type: 'application/pdf'}));
+    for (const path of deletes) chosen.delete(path);
+    raw = next;
+    version++;
+    return `local-${version}`;
+  }
+
   return {
     user: async () => ({login: 'aperçu local'}),
     canWrite: async () => true,
-    read, pdfFiles, fileContent
+    read, pdfFiles, fileContent, commit
   };
 }
