@@ -56,6 +56,26 @@ Each type then adds its own fields. A field that does not belong to the type is 
 
 `academicYear` is optional on Cours, TD, and TP so that two versions of the same sheet from different years can be told apart. Leave it out when there is only one version.
 
+## Arabic terminology
+
+Use these preferred terms when drafting future Arabic module and resource titles. Keep Arabic titles subject to the maintainer's review as described in `docs/project-brief.md`.
+
+| French term | Preferred Arabic term |
+| --- | --- |
+| graphes | الرسوم البيانية |
+| données | البيانات |
+| parcours | الاجتياز |
+| constructeurs | المنشئات |
+| interpolation | الاستيفاء |
+| dénombrement | مبادئ العدّ |
+| cartes de Karnaugh | خرائط كارنو |
+| modèle entité-relation | نموذج الكيان-العلاقة |
+| conceptuel | مفاهيمي |
+| implémentation | تنفيذ |
+| contrôle | اختبار |
+
+For a rattrapage exam title, use `امتحان استدراكي – جوان YYYY`, replacing `YYYY` with the exam year.
+
 ### Display order and filters
 
 | Type | Order | Filters on the module page |

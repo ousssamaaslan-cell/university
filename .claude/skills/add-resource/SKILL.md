@@ -10,6 +10,8 @@ One maintainer keeps the catalogue, by two routes that both end in a commit on `
 
 Read `docs/project-brief.md`, `docs/content-model.md`, `.claude/rules/content-structure.md`, `.claude/rules/pdf-storage.md`, the current `data/resources.json` (when present), and $ARGUMENTS. Do not use the format examples in the content-model document as real data. Do not create another level or semester. This workflow is for real content; the build-phase `sample-` records and placeholder PDFs described in the brief are the only exception to its real-PDF rule, and they are removed before publication.
 
+When drafting an Arabic module or resource title, use the preferred terms and rattrapage title format in the "Arabic terminology" section of `docs/content-model.md`.
+
 ## The admin form
 
 The maintainer can add, change, or remove a document without this workflow: `/admin` on the published site, logged in with a GitHub account that has write access to the repository. `README.md` gives the steps and the one-time login setup.

@@ -2,7 +2,7 @@
 // and a quiet line under the title gives the facts.
 // What a row shows depends on the resource type; see docs/content-model.md.
 import {el} from './dom.js';
-import {t, localized, formatFileSize} from './i18n.js';
+import {lang, t, localized, formatFileSize} from './i18n.js';
 import {isSample} from './catalogue.js';
 import {checkFile} from './files.js';
 import {reportLink} from './components.js';
@@ -47,11 +47,25 @@ function sizeFact() {
   return {size, node: fact([el('bdi', {}, t('file.type')), size], 'size')};
 }
 
+// Keep Latin terms in an Arabic title in their own direction without changing the catalogue text.
+function titleContent(title) {
+  if (lang !== 'ar') return title;
+  const parts = [];
+  let start = 0;
+  for (const match of title.matchAll(/[A-Za-z][A-Za-z0-9+#]*/g)) {
+    if (match.index > start) parts.push(title.slice(start, match.index));
+    parts.push(el('bdi', {dir: 'ltr'}, match[0]));
+    start = match.index + match[0].length;
+  }
+  if (start < title.length) parts.push(title.slice(start));
+  return parts;
+}
+
 function resourceItem(resource, mixed, context) {
   const mark = markerText(resource, mixed);
   const title = localized(resource.title);
   // TD and TP keep their Latin abbreviation in Arabic, so the marker is isolated from right-to-left text.
-  const heading = () => [mark && el('bdi', {class: 'resource__marker'}, mark), mark && ' ', el('span', {class: 'resource__title'}, title)];
+  const heading = () => [mark && el('bdi', {class: 'resource__marker'}, mark), mark && ' ', el('span', {class: 'resource__title'}, titleContent(title))];
 
   // The title is the link that opens the PDF in the browser's own viewer. The number is inside the
   // link too: a bigger target to tap, and a link that names its document in full.

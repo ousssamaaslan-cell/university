@@ -42,7 +42,8 @@ function setParams(changes) {
 function selectField(name, options) {
   const id = `filter-${name}`;
   const select = el('select', {id},
-    [['', t('filter.all')], ...options].map(([value, text]) => el('option', {value, selected: value === filters[name]}, text))
+    [['', t('filter.all')], ...options].map(([value, text]) =>
+      el('option', {value, selected: value === filters[name], dir: name === 'year' && value ? 'ltr' : null}, text))
   );
   return {name, select, field: el('div', {class: 'field'}, el('label', {for: id}, t(`filter.${name}`)), select)};
 }
