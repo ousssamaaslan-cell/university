@@ -682,6 +682,135 @@ test('dashboard, add on GitHub: the bytes are checked again at the save, and a r
   assert.deepEqual(github.history(), ['another change', 'start']);
 });
 
+// What the form holds for a document already published: its own fields, as the form shows them.
+const shown = (resource, changes = {}) => ({
+  semester: resource.semester, module: resource.module, type: resource.type,
+  chapter: resource.chapter ?? '', number: resource.number ?? '', academicYear: resource.academicYear ?? '',
+  session: resource.session ?? '', examKind: resource.examKind ?? '', hasCorrection: resource.hasCorrection === true,
+  title: {...resource.title}, ...changes
+});
+const edit = (catalogue, id, changes = {}, more = {}) => ({action: 'edit', id, base: record(catalogue, id), fields: shown(record(catalogue, id), changes), pdf: null, ...more});
+
+test('dashboard, edit: titles, fields and the correction change; the ID, the PDF path and the place in the file do not', () => {
+  const start = fixture();
+  const titled = plan(start, edit(start, 'asd3-td-03', {title: {fr: ' Nouveau titre ', ar: 'عنوان جديد'}, hasCorrection: false}));
+  assert.deepEqual([titled.errors, titled.updated, titled.writes, titled.deletes, titled.added, titled.removed, titled.changed], [[], ['asd3-td-03'], [], [], [], [], true]);
+  assert.deepEqual(titled.record, {id: 'asd3-td-03', level: 'L2', semester: 'S3', module: 'asd3', type: 'td', number: 3, title: {fr: 'Nouveau titre', ar: 'عنوان جديد'}, hasCorrection: false, pdfPath: 'pdfs/S3/asd3/asd3-td-03.pdf', order: 3});
+  assert.equal(titled.raw, serialize({...start, resources: start.resources.map(resource => (resource.id === 'asd3-td-03' ? titled.record : resource))}));
+  assert.equal(rules.commitMessage(titled), 'Admin: edit asd3-td-03');
+
+  // A new number: the order follows it, the ID and the file name stay.
+  const renumbered = plan(start, edit(start, 'asd3-td-03', {number: '4'}));
+  assert.deepEqual([renumbered.record.number, renumbered.record.order, renumbered.record.id, renumbered.record.pdfPath], [4, 4, 'asd3-td-03', 'pdfs/S3/asd3/asd3-td-03.pdf']);
+  // An order typed by hand is kept (the fixture's exam has order 2 as an EMD; give a TD an order of its own).
+  const custom = fixture();
+  record(custom, 'asd3-td-01').order = 0;
+  const kept = plan(custom, edit(custom, 'asd3-td-01', {number: '6', academicYear: '2024-2025'}));
+  assert.deepEqual([kept.record.number, kept.record.order, kept.record.academicYear, kept.record.id], [6, 0, '2024-2025', 'asd3-td-01']);
+  assert.deepEqual(Object.keys(kept.record), ['id', 'level', 'semester', 'module', 'type', 'number', 'academicYear', 'title', 'hasCorrection', 'pdfPath', 'order']);
+  // An exam: its kind changes, and its usual order with it.
+  const exam = plan(start, edit(start, 'asd3-examen-2024-2025-emd', {examKind: 'final', hasCorrection: true}));
+  assert.deepEqual([exam.record.examKind, exam.record.order, exam.record.hasCorrection, exam.record.id], ['final', 3, true, 'asd3-examen-2024-2025-emd']);
+
+  // Nothing changed: nothing to commit, and the file is returned as it is.
+  const same = plan(start, edit(start, 'asd3-td-03'));
+  assert.deepEqual([same.errors, same.changed, same.updated, same.writes], [[], false, [], []]);
+  assert.equal(same.raw, serialize(start));
+});
+
+test('dashboard, edit: the PDF is replaced at the same path; the same file again replaces nothing', () => {
+  const start = fixture();
+  const replaced = plan(start, edit(start, 'asd3-td-01', {}, {pdf: chosen({sha: 'b'.repeat(40)})}), new Map([['pdfs/S3/asd3/asd3-td-01.pdf', {sha: 'a'.repeat(40)}]]));
+  assert.deepEqual([replaced.errors, replaced.updated, replaced.writes, replaced.deletes, replaced.changed], [[], ['asd3-td-01'], [{to: 'pdfs/S3/asd3/asd3-td-01.pdf'}], [], true]);
+  // The record itself is untouched: only the file changes.
+  assert.equal(JSON.stringify(replaced.record), JSON.stringify(record(start, 'asd3-td-01')));
+  assert.equal(replaced.raw, serialize(start));
+
+  const identical = plan(start, edit(start, 'asd3-td-01', {}, {pdf: chosen({sha: 'a'.repeat(40)})}), new Map([['pdfs/S3/asd3/asd3-td-01.pdf', {sha: 'a'.repeat(40)}]]));
+  assert.deepEqual([identical.errors, identical.changed, identical.writes], [[], false, []]);
+  // The same file with a new title: the title is saved, the file is not sent again.
+  const titleOnly = plan(start, edit(start, 'asd3-td-01', {title: {fr: 'Autre', ar: 'آخر'}}, {pdf: chosen({sha: 'a'.repeat(40)})}), new Map([['pdfs/S3/asd3/asd3-td-01.pdf', {sha: 'a'.repeat(40)}]]));
+  assert.deepEqual([titleOnly.changed, titleOnly.updated, titleOnly.writes], [true, ['asd3-td-01'], []]);
+  // A replacement must be a PDF too.
+  assert.equal(plan(start, edit(start, 'asd3-td-01', {}, {pdf: chosen({isPdf: false})})).code, 'file');
+  assert.equal(plan(start, edit(start, 'asd3-td-01', {}, {pdf: chosen({size: 50e6 + 1})})).code, 'file');
+});
+
+test('dashboard, edit: the module and the type are locked, and a form opened on an older catalogue is refused', () => {
+  const start = fixture();
+  assert.match(plan(start, edit(start, 'asd3-td-03', {module: 'ao'})).errors.join(' '), /Le module et le type d'un document déjà publié ne changent pas : supprimez ce document, puis ajoutez-le de nouveau\./);
+  assert.match(plan(start, edit(start, 'asd3-td-03', {type: 'tp'})).errors.join(' '), /Le module et le type d'un document déjà publié ne changent pas/);
+  assert.match(plan(start, edit(start, 'asd3-td-03', {semester: 'S4'})).errors.join(' '), /Le module ASD3 appartient au semestre S3/);
+  assert.match(plan(start, edit(start, 'asd3-td-03', {title: {fr: '', ar: 'عنوان'}})).errors.join(' '), /Le titre en français est vide/);
+  assert.match(plan(start, edit(start, 'asd3-td-03', {number: '0'})).errors.join(' '), /Le numéro de la série/);
+
+  // Removed elsewhere, or changed elsewhere, since the form was opened.
+  const gone = plan(without(start, 'asd3-td-03'), edit(start, 'asd3-td-03', {title: {fr: 'Nouveau', ar: 'جديد'}}));
+  assert.deepEqual([gone.code, 'raw' in gone], ['stale', false]);
+  const elsewhere = fixture();
+  record(elsewhere, 'asd3-td-03').hasCorrection = false;
+  const moved = plan(elsewhere, edit(start, 'asd3-td-03', {title: {fr: 'Nouveau', ar: 'جديد'}}));
+  assert.equal(moved.code, 'stale');
+  assert.match(moved.errors[0], /asd3-td-03 a été modifié ailleurs/);
+
+  // Moving onto another document's place is warned about; staying where it is, never.
+  const onto = plan(start, edit(start, 'asd3-td-03', {number: '1'}));
+  assert.deepEqual([onto.code, onto.duplicates.map(duplicate => duplicate.id)], ['duplicate', ['asd3-td-01']]);
+  assert.deepEqual(plan(start, edit(start, 'asd3-td-03', {number: '1'}, {acknowledged: ['asd3-td-01']})).updated, ['asd3-td-03']);
+  const twins = fixture();
+  twins.resources.push({...record(twins, 'asd3-td-03'), id: 'asd3-td-03-2', pdfPath: 'pdfs/S3/asd3/asd3-td-03-2.pdf'});
+  assert.deepEqual(plan(twins, edit(twins, 'asd3-td-03-2', {title: {fr: 'Seconde version', ar: 'نسخة ثانية'}})).updated, ['asd3-td-03-2']);
+  assert.deepEqual(rules.similarDocuments(twins, shown(record(twins, 'asd3-td-03-2')), record(twins, 'asd3-td-03-2')), []);
+  assert.deepEqual(rules.similarDocuments(twins, shown(record(twins, 'asd3-td-03-2'), {number: '1'}), record(twins, 'asd3-td-03-2')).map(item => item.id), ['asd3-td-01']);
+});
+
+test('dashboard, edit on GitHub: an edit, a replaced PDF and both together are each one commit', async () => {
+  const github = fakeGitHub(startFiles());
+  const start = fixture();
+  let before = github.state.head;
+
+  // Titles only: the catalogue changes, no file is sent.
+  const titled = await publish(github, edit(start, 'asd3-td-01', {title: {fr: 'Piles et files', ar: 'المكدسات والطوابير'}}));
+  assert.deepEqual([titled.changed, titled.plan.writes, titled.pdfSha], [true, [], null]);
+  assert.deepEqual([github.commits.get(github.state.head).parents, github.commits.get(github.state.head).message], [[before], 'Admin: edit asd3-td-01']);
+  assert.equal(github.filesAtHead()['pdfs/S3/asd3/asd3-td-01.pdf'], '%PDF-old');
+  assert.equal(JSON.parse(github.filesAtHead()['data/resources.json']).resources.find(resource => resource.id === 'asd3-td-01').title.ar, 'المكدسات والطوابير');
+  assert.equal(github.requests.filter(request => request.method === 'POST' && request.url.endsWith('/git/blobs')).length, 1);
+
+  // The PDF only: same path, new content, and the catalogue byte for byte the same.
+  const now = JSON.parse(github.filesAtHead()['data/resources.json']);
+  before = github.state.head;
+  const catalogueBefore = github.filesAtHead()['data/resources.json'];
+  const replaced = await publish(github, {...edit(now, 'asd3-td-01'), pdf: {name: 'nouvelle version.pdf'}}, async () => pdfOf('version 2'));
+  assert.deepEqual([replaced.changed, replaced.plan.writes], [true, [{to: 'pdfs/S3/asd3/asd3-td-01.pdf'}]]);
+  assert.deepEqual([github.commits.get(github.state.head).parents, github.commits.get(github.state.head).message], [[before], 'Admin: edit asd3-td-01']);
+  assert.equal(github.filesAtHead()['pdfs/S3/asd3/asd3-td-01.pdf'], new TextDecoder().decode(pdfOf('version 2')));
+  assert.equal(github.filesAtHead()['data/resources.json'], catalogueBefore);
+  assert.deepEqual(Object.keys(github.filesAtHead()).sort(), ['README.md', 'data/resources.json', 'pdfs/S3/ao/ao-cours-ch01.pdf', 'pdfs/S3/asd3/asd3-td-01.pdf']);
+
+  // The very same file again: GitHub is not asked to commit anything.
+  before = github.state.head;
+  const writes = github.requests.filter(request => request.method !== 'GET').length;
+  const again = await publish(github, {...edit(now, 'asd3-td-01'), pdf: {name: 'nouvelle version.pdf'}}, async () => pdfOf('version 2'));
+  assert.deepEqual([again.changed, again.commit, github.state.head], [false, null, before]);
+  assert.equal(github.requests.filter(request => request.method !== 'GET').length, writes);
+
+  // Both at once, on a branch that moves during the save: still one commit of ours, on top of theirs.
+  let theirs;
+  github.before('PATCH /git/refs/heads/main', () => { theirs = github.commitElsewhere(catalogue => { catalogue.resources = catalogue.resources.filter(resource => resource.id !== 'ao-cours-ch01'); }); });
+  const both = await publish(github, {...edit(now, 'asd3-td-01', {number: '2', hasCorrection: true}), pdf: {name: 'v3.pdf'}}, async () => pdfOf('version 3'));
+  assert.deepEqual([both.changed, both.attempts], [true, 2]);
+  assert.deepEqual(github.commits.get(github.state.head).parents, [theirs]);
+  const final = JSON.parse(github.filesAtHead()['data/resources.json']);
+  assert.deepEqual([final.resources.find(resource => resource.id === 'asd3-td-01').number, final.resources.some(resource => resource.id === 'ao-cours-ch01')], [2, false]);
+  assert.equal(github.filesAtHead()['pdfs/S3/asd3/asd3-td-01.pdf'], new TextDecoder().decode(pdfOf('version 3')));
+
+  // The document was changed elsewhere after the form was opened: the edit is refused, not merged over it.
+  const stale = await rejection(publish(github, edit(now, 'asd3-td-01', {title: {fr: 'Trop tard', ar: 'فات الأوان'}})));
+  assert.equal(stale.kind, 'stale');
+  assert.equal(JSON.parse(github.filesAtHead()['data/resources.json']).resources.find(resource => resource.id === 'asd3-td-01').title.fr, 'Piles et files');
+});
+
 test('dashboard: a file gets the name Git gives it, and travels as base64', async () => {
   assert.equal(await flow.gitBlobSha(new Uint8Array()), 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391');
   assert.equal(await flow.gitBlobSha(new TextEncoder().encode('hello\n')), 'ce013625030ba8dba906f756967f9e9ca394464a');

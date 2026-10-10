@@ -566,7 +566,8 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
         )
       )
     ),
-    step(editing ? 'Fichier PDF (facultatif)' : 'Fichier PDF', dropzone, fileBox),
+    // On an edit the current file is named first, then the zone that replaces it.
+    editing ? step('Fichier PDF (facultatif)', fileBox, dropzone) : step('Fichier PDF', dropzone, fileBox),
     el('section', {class: 'step'},
       el('h3', {class: 'step__title'}, editing ? 'Aperçu avant enregistrement' : `${++stepNumber}. Aperçu avant publication`),
       previewBox

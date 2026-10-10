@@ -1,8 +1,10 @@
 // "Mes documents": every document of the catalogue as GitHub holds it now, grouped by semester,
 // by module and by type, in the order the site lists them, with a search box and a type filter.
-// A document is removed from here, alone or with others, after a confirmation inside the page.
+// A document is changed from here, in the same form that adds one, and removed from here, alone
+// or with others, after a confirmation inside the page.
 import {el} from '../js/dom.js';
 import {button, note, focusOn, markerOf, nameOf, sizeLabel, countLabel, TYPE_LABELS, TYPE_GROUP_LABELS, KIND_LABELS, SESSION_LABELS} from './ui.js';
+import {createForm} from './form.js';
 
 // Lower case and without accents, so "algebre" finds "Algèbre".
 const fold = text => String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -74,18 +76,59 @@ export function createDocumentsView(app) {
   let asked = null;
   let deleting = false;
 
-  const node = el('div', {class: 'documents'},
-    messages,
-    el('div', {class: 'doc-tools'},
-      el('div', {class: 'field doc-tools__search'}, el('label', {for: 'doc-search'}, 'Rechercher'), search),
-      el('div', {class: 'field'}, el('label', {for: 'doc-type'}, 'Type'), type),
-      refresh
-    ),
-    status,
-    selectionBar,
-    groups,
-    dialog
+  const tools = el('div', {class: 'doc-tools'},
+    el('div', {class: 'field doc-tools__search'}, el('label', {for: 'doc-search'}, 'Rechercher'), search),
+    el('div', {class: 'field'}, el('label', {for: 'doc-type'}, 'Type'), type),
+    refresh
   );
+  // The form of the document being changed. While it is open it takes the place of the list.
+  const editor = el('div', {class: 'doc-editor', hidden: true});
+  let edited = null;
+  const node = el('div', {class: 'documents'}, messages, tools, status, selectionBar, groups, editor, dialog);
+
+  function openEditor(resource) {
+    const module = app.snapshot.catalogue.modules.find(item => item.id === resource.module);
+    const name = nameOf(resource, module);
+    const heading = el('h3', {class: 'doc-editor__title'}, `Modifier : ${name}`);
+    const form = createForm(app, {
+      resource,
+      onCancel: () => closeEditor(resource.id),
+      onSaved: result => closeEditor(resource.id, result.changed
+        ? note('ok', {
+          title: `Modifications enregistrées : ${nameOf(result.plan.record, module)}.`,
+          text: app.local
+            ? "Aperçu local : rien n'a été envoyé à GitHub."
+            : `${result.plan.writes.length ? 'Le PDF a été remplacé et sa fiche mise à jour, en un seul enregistrement.' : 'La fiche a été mise à jour.'} Le site public se met à jour dans environ une minute.`,
+          lines: result.listIsOld ? ["La liste n'a pas pu être relue : cliquez sur « Rafraîchir »."] : []
+        })
+        : note('info', {title: 'Rien à enregistrer.', text: 'Le fichier choisi est le même que le fichier actuel, et la fiche est inchangée.'}))
+    });
+    edited = {id: resource.id, form};
+    editor.replaceChildren(
+      el('p', {}, button('Retour à la liste sans enregistrer', {onClick: () => closeEditor(resource.id)})),
+      heading,
+      form.node
+    );
+    for (const part of [tools, status, selectionBar, groups]) part.hidden = true;
+    messages.replaceChildren();
+    editor.hidden = false;
+    focusOn(heading);
+  }
+
+  // Back to the list: with a message after a save, or on the row's button after "Annuler".
+  function closeEditor(id, message = null) {
+    edited = null;
+    editor.hidden = true;
+    editor.replaceChildren();
+    for (const part of [tools, status, groups]) part.hidden = false;
+    draw();
+    if (message) {
+      messages.replaceChildren(message);
+      focusOn(message);
+    } else {
+      groups.querySelector(`.doc[data-id="${CSS.escape(id)}"] .button--edit`)?.focus();
+    }
+  }
 
   search.addEventListener('input', () => { filters.query = search.value; draw(); });
   type.addEventListener('change', () => { filters.type = type.value; draw(); });
@@ -228,6 +271,8 @@ export function createDocumentsView(app) {
     });
     const view = button(['Voir', about()], {disabled: !file});
     view.addEventListener('click', () => app.openPdf(resource, messages));
+    const edit = button(['Modifier', about()], {class: 'button button--edit'});
+    edit.addEventListener('click', () => openEditor(resource));
     const remove = button(['Supprimer', about()], {class: 'button button--remove'});
     remove.addEventListener('click', () => askToDelete([resource], remove));
     return el('li', {class: 'doc', 'data-id': resource.id},
@@ -237,7 +282,7 @@ export function createDocumentsView(app) {
         el('p', {class: 'doc__title-ar', lang: 'ar', dir: 'rtl'}, resource.title.ar),
         el('ul', {class: 'facts', role: 'list'}, factsOf(resource, file).map(fact => el('li', {class: 'fact'}, fact)))
       ),
-      el('div', {class: 'doc__actions'}, view, remove)
+      el('div', {class: 'doc__actions'}, view, edit, remove)
     );
   }
 
@@ -303,6 +348,11 @@ export function createDocumentsView(app) {
       )]
       : sections));
     drawSelection();
+    // The open form follows the catalogue too, and the bar of ticked rows stays out of its way.
+    if (edited) {
+      selectionBar.hidden = true;
+      edited.form.draw();
+    }
   }
 
   return {node, draw};
