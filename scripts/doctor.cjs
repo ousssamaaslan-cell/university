@@ -16,12 +16,18 @@ const readJson = relative => {
   catch (error) { fail(`${relative}: missing or invalid JSON (${error.message})`); return null; }
 };
 
+// The admin dashboard at /admin, and the former Decap form kept at /admin/decap as a temporary backup.
+const adminFiles = [
+  'admin/index.html', 'admin/admin.css', 'admin/admin.js', 'admin/ui.js', 'admin/local-preview.js',
+  'admin/catalogue-rules.js', 'admin/github-commit.js', 'admin/netlify-auth.js',
+  'admin/decap/index.html', 'admin/decap/admin.js', 'admin/decap/decap-cms.js'
+];
 for (const relative of [
   'AGENTS.md', '.claude/CLAUDE.md', '.claude/settings.json',
   'docs/project-brief.md', 'docs/design-system.md', 'docs/content-model.md',
   'templates/qa-report.md', 'README.md', 'NOTICE.md',
   'data', 'pdfs/S3', 'pdfs/S4', 'css', 'js', 'assets',
-  'admin/index.html', 'admin/admin.js', 'admin/catalogue-rules.js', 'admin/github-commit.js', 'admin/decap-cms.js'
+  ...adminFiles
 ]) if (!exists(relative)) fail(`Missing ${relative}`);
 
 if (exists('package.json')) fail('package.json exists, but this project is specified to have no site npm dependencies or build step.');
@@ -215,10 +221,15 @@ function checkPublication() {
   if (!/^publish\s*=\s*"\.netlify-publish"\s*$/m.test(config)) fail('netlify.toml: publish must be ".netlify-publish", the allowlisted copy');
   if (!/^command\s*=\s*"node scripts\/doctor\.cjs && node scripts\/publish\.cjs"\s*$/m.test(config)) fail('netlify.toml: the build command must run the doctor, then the publish copy');
   const scripts = exists('js') ? fs.readdirSync(path.join(root, 'js')).filter(name => name.endsWith('.js')).map(name => `js/${name}`) : [];
-  // The vendored admin/decap-cms.js is not read here: its hash is verified against vendor-manifest.json above.
+  // Every page, script and stylesheet under admin/, so a file added there later is read too.
+  // The vendored admin/decap/decap-cms.js is not read here: its hash is verified against vendor-manifest.json above.
+  const filesUnder = folder => fs.readdirSync(path.join(root, folder), {withFileTypes: true}).flatMap(entry =>
+    entry.isDirectory() ? filesUnder(`${folder}/${entry.name}`) : [`${folder}/${entry.name}`]
+  );
+  const admin = exists('admin') ? filesUnder('admin').filter(file => /\.(html|js|css)$/.test(file) && file !== 'admin/decap/decap-cms.js') : [];
   const published = [
     'netlify.toml', 'index.html', 'module.html', 'search.html', 'report.html', '404.html', 'css/styles.css', 'data/resources.json',
-    'admin/index.html', 'admin/admin.js', 'admin/catalogue-rules.js', 'admin/github-commit.js', ...scripts
+    ...admin, ...scripts
   ];
   const secrets = [
     [/\bgh[pousr]_[A-Za-z0-9]{20,}/, 'a GitHub token'],
@@ -230,6 +241,14 @@ function checkPublication() {
     if (!exists(relative)) continue;
     const text = fs.readFileSync(path.join(root, relative), 'utf8');
     for (const [pattern, name] of secrets) if (pattern.test(text)) fail(`${relative}: contains what looks like ${name}; published files must hold no credential`);
+  }
+  // The admin is for the maintainer: no student page or script mentions it, and search engines are told to leave it out.
+  for (const relative of ['index.html', 'module.html', 'search.html', 'report.html', '404.html', ...scripts]) {
+    if (exists(relative) && /\badmin\b/i.test(fs.readFileSync(path.join(root, relative), 'utf8'))) fail(`${relative}: student pages must not link to or mention the admin`);
+  }
+  if (!/^for\s*=\s*"\/admin\/\*"\s*\r?\n\[headers\.values\]\s*\r?\nX-Robots-Tag\s*=\s*"noindex, nofollow"\s*$/m.test(config)) fail('netlify.toml: /admin/* must be sent with X-Robots-Tag "noindex, nofollow"');
+  for (const relative of admin.filter(file => file.endsWith('.html'))) {
+    if (!/<meta name="robots" content="noindex, nofollow"/.test(fs.readFileSync(path.join(root, relative), 'utf8'))) fail(`${relative}: an admin page must carry <meta name="robots" content="noindex, nofollow">`);
   }
 }
 

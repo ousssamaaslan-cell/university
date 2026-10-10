@@ -262,10 +262,11 @@
     return plan;
   }
 
-  // "Admin: add asd3-td-03", or a count and one line per document when several changed.
+  // "Admin: add asd3-td-03", "Admin: edit ...", "Admin: delete ...", or a count and one line per
+  // document when several changed.
   function commitMessage(plan) {
     const part = (verb, ids) => (ids.length === 0 ? null : ids.length === 1 ? `${verb} ${ids[0]}` : `${verb} ${ids.length} documents`);
-    const parts = [part('add', plan.added), part('update', plan.updated), part('remove', plan.removed)].filter(Boolean);
+    const parts = [part('add', plan.added), part('edit', plan.updated), part('delete', plan.removed)].filter(Boolean);
     const lines = [...plan.added.map(id => `+ ${id}`), ...plan.updated.map(id => `~ ${id}`), ...plan.removed.map(id => `- ${id}`)];
     const subject = `Admin: ${parts.join(', ') || 'rewrite the catalogue in its usual layout'}`;
     return lines.length > 1 ? `${subject}\n\n${lines.join('\n')}` : subject;

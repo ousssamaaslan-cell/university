@@ -1,0 +1,236 @@
+/*
+  The admin dashboard at /admin. This file is loaded after css/styles.css and uses its tokens,
+  buttons, tabs and module code, so the dashboard looks like the site it manages.
+  docs/design-system.md explains the tokens. Logical properties only, as in the site's stylesheet:
+  the Arabic title fields are right-to-left inside a French page.
+*/
+
+/* ---------- Header ---------- */
+
+/* The site's own header is the page colour. This one is the page's colours reversed, so the
+   maintainer always sees which side of the site this is. */
+.admin-header {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.admin-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--space-5);
+  min-block-size: 3.5rem;
+  padding-block: var(--space-2);
+}
+
+.admin-brand {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  font-weight: 700;
+  line-height: var(--line-tight);
+}
+
+/* "Administration", as a light label on the dark band. */
+.admin-brand__zone {
+  padding: 0.15em 0.5em;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+.admin-session {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-4);
+  font-size: var(--text-sm);
+}
+
+/* A long account name wraps instead of pushing the page wider than a phone. */
+.admin-session__user {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-session a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--tap);
+  color: inherit;
+  font-weight: 600;
+}
+
+/* On the dark band the focus ring and the button take the light colour. */
+.admin-header :focus-visible {
+  outline-color: var(--color-bg);
+}
+
+.admin-session .button {
+  border-color: var(--color-bg);
+  background: transparent;
+  color: var(--color-bg);
+}
+
+.admin-session .button:hover,
+.admin-session .button:active {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* ---------- Page ---------- */
+
+.admin-login {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  max-inline-size: var(--measure);
+}
+
+.lede {
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+}
+
+.hint {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+main h1 {
+  margin-block-end: var(--space-4);
+}
+
+.admin-login h1 {
+  margin-block-end: 0;
+}
+
+/* A heading or a message that received focus by script is not something to tap: no ring. */
+main [tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* Two tabs with long labels: equal halves, and a label may take two lines on a narrow phone. */
+.admin-tabs .tab {
+  flex: 1 1 0;
+  justify-content: center;
+  white-space: normal;
+  text-align: center;
+}
+
+.tab-panel > h2 {
+  margin-block-end: var(--space-4);
+}
+
+.admin-footer {
+  padding-block: var(--space-4);
+  border-block-start: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* The padding makes the link tall enough to tap. */
+.admin-footer a {
+  display: inline-block;
+  padding-block: var(--space-3);
+}
+
+/* ---------- Buttons ---------- */
+
+/* The main action of a screen: "Se connecter", "Publier". */
+.button--primary {
+  border-color: var(--color-link);
+  background: var(--color-link);
+  color: var(--color-bg);
+}
+
+.button--primary:hover,
+.button--primary:active {
+  border-color: var(--color-link-hover);
+  background: var(--color-link-hover);
+  color: var(--color-bg);
+}
+
+/* A deletion that cannot be undone. */
+.button--danger {
+  border-color: var(--color-error-text);
+  background: var(--color-error-text);
+  color: var(--color-bg);
+}
+
+.button--danger:hover,
+.button--danger:active {
+  background: var(--color-error-text);
+  color: var(--color-bg);
+  text-decoration: underline;
+}
+
+/* A button that cannot be used yet. The text beside it says what is missing. */
+.button:disabled {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+/* ---------- Messages ---------- */
+
+/* What happened and what to do next. The fill marks the message; the transparent edge shows only
+   where a system setting removes backgrounds. */
+.note {
+  display: grid;
+  gap: var(--space-1);
+  max-inline-size: var(--measure);
+  margin-block-end: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+}
+
+.note--ok {
+  background: var(--color-ok-bg);
+  color: var(--color-ok-text);
+}
+
+.note--warn {
+  background: var(--color-notice-bg);
+  color: var(--color-notice-text);
+}
+
+.note--error {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.note--info {
+  background: var(--color-accent-surface);
+  color: var(--color-text);
+}
+
+.note__title {
+  font-weight: 700;
+}
+
+.note ul {
+  padding-inline-start: var(--space-5);
+}
+
+.note a {
+  color: inherit;
+  font-weight: 600;
+}
+
+.note__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-2);
+}
+
+.admin-login .note {
+  margin-block-end: 0;
+}

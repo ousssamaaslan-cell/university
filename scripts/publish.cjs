@@ -45,11 +45,14 @@ add('css/styles.css');
 add('data/resources.json');
 addAssetTree('js', ['.js']);
 addAssetTree('assets', ['.svg', '.png', '.jpg', '.jpeg', '.webp', '.ico']);
-// The admin form at /admin. Its files are named one by one, so nothing else placed in admin/ is published.
+// The admin dashboard at /admin, then the former Decap form kept at /admin/decap as a temporary backup.
+// The files are named one by one, so nothing else placed in admin/ is published.
 // Nothing here is secret: the GitHub login goes through Netlify, which keeps the OAuth secret.
 for (const file of [
-  'index.html', 'admin.js', 'catalogue-rules.js', 'github-commit.js',
-  'decap-cms.js', 'decap-cms.js.LICENSE.txt', 'decap-cms.LICENSE.txt'
+  'index.html', 'admin.css', 'admin.js', 'ui.js', 'local-preview.js',
+  'catalogue-rules.js', 'github-commit.js', 'netlify-auth.js',
+  'decap/index.html', 'decap/admin.js',
+  'decap/decap-cms.js', 'decap/decap-cms.js.LICENSE.txt', 'decap/decap-cms.LICENSE.txt'
 ]) add(`admin/${file}`);
 
 const catalogue = JSON.parse(fs.readFileSync(path.join(root, 'data', 'resources.json'), 'utf8'));

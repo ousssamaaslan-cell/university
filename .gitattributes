@@ -2,4 +2,4 @@
 *.sh text eol=lf
 *.pdf binary
 # The vendored Decap CMS bundle is kept byte for byte (its hash is in vendor-manifest.json) and is never diffed.
-admin/decap-cms.js binary
+admin/decap/decap-cms.js binary

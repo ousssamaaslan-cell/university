@@ -1,7 +1,10 @@
-// Checks the admin form's save without a browser and without GitHub:
+// Checks the admin without a browser, without Netlify and without GitHub:
 //   1. admin/catalogue-rules.js: what a save writes, and what it refuses;
 //   2. admin/github-commit.js: the commit, against a stand-in for GitHub's API;
-//   3. scripts/doctor.cjs: it accepts what the admin commits and stops what must never be published.
+//   3. admin/netlify-auth.js: the login exchange, against a stand-in for the browser window;
+//   4. scripts/doctor.cjs: it accepts what the admin commits and stops what must never be published.
+// The first tests are those of the former Decap form at /admin/decap, which still saves through
+// the same rules; the dashboard's own tests follow them.
 // Run from anywhere: node scripts/test-admin.cjs. No npm packages required.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -13,6 +16,7 @@ const {spawnSync} = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const rules = require('../admin/catalogue-rules.js');
 const gitHubStore = require('../admin/github-commit.js');
+const netlifyAuth = require('../admin/netlify-auth.js');
 
 const text = {fr: 'Titre', ar: 'عنوان'};
 const serialize = catalogue => JSON.stringify(catalogue, null, 2) + '\n';
@@ -168,8 +172,9 @@ test('removing a document removes its PDF in the same change', () => {
 test('the commit message names what changed', () => {
   const message = plan => rules.commitMessage({added: [], updated: [], removed: [], ...plan});
   assert.equal(message({added: ['asd3-td-02']}), 'Admin: add asd3-td-02');
-  assert.equal(message({updated: ['asd3-td-03']}), 'Admin: update asd3-td-03');
-  assert.equal(message({added: ['a', 'b'], removed: ['c']}), 'Admin: add 2 documents, remove c\n\n+ a\n+ b\n- c');
+  assert.equal(message({updated: ['asd3-td-03']}), 'Admin: edit asd3-td-03');
+  assert.equal(message({removed: ['asd3-td-03']}), 'Admin: delete asd3-td-03');
+  assert.equal(message({added: ['a', 'b'], removed: ['c']}), 'Admin: add 2 documents, delete c\n\n+ a\n+ b\n- c');
   assert.equal(message({}), 'Admin: rewrite the catalogue in its usual layout');
 });
 
@@ -192,24 +197,52 @@ test('the form receives the documents and a fingerprint of the file it was loade
 });
 
 // A stand-in for the part of GitHub's REST API that admin/github-commit.js uses. It keeps blobs,
-// trees and commits in memory and refuses what GitHub refuses: a bad token, removing a file that is
-// not there, and moving the branch to a commit that does not descend from it.
+// trees and commits in memory and refuses what GitHub refuses: a bad token, a write by an account
+// that may only read, removing a file that is not there, and moving the branch to a commit that
+// does not descend from it. Two accounts exist: "secret-token" may write, "reader-token" may not.
 function fakeGitHub(files) {
-  const blobs = new Map(), trees = new Map(), commits = new Map(), requests = [];
+  const blobs = new Map(), trees = new Map(), commits = new Map(), folders = new Map(), requests = [];
+  const accounts = {'token secret-token': {login: 'responsable', push: true}, 'token reader-token': {login: 'lecteur', push: false}};
   let counter = 0;
   const sha = () => (++counter).toString(16).padStart(40, '0');
   const store = (map, value) => { const id = sha(); map.set(id, value); return id; };
   const firstTree = new Map(Object.entries(files).map(([file, content]) => [file, store(blobs, Buffer.from(content))]));
   const state = {head: store(commits, {tree: store(trees, firstTree), parents: [], message: 'start'})};
-  const answer = (status, body) => new Response(typeof body === 'string' ? body : JSON.stringify(body), {status});
+  const answer = (status, body) => new Response(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body), {status});
   const descendsFrom = (commit, ancestor) => commit === ancestor || (commits.get(commit)?.parents ?? []).some(parent => descendsFrom(parent, ancestor));
+  // Trees are kept flat here (path -> blob). GitHub lists one folder at a time, each folder with a sha of its own.
+  const folderSha = (tree, name) => {
+    const key = `${tree}:${name}`;
+    if (!folders.has(key)) folders.set(key, sha());
+    return folders.get(key);
+  };
 
   async function fetch(url, options) {
     requests.push({url, ...options});
-    if (options.headers.Authorization !== 'token secret-token') return answer(401, {message: 'Bad credentials'});
-    const route = `${options.method} ${url.replace('https://api.github.test/repos/owner/site', '')}`;
+    const account = accounts[options.headers.Authorization];
+    if (!account) return answer(401, {message: 'Bad credentials'});
+    const route = `${options.method} ${url.replace('https://api.github.test', '').replace('/repos/owner/site', '')}`;
     const body = options.body ? JSON.parse(options.body) : null;
     let match;
+    if (route === 'GET /user') return answer(200, {login: account.login});
+    if (route === 'GET ') return answer(200, {full_name: 'owner/site', permissions: {pull: true, push: account.push}});
+    // GitHub hides a write behind "Not Found" when the account may only read.
+    if (options.method !== 'GET' && !account.push) return answer(404, {message: 'Not Found'});
+    if ((match = route.match(/^GET \/git\/trees\/(\w+)(\?recursive=1)?$/))) {
+      const folder = [...folders].find(([, id]) => id === match[1]);
+      if (folder) {
+        const [tree, name] = folder[0].split(':');
+        const inside = [...trees.get(tree)].filter(([file]) => file.startsWith(`${name}/`));
+        return answer(200, {tree: inside.map(([file, blob]) => ({path: file.slice(name.length + 1), type: 'blob', sha: blob, size: blobs.get(blob).length}))});
+      }
+      const top = new Map();
+      for (const [file, blob] of trees.get(match[1])) {
+        const name = file.split('/')[0];
+        top.set(name, name === file ? {path: name, type: 'blob', sha: blob, size: blobs.get(blob).length} : {path: name, type: 'tree', sha: folderSha(match[1], name)});
+      }
+      return answer(200, {tree: [...top.values()]});
+    }
+    if ((match = route.match(/^GET \/git\/blobs\/(\w+)$/))) return blobs.has(match[1]) ? answer(200, blobs.get(match[1])) : answer(404, {message: 'Not Found'});
     if (route === 'GET /git/ref/heads/main') return answer(200, {object: {sha: state.head}});
     if ((match = route.match(/^GET \/contents\/(.+)\?ref=(\w+)$/))) {
       const blob = trees.get(commits.get(match[2]).tree).get(match[1]);
@@ -260,7 +293,7 @@ test('GitHub: the catalogue, the new PDF and the removed PDF go into one commit'
   assert.equal(files['README.md'], 'readme');
   const commit = github.commits.get(github.state.head);
   assert.deepEqual(commit.parents, [before]);
-  assert.equal(commit.message, 'Admin: add asd3-td-02, remove ao-cours-ch01\n\n+ asd3-td-02\n- ao-cours-ch01');
+  assert.equal(commit.message, 'Admin: add asd3-td-02, delete ao-cours-ch01\n\n+ asd3-td-02\n- ao-cours-ch01');
   // Arabic titles survive the round trip, and no answer may come from the browser's cache.
   assert.equal(JSON.parse(files['data/resources.json']).resources[0].title.ar, 'عنوان');
   assert.ok(github.requests.every(request => request.cache === 'no-store'));
@@ -284,7 +317,132 @@ test('GitHub: a refused session, a missing session and a dead connection are exp
   await assert.rejects(offline.read(), /GitHub est injoignable/);
   const github = fakeGitHub(startFiles());
   const current = await connect(github).read();
-  await assert.rejects(connect(github).commit({head: current.head, raw: 'x', files: [], deletes: ['pdfs/absent.pdf'], message: 'm'}), /GitHub a refusé la demande \(422 : GitRPC::BadObjectState\)/);
+  await assert.rejects(connect(github).commit({head: current.head, raw: 'x', files: [], deletes: ['pdfs/S3/asd3/absent.pdf'], message: 'm'}), /GitHub a refusé la demande \(422 : GitRPC::BadObjectState\)/);
+});
+
+// ---------- The dashboard at /admin ----------
+
+const rejection = async promise => {
+  try { await promise; } catch (error) { return error; }
+  throw new Error('The promise was expected to be rejected');
+};
+
+test('GitHub: the account and its right to write are read; each refusal says what kind it is', async () => {
+  const github = fakeGitHub(startFiles());
+  assert.deepEqual(await connect(github).user(), {login: 'responsable'});
+  assert.equal(await connect(github).canWrite(), true);
+  assert.deepEqual(await connect(github, 'reader-token').user(), {login: 'lecteur'});
+  assert.equal(await connect(github, 'reader-token').canWrite(), false);
+
+  assert.equal((await rejection(connect(github, 'expired').user())).kind, 'session');
+  assert.equal((await rejection(connect(github, null).read())).kind, 'session');
+  const offline = gitHubStore.create({fetch: async () => { throw new TypeError('Failed to fetch'); }, apiRoot: 'https://api.github.test', repo: 'owner/site', branch: 'main', getToken: async () => 'secret-token'});
+  assert.equal((await rejection(offline.read())).kind, 'network');
+
+  // An account that may only read: the list loads, a save is refused as a lack of access, and nothing moves.
+  const reader = connect(github, 'reader-token');
+  const current = await reader.read();
+  const refused = await rejection(reader.commit({head: current.head, raw: current.raw, files: [], deletes: [], message: 'm'}));
+  assert.equal(refused.kind, 'access');
+  assert.equal(github.state.head, current.head);
+
+  // The token travels in the Authorization header only: never in an address, never in a body.
+  for (const request of github.requests) {
+    assert.equal(request.url.includes('secret-token'), false);
+    assert.equal((request.body ?? '').includes('secret-token'), false);
+  }
+});
+
+test('GitHub: only the catalogue and PDFs in their module folder can be written or removed', async () => {
+  const github = fakeGitHub(startFiles());
+  const store = connect(github);
+  const current = await store.read();
+  const before = github.requests.length;
+  const escapes = [
+    'pdfs/../README.md', 'pdfs/S3/asd3/../../../README.md', '../pdfs/S3/asd3/a.pdf', '/pdfs/S3/asd3/a.pdf', 'pdfs\\S3\\asd3\\a.pdf',
+    'README.md', 'data/resources.json', 'js/home.js', 'admin/admin.js', 'netlify.toml', 'pdfs/a.pdf', 'pdfs/S3/a.pdf',
+    'pdfs/S5/asd3/a.pdf', 'pdfs/S3/asd3/sous-dossier/a.pdf', 'pdfs/S3/asd3/a.txt', 'pdfs/S3/asd3/A.pdf', 'pdfs/S3/asd3/a b.pdf', 'pdfs/S3/asd3/.pdf', ''
+  ];
+  for (const escape of escapes) {
+    assert.equal(gitHubStore.isPdfPath(escape), false, escape);
+    const written = await rejection(store.commit({head: current.head, raw: current.raw, files: [{path: escape, base64: 'JVBERi0='}], deletes: [], message: 'm'}));
+    const removed = await rejection(store.commit({head: current.head, raw: current.raw, files: [], deletes: [escape], message: 'm'}));
+    assert.deepEqual([written.kind, removed.kind], ['path', 'path'], escape);
+  }
+  // Each one was refused before any request left for GitHub.
+  assert.equal(github.requests.length, before);
+  assert.equal(github.state.head, current.head);
+  assert.equal(gitHubStore.isPdfPath('pdfs/S3/asd3/asd3-td-03.pdf'), true);
+  assert.equal(gitHubStore.isPdfPath('pdfs/S4/poo2/poo2-examen-2024-2025-emd-2.pdf'), true);
+});
+
+// A stand-in for the browser window during the login: it records the window that was opened and
+// lets a test post messages and run the timers by hand.
+function fakeWindow({blocked = false} = {}) {
+  const listeners = new Set();
+  const timers = new Map();
+  let nextTimer = 0;
+  const popup = {closed: false, received: [], postMessage(data, origin) { this.received.push({data, origin}); }, close() { this.closed = true; }, focus() {}};
+  const window = {
+    screen: {width: 1280, height: 800},
+    opened: null,
+    open(address, name, features) { this.opened = {address, name, features}; return blocked ? null : popup; },
+    addEventListener: (type, listener) => { if (type === 'message') listeners.add(listener); },
+    removeEventListener: (type, listener) => listeners.delete(listener),
+    setInterval: callback => { timers.set(++nextTimer, callback); return nextTimer; },
+    setTimeout: callback => { timers.set(++nextTimer, callback); return nextTimer; },
+    clearInterval: id => timers.delete(id)
+  };
+  return {
+    window, popup, listeners,
+    post: (data, origin = 'https://api.netlify.com') => { for (const listener of [...listeners]) listener({data, origin}); },
+    runTimers: () => { for (const callback of [...timers.values()]) callback(); }
+  };
+}
+
+test('login: the Netlify window is opened for this site and scope, greeted, and its token returned', async () => {
+  const browser = fakeWindow();
+  const login = netlifyAuth.create({window: browser.window, siteId: 'exemple.netlify.app'}).login({scope: 'public_repo'});
+  assert.equal(browser.window.opened.address, 'https://api.netlify.com/auth?provider=github&site_id=exemple.netlify.app&scope=public_repo');
+  assert.equal(browser.window.opened.name, 'Netlify Authorization');
+
+  // Messages from anywhere else are ignored, and so is a result that comes before the greeting.
+  browser.post('authorization:github:success:{"token":"stolen"}', 'https://evil.example');
+  browser.post('authorizing:github', 'https://evil.example');
+  browser.post('authorization:github:success:{"token":"early"}');
+  browser.post({not: 'a string'});
+  assert.deepEqual(browser.popup.received, []);
+
+  browser.post('authorizing:github');
+  assert.deepEqual(browser.popup.received, [{data: 'authorizing:github', origin: 'https://api.netlify.com'}]);
+  browser.post('authorization:github:success:{"token":"abc123","provider":"github"}');
+  assert.equal(await login, 'abc123');
+  assert.equal(browser.popup.closed, true);
+  assert.equal(browser.listeners.size, 0);
+});
+
+test('login: a blocked window, a refusal and a closed window are told apart', async () => {
+  const blocked = fakeWindow({blocked: true});
+  assert.equal((await rejection(netlifyAuth.create({window: blocked.window, siteId: 'a.netlify.app'}).login({scope: 'public_repo'}))).kind, 'blocked');
+
+  for (const answer of ['authorization:github:error:{"message":"access_denied"}', 'authorization:github:success:{"provider":"github"}', 'authorization:github:success:pas du JSON']) {
+    const browser = fakeWindow();
+    const login = netlifyAuth.create({window: browser.window, siteId: 'a.netlify.app'}).login({scope: 'public_repo'});
+    browser.post('authorizing:github');
+    browser.post(answer);
+    assert.equal((await rejection(login)).kind, 'refused', answer);
+    assert.equal(browser.listeners.size, 0);
+  }
+
+  const closed = fakeWindow();
+  const login = netlifyAuth.create({window: closed.window, siteId: 'a.netlify.app'}).login({scope: 'public_repo'});
+  closed.runTimers();
+  assert.equal(closed.listeners.size, 1, 'an open window keeps the login waiting');
+  closed.popup.closed = true;
+  closed.runTimers();
+  closed.runTimers();
+  assert.equal((await rejection(login)).kind, 'cancelled');
+  assert.equal(closed.listeners.size, 0);
 });
 
 // The doctor reads the project folder it lives in, so it is run on a throwaway copy of the project.
@@ -396,6 +554,30 @@ test('the doctor stops a credential in a published file and a publish folder oth
   project.write('netlify.toml', toml.replace('publish = ".netlify-publish"', 'publish = "."'));
   assert.match(project.doctor().errors.join('\n'), /netlify\.toml: publish must be "\.netlify-publish"/);
   project.write('netlify.toml', toml);
-  project.remove('admin/decap-cms.js');
-  assert.match(project.doctor().errors.join('\n'), /Missing admin\/decap-cms\.js/);
+  // A file added to admin/ later is read too, wherever it sits.
+  project.write('admin/decap/extra.js', `const token = '${token}';\n`);
+  assert.match(project.doctor().errors.join('\n'), /admin\/decap\/extra\.js: contains what looks like a GitHub token/);
+  project.remove('admin/decap/extra.js');
+  project.remove('admin/decap/decap-cms.js');
+  assert.match(project.doctor().errors.join('\n'), /Missing admin\/decap\/decap-cms\.js/);
+});
+
+test('the doctor keeps the admin out of the student pages and out of search engines', t => {
+  const project = projectCopy(t);
+  assert.deepEqual(project.doctor().errors, []);
+  const home = project.read('index.html');
+  project.write('index.html', home.replace('</main>', '<a href="admin/">Administration</a></main>'));
+  assert.match(project.doctor().errors.join('\n'), /index\.html: student pages must not link to or mention the admin/);
+  project.write('index.html', home);
+  const toml = project.read('netlify.toml');
+  project.write('netlify.toml', toml.replace('X-Robots-Tag = "noindex, nofollow"', 'X-Robots-Tag = "all"'));
+  assert.match(project.doctor().errors.join('\n'), /netlify\.toml: \/admin\/\* must be sent with X-Robots-Tag/);
+  project.write('netlify.toml', toml);
+  for (const page of ['admin/index.html', 'admin/decap/index.html']) {
+    const html = project.read(page);
+    project.write(page, html.replace('<meta name="robots" content="noindex, nofollow" />', ''));
+    assert.match(project.doctor().errors.join('\n'), new RegExp(`${page.replaceAll('/', '\\/').replace('.', '\\.')}: an admin page must carry`));
+    project.write(page, html);
+  }
+  assert.deepEqual(project.doctor().errors, []);
 });
