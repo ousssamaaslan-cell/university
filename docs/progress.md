@@ -40,6 +40,12 @@ Choices made while building. Say so if you prefer otherwise.
 - **"Termes recommandés" opens `docs/content-model.md` on GitHub,** because the repository's documents are not published on the site.
 - **The project instructions were updated** (`.claude/CLAUDE.md` and the rules) where they still described Decap as the admin.
 
+Verified on the published site after the push (commit `0b05e18`), with requests that only read: `/admin/` and `/admin/decap/` answer with `noindex`, the 14 admin scripts, stylesheet, and licence files are byte for byte the repository's, the bundle's old address and the repository's documents answer 404, and the home page does not mention the admin.
+
+That look found one defect, fixed in a follow-up commit: Netlify sends PDFs compressed, so the length a browser is given is not the file's size, and the dashboard would never have said "En ligne ✓" after a replaced PDF. It now goes by the server's mark of the content and by the file itself.
+
+To decide, on the student side (not changed in this phase): on the published site the module page shows "PDF" without a size, for the same reason. On a local preview it shows "PDF, 210 ko".
+
 Not verified, because it can only be done on the published site with your GitHub account: the login, a real addition, edit, replacement and deletion, and "En ligne ✓" against the real Netlify. The checklist is in the last message of the session and in `docs/qa-report.md`.
 
 Known and left as is:

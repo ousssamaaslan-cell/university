@@ -649,7 +649,7 @@ test('dashboard, add on GitHub: the record and the PDF go into one commit, for e
     const files = github.filesAtHead();
     assert.equal(files[result.plan.record.pdfPath], new TextDecoder().decode(bytes));
     assert.equal(files['data/resources.json'], result.plan.raw);
-    assert.deepEqual(result.pdf, {path: result.plan.record.pdfPath, size: bytes.length, sha: await flow.gitBlobSha(bytes)});
+    assert.deepEqual(result.pdf, {path: result.plan.record.pdfPath, sha: await flow.gitBlobSha(bytes)});
   }
   assert.deepEqual(github.history(), ['Admin: add ao-examen-2025-2026-final', 'Admin: add asd3-tp-01', 'Admin: add asd3-td-02', 'Admin: add asd3-cours-ch02', 'start']);
   assert.deepEqual(JSON.parse(github.filesAtHead()['data/resources.json']).resources.map(resource => resource.id),
@@ -821,7 +821,8 @@ function fakeSite(catalogue) {
     if (path === 'data/resources.json') return new Response(typeof site.catalogue === 'string' ? site.catalogue : serialize(site.catalogue), {status: site.catalogue === null ? 404 : 200});
     const file = site.files.get(path);
     if (!file) return new Response('', {status: 404});
-    const headers = {...(file.noLength ? {} : {'content-length': String(file.bytes.length)}), ...(file.etag ? {etag: file.etag} : {})};
+    // As Netlify does for a browser, the length announced may be that of a compressed copy, not the file's.
+    const headers = {'content-length': String(file.announcedLength ?? file.bytes.length), ...(file.etag ? {etag: file.etag} : {})};
     return new Response(options.method === 'HEAD' ? null : file.bytes, {status: 200, headers});
   };
   return site;
@@ -861,37 +862,38 @@ test('deployment: the public catalogue says when an addition, an edit or a delet
   assert.equal(await live(site, {absent: ['asd3-td-01']}), false);
 });
 
-test('deployment: a replaced PDF is recognised by its size, by the server\'s mark, or by its content', async () => {
+test('deployment: a replaced PDF is recognised by the server\'s mark and by its content, never by its announced length', async () => {
   const start = fixture();
   const path = 'pdfs/S3/asd3/asd3-td-01.pdf';
   const oldBytes = pdfOf('ancienne version');
   const newBytes = pdfOf('nouvelle version, plus longue');
-  const expected = async (bytes, before) => ({present: [record(start, 'asd3-td-01')], pdf: {path, size: bytes.length, sha: await flow.gitBlobSha(bytes), before}});
+  const expected = async (bytes, before) => ({present: [record(start, 'asd3-td-01')], pdf: {path, sha: await flow.gitBlobSha(bytes), before}});
   const site = fakeSite(start);
+  const pdfRequests = () => site.requests.filter(request => request.url.endsWith('.pdf')).map(request => request.method ?? 'GET');
 
-  // The catalogue is unchanged by a replacement, so it cannot be the sign: the old file is still served.
+  // The catalogue is unchanged by a replacement, so it cannot be the sign. While the server's mark
+  // is the one seen before the commit, the old file is still served: one header request, no download.
   site.files.set(path, {bytes: oldBytes, etag: '"old"'});
-  assert.equal(await live(site, await expected(newBytes, {size: oldBytes.length, etag: '"old"'})), false);
+  assert.equal(await live(site, await expected(newBytes, {etag: '"old"'})), false);
+  assert.deepEqual(pdfRequests(), ['HEAD']);
+  // The mark changed: the file is read once and compared with the one that was sent.
   site.files.set(path, {bytes: newBytes, etag: '"new"'});
-  assert.equal(await live(site, await expected(newBytes, {size: oldBytes.length, etag: '"old"'})), true);
-  // Sizes differ: a header request was enough, the file was not downloaded.
-  assert.deepEqual(site.requests.filter(request => request.url.endsWith('.pdf')).map(request => request.method), ['HEAD', 'HEAD']);
+  assert.equal(await live(site, await expected(newBytes, {etag: '"old"'})), true);
+  assert.deepEqual(pdfRequests(), ['HEAD', 'HEAD', 'GET']);
 
-  // Same size as before: the server's mark of the content tells the two files apart.
-  const sameSize = pdfOf('nouvelle version');
-  assert.equal(sameSize.length, oldBytes.length);
-  site.files.set(path, {bytes: oldBytes, etag: '"old"'});
-  assert.equal(await live(site, await expected(sameSize, {size: oldBytes.length, etag: '"old"'})), false);
-  site.files.set(path, {bytes: sameSize, etag: '"new"'});
-  assert.equal(await live(site, await expected(sameSize, {size: oldBytes.length, etag: '"old"'})), true);
+  // Netlify sends PDFs compressed: the length a browser is given is not the file's size. Seen on the
+  // published site on 2026-10-10: 190,904 announced for a file of 210,089 bytes. It must not matter.
+  site.files.set(path, {bytes: newBytes, etag: '"new"', announcedLength: newBytes.length - 19});
+  assert.equal(await live(site, await expected(newBytes, {etag: '"old"'})), true);
+  site.files.set(path, {bytes: oldBytes, etag: '"old-compressed"', announcedLength: newBytes.length});
+  assert.equal(await live(site, await expected(newBytes, {etag: '"old"'})), false, 'a new mark on the old content is not the new file');
 
-  // No mark and no earlier measure: the file itself is compared with the one that was sent.
+  // No mark, or no look before the commit: the file itself is compared.
   site.files.set(path, {bytes: oldBytes});
-  assert.equal(await live(site, await expected(sameSize, null)), false);
-  site.files.set(path, {bytes: sameSize});
-  assert.equal(await live(site, await expected(sameSize, null)), true);
-  site.files.set(path, {bytes: sameSize, noLength: true});
-  assert.equal(await live(site, await expected(sameSize, {size: null, etag: null})), true);
+  assert.equal(await live(site, await expected(newBytes, null)), false);
+  site.files.set(path, {bytes: newBytes});
+  assert.equal(await live(site, await expected(newBytes, null)), true);
+  assert.equal(await live(site, await expected(newBytes, {etag: null})), true);
   // A PDF the public site does not serve yet.
   site.files.delete(path);
   assert.equal(await live(site, await expected(newBytes, null)), false);

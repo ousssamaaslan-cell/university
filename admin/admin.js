@@ -128,12 +128,11 @@ function setDeployment(state) {
   }
 }
 
+// The server's mark of a public file's content (its ETag), or null when there is none to read.
 async function publicFile(path) {
   try {
     const response = await fetch(`../${path}`, {method: 'HEAD', cache: 'no-store'});
-    if (!response.ok) return null;
-    const length = response.headers.get('content-length');
-    return {size: length === null ? null : Number(length), etag: response.headers.get('etag')};
+    return response.ok ? {etag: response.headers.get('etag')} : null;
   } catch {
     return null;
   }

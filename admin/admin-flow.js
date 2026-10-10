@@ -35,7 +35,7 @@
 
   // Makes one change, in one commit. Returns {changed, plan, commit, attempts, pdf}; changed is
   // false, and nothing is committed, when the change leaves the repository as it is. pdf is the
-  // file that was sent, {path, size, sha}, or null when none was.
+  // file that was sent, {path, sha}, or null when none was.
   //   change   what catalogue-rules.js planChange takes; change.pdf is {name} when a file was chosen
   //   readPdf  gives the chosen file's bytes as a Uint8Array; it is called once
   // It throws an error with a kind: one of github-commit.js, or 'invalid', 'file', 'duplicate' or
@@ -62,7 +62,7 @@
           deletes: plan.deletes,
           message: rules.commitMessage(plan)
         });
-        const sent = plan.writes.length ? {path: plan.writes[0].to, size: pdf.facts.size, sha: pdf.facts.sha} : null;
+        const sent = plan.writes.length ? {path: plan.writes[0].to, sha: pdf.facts.sha} : null;
         return {changed: true, plan, commit, attempts: attempt, pdf: sent};
       } catch (error) {
         // The branch moved between the read and the commit: read it again and apply the change
@@ -76,9 +76,11 @@
   // Builds the question "does the public site show this change yet?":
   //   present  records the public catalogue must hold, exactly as they were saved
   //   absent   the ids it must no longer hold
-  //   pdf      for a PDF replaced at the same address: {path, size, sha, before}, before being
-  //            {size, etag} of the public file just before the commit; null otherwise
+  //   pdf      for a PDF replaced at the same address: {path, sha, before}, before being {etag},
+  //            the server's mark of the public file just before the commit; null otherwise
   // fetch and siteRoot are those of the public site: this never asks GitHub.
+  // The file's size is not used: Netlify sends PDFs compressed, and the length a browser is given
+  // is that of the compressed copy.
   function liveCheck({fetch, siteRoot, present = [], absent = [], pdf = null}) {
     return async function isLive() {
       try {
@@ -94,13 +96,11 @@
         const address = `${siteRoot}${pdf.path}`;
         const head = await fetch(address, {method: 'HEAD', cache: 'no-store'});
         if (!head.ok) return false;
-        const length = head.headers.get('content-length');
-        if (length !== null && Number(length) !== pdf.size) return false;
-        if (length !== null && pdf.before && pdf.before.size !== null && pdf.before.size !== pdf.size) return true;
-        // Same size as the old file: the server's own mark of the content tells them apart.
+        // The server's mark of the content has not changed: it is still the old file. This look
+        // costs one header request and downloads nothing.
         const etag = head.headers.get('etag');
-        if (etag && pdf.before && pdf.before.etag) return etag !== pdf.before.etag;
-        // No other sign: read the file and compare it with the one that was sent.
+        if (etag && pdf.before && pdf.before.etag && etag === pdf.before.etag) return false;
+        // The mark changed, or there is none to go by: read the file and compare it with the one sent.
         const body = await fetch(address, {cache: 'no-store'});
         return body.ok && await gitBlobSha(new Uint8Array(await body.arrayBuffer())) === pdf.sha;
       } catch {
