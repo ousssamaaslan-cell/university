@@ -31,6 +31,7 @@ The sections below this one are records of their day and still describe the Arab
 | Console | Passed | No script error and no warning from the pages. The only failed requests were expected: the 404 page's own status, the report form's `POST` to a local server, and the PDF left out of the copy on purpose. |
 | axe-core | Passed | axe-core 4.10.2 on 18 states (home, module with exams, module with a missing file, search with and without results, report, 404, the admin form, and the admin list, at 375 and 1280): no violation. It was loaded into the test browser only. |
 | Keyboard | Passed, short check | On the home page Tab goes to the skip link, the site name, the search field, "Rechercher", then the first module, with the 3px focus ring. The tabs' arrow keys are in the module row above. |
+| Published site after the push | Passed | With GET and HEAD requests only, a few minutes after commit `0e0e77d` was pushed: the published catalogue is the repository's; the stylesheet, the 14 scripts under `js/`, and the 11 admin scripts and stylesheet are byte for byte the repository's; the five pages and the two admin pages differ from the repository's only by the four lines Netlify adds to every page (a comment and its own badge script); none of these files holds an Arabic character; `js/lang.js` answers 404; the PDF answers 200 as `application/pdf`; `module.html?id=poo1&lang=ar` answers the French page; an unknown address answers 404 with the 404 page; `/admin/` and `/admin/decap/` answer with `X-Robots-Tag: noindex, nofollow`; the repository's documents and scripts answer 404. No page was opened in a browser on the published site. |
 
 Test counts, for the record: 206 scripted checks on the student pages and 65 on the admin. Six of them failed as first written, and each was the script's own expectation: four expected an ordinary no-break space before "ko" where the browser writes a narrow one, and two expected the row's number on its own line at 375, where it runs on before the title by design. Each was looked at again by hand.
 
@@ -38,7 +39,7 @@ Seen, not changed: in "Mes documents" a title is shown as typed, so on a phone a
 
 Not verified:
 
-- The published site after the push. See the note under this list once it is done.
+- The published pages in a browser: they were compared file by file with the repository (row above), not opened and clicked through.
 - The GitHub login and a real addition, edit, and deletion on the published site: they need the maintainer's GitHub account.
 - A real sending of the report form.
 - Dark mode, contrast, and 320 and 640px were not looked at again; no colour or size changed.

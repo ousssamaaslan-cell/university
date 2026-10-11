@@ -39,7 +39,9 @@ Choices made while removing. Say so if you prefer otherwise.
 - **The stylesheets keep logical properties** (`margin-inline` and the like). Rewriting them as left and right would change every rule for no visible difference.
 - **The maintainer's document keeps its French title as typed,** "programmation oriente objet"; only its Arabic title was removed.
 
-Checks are in `docs/qa-report.md`, "French only".
+Checks are in `docs/qa-report.md`, "French only". After the push (commit `0e0e77d`), the published site was compared with the repository by requests that only read: it serves the new catalogue, pages, scripts, and admin, `js/lang.js` is gone, and no published file holds Arabic text.
+
+For the maintainer: reload `/admin/` once before the next use (Ctrl+F5), so the browser does not keep the former form with its two title fields. Then try one addition, one edit, and one deletion there; that part can only be checked with your GitHub account.
 
 ## Phase 7 — admin dashboard — 2026-10-10
 
