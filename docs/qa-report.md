@@ -1,5 +1,49 @@
 # QA report — L2 study resources
 
+## French only — 2026-10-10 (Arabic version removed)
+
+Environment: Windows 10, Node 24.11, Chrome driven by Playwright at 375 by 812 and 1280 by 800. Two small local static servers were used, which answer like Netlify for a folder address, an unknown address (`404.html` with status 404), and a `HEAD` request:
+
+- **Repository**: the site as committed, with its one document.
+- **Throwaway copy**: the same pages and scripts in a temporary folder outside the repository, with 15 test documents (Cours, TD, TP, and exams of two years and both sessions, and one record without its PDF), so the four tabs and the filters had something to show. It was deleted afterwards; nothing of it is in the repository.
+
+The sections below this one are records of their day and still describe the Arabic version where it existed then.
+
+| Check | Status | Evidence and limit |
+| --- | --- | --- |
+| Catalogue and project doctor | Passed | `node scripts/doctor.cjs`: `ok: true`, 2 semesters, 7 modules, 1 resource, 0 samples, 48 vendored files verified. |
+| Catalogue content unchanged apart from the format | Passed | The new `data/resources.json` is byte for byte the file of the tag `before-french-only` with every `{ "fr", "ar" }` pair replaced by its French text, rebuilt by a script and compared. |
+| Save rules, commit, login, deployment watch | Passed | `node scripts/test-admin.cjs`: 42 tests pass, on fixtures in the new format. An empty title and the former two-language pair are refused by the rules and by the doctor. |
+| Publish copy | Passed | `node scripts/publish.cjs` makes 40 files, the list in `docs/published-files.md`. No Arabic character is left in its pages, scripts, stylesheets, or catalogue (the vendored Decap bundle, which carries its own translations, was not read). |
+| Every page in French, `lang="fr"` | Passed | On the home, module, search, report, and 404 pages, at both widths: `<html lang="fr">` with no `dir` attribute, no Arabic character, no direction mark, no `<bdi>`, no language switch, no `lang=` in a link or a form, and nothing stored in the browser for a language. Each file as served has no Arabic text and loads `js/old-browser.js`; `js/lang.js` answers 404. |
+| Header | Passed | It holds the site name and the search field. At 375 the name is on the first row and the search on the second; at 1280 they share one row. Its height is the height the stylesheet reserves for it (109px at 375, 69px at 1280), values this change did not touch. Screenshots looked at. |
+| Home | Passed | Semestre 3 with its 7 modules and their codes, Semestre 4 "Bientôt disponible", the footer with the date and "Signaler une erreur". No horizontal overflow at either width. |
+| Module page, four tabs | Passed on the copy | Cours, TD, TP, Examens in one row with their counts; rows in order, with the file sizes; "Avec corrigé" as the badge; a TP's year shown. Right and Left arrows move between the tabs and wrap, Home and End jump, and the address follows the open tab. On the repository's site, POO1 shows its TP with "PDF, 210 ko", the title opens the PDF (200, `application/pdf`, 210,089 bytes) and "Télécharger" carries the `download` attribute. |
+| Exam filters | Passed on the copy | Newest year first under its heading; the two filters side by side; a year, a year with a session, a session alone, and the reset, each with the right exams, the count, and the address; the reset returns the focus to the first filter; a shared link opens the same tab and filters. |
+| Empty and error states | Passed on the copy | An empty tab, a module without documents, an unknown module, and a record whose PDF is missing ("Fichier indisponible" with the report link carrying the document's name). |
+| Search | Passed on the copy | "asd3" (1 module, 12 documents), "asd3 td 3" and "chapitre 2" (one document each), "donnees" and "complexite" (accents ignored), "rattrapage 2024-2025", "travaux pratiques", no result, one character, nothing typed, typing in the field on the results page, and Enter from the home page (`search.html?q=architecture`, no other parameter). |
+| Report form | Passed locally; sending blocked | French title, labels, and button, now read from `report.html` alone; the module and the document are filled in from the link; `noindex`. The local server takes no form, so the page showed "L'envoi a échoué…" and gave the button its label back. A real sending needs Netlify. |
+| 404 page | Passed | An unknown address answers 404 with "Page introuvable"; its links and its search form point to the site root. |
+| An old `?lang=ar` link | Passed | It opens the French page, and the page's own links do not carry the parameter. |
+| Admin: add | Passed on the local preview | At both widths: seven steps, the fifth with one field, "Titre du document"; a Cours, a TD, a TP with a year, and an exam added, each with the expected ID; the preview shows the ID, the path, and one row; the missing list names the one title; the duplicate warning names the existing document by its title. |
+| Admin: Mes documents, edit, delete | Passed on the local preview | At both widths: five documents in the site's order with one title each; search by title, without accents, by number, and by module; the type filter; an edit of the title; an empty title stops the save; a replaced PDF; one deletion with its confirmation; three deletions together. No horizontal overflow at 375. |
+| Decap backup | Passed on the local preview, 1280 only | It lists "POO1 · TP 2 · programmation oriente objet", shows one "Titre" field, and a changed title is saved as a plain string in the catalogue's usual layout (in the tab's copy). Its editor needs 800px, as before. |
+| Console | Passed | No script error and no warning from the pages. The only failed requests were expected: the 404 page's own status, the report form's `POST` to a local server, and the PDF left out of the copy on purpose. |
+| axe-core | Passed | axe-core 4.10.2 on 18 states (home, module with exams, module with a missing file, search with and without results, report, 404, the admin form, and the admin list, at 375 and 1280): no violation. It was loaded into the test browser only. |
+| Keyboard | Passed, short check | On the home page Tab goes to the skip link, the site name, the search field, "Rechercher", then the first module, with the 3px focus ring. The tabs' arrow keys are in the module row above. |
+
+Test counts, for the record: 206 scripted checks on the student pages and 65 on the admin. Six of them failed as first written, and each was the script's own expectation: four expected an ordinary no-break space before "ko" where the browser writes a narrow one, and two expected the row's number on its own line at 375, where it runs on before the title by design. Each was looked at again by hand.
+
+Seen, not changed: in "Mes documents" a title is shown as typed, so on a phone a colon can start a line ("Listes chaînées" / ": définitions"). The student pages keep the colon with its word. It was the same before this change.
+
+Not verified:
+
+- The published site after the push. See the note under this list once it is done.
+- The GitHub login and a real addition, edit, and deletion on the published site: they need the maintainer's GitHub account.
+- A real sending of the report form.
+- Dark mode, contrast, and 320 and 640px were not looked at again; no colour or size changed.
+- A real phone, a real screen reader, Safari, Firefox, and real browser zoom at 200%.
+
 ## Phase 7 verification — 2026-10-10 (admin dashboard)
 
 Environment: Windows 10, Node 24.11, Chrome driven by Playwright at 375 by 812 and 1280 by 800 (layout also at 320 and 640), in light and dark mode. The pages were served by a small local static server, from the repository and, for the last check, from `.netlify-publish`. The browser scripts were temporary and are not in the repository; `scripts/test-admin.cjs` is.
