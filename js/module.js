@@ -5,9 +5,9 @@
 //   year=2024-2025            the academic-year filter (Examens only)
 //   session=normal|rattrapage the session filter (Examens only)
 import {el} from './dom.js';
-import {t, tCount, localized, pageUrl} from './i18n.js';
+import {t, tCount, typeset, pageUrl} from './i18n.js';
 import {RESOURCE_TYPES, SESSIONS, loadCatalogue, findModule, findSemester, resourcesOf, sortedResources, semesterAnchor} from './catalogue.js';
-import {renderLayout, renderBreadcrumb, renderCatalogueFacts, renderFooter, setDescription, setNoIndex, homeCrumb, updateLanguageLinks} from './layout.js';
+import {renderLayout, renderBreadcrumb, renderCatalogueFacts, renderFooter, setDescription, setNoIndex, homeCrumb} from './layout.js';
 import {moduleCode, loadingState, loadErrorState, emptyState, actionLink} from './components.js';
 import {createTabs} from './tabs.js';
 import {resourceList} from './resource-list.js';
@@ -33,9 +33,8 @@ function setParams(changes) {
   try {
     history.replaceState(null, '', url);
   } catch (error) {
-    return;
+    // Refused: nothing else to do.
   }
-  updateLanguageLinks();
 }
 
 // A labelled <select> for one filter, 'year' or 'session'. `options` is a list of [value, text].
@@ -43,7 +42,7 @@ function selectField(name, options) {
   const id = `filter-${name}`;
   const select = el('select', {id},
     [['', t('filter.all')], ...options].map(([value, text]) =>
-      el('option', {value, selected: value === filters[name], dir: name === 'year' && value ? 'ltr' : null}, text))
+      el('option', {value, selected: value === filters[name]}, text))
   );
   return {name, select, field: el('div', {class: 'field'}, el('label', {for: id}, t(`filter.${name}`)), select)};
 }
@@ -53,7 +52,7 @@ function examsByYear(exams) {
   const years = [...new Set(exams.map(exam => exam.academicYear))];
   return years.map(year =>
     el('section', {class: 'year-group'},
-      el('h2', {class: 'year-group__title'}, el('bdi', {}, year)),
+      el('h2', {class: 'year-group__title'}, year),
       resourceList(exams.filter(exam => exam.academicYear === year))
     )
   );
@@ -129,16 +128,17 @@ function modulePage(catalogue, module) {
   const semester = findSemester(catalogue, module.semester);
   const total = resourcesOf(catalogue, module.id).length;
 
-  document.title = t('module.docTitle', {abbr: module.abbr, title: localized(module.title)});
-  setDescription(t('module.description', {abbr: module.abbr, title: localized(module.title)}));
+  const name = typeset(module.title.fr);
+  document.title = t('module.docTitle', {abbr: module.abbr, title: name});
+  setDescription(t('module.description', {abbr: module.abbr, title: name}));
   renderBreadcrumb([
     homeCrumb(),
-    {label: localized(semester.label), href: pageUrl('index.html', {}, semesterAnchor(semester.id))}
+    {label: typeset(semester.label.fr), href: pageUrl('index.html', {}, semesterAnchor(semester.id))}
   ]);
 
   // The semester is in the breadcrumb and each tab shows its own count, so the title stands alone.
   const header = el('header', {class: 'page-header'},
-    el('h1', {}, moduleCode(module, {large: true}), ' ', localized(module.title))
+    el('h1', {}, moduleCode(module, {large: true}), ' ', name)
   );
 
   if (total === 0) {
@@ -180,7 +180,7 @@ function modulePage(catalogue, module) {
   });
   drawPanel(first, tabs.panel);
   // Tidy the address on arrival: an unknown type is dropped, and so are exam filters when
-  // another tab is open. A shared link and the language switch then carry only what is shown.
+  // another tab is open. A shared link then carries only what is shown.
   setParams({type: RESOURCE_TYPES.includes(requested) ? requested : '', ...(first === 'examen' ? {} : {year: '', session: ''})});
 
   return [header, tabs.tablist, tabs.panel];

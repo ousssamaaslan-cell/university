@@ -2,7 +2,7 @@
 // published. It offers only what docs/content-model.md allows: lists and number fields for every
 // fixed value. admin/catalogue-rules.js checks everything again when the change is saved.
 import {el} from '../js/dom.js';
-import {everyLanguage} from '../js/i18n.js';
+import {t} from '../js/i18n.js';
 import {button, note, focusOn, countLabel, markerOf, sizeLabel, TYPE_LABELS, TYPE_GROUP_LABELS, KIND_LABELS} from './ui.js';
 
 const MEMORY_KEY = 'l2-admin-last-choice';
@@ -50,14 +50,6 @@ const valuesOf = resource => ({
 
 // A whole number of one or two digits, at least `minimum`: a chapter or a sheet number.
 const isWhole = (text, minimum) => /^\d{1,2}$/.test(String(text).trim()) && Number(text) >= minimum;
-
-// "14 ko" or "1,4 Mo", written as the French or the Arabic page writes it (js/i18n.js).
-function sizeText(bytes, language) {
-  const inMegabytes = bytes >= 1000 * 1000;
-  return new Intl.NumberFormat(language === 'ar' ? 'ar-DZ' : 'fr-DZ', {
-    style: 'unit', unit: inMegabytes ? 'megabyte' : 'kilobyte', unitDisplay: 'short', maximumFractionDigits: inMegabytes ? 1 : 0
-  }).format(inMegabytes ? bytes / (1000 * 1000) : Math.max(1, bytes / 1000));
-}
 
 // One choice among a few, drawn as a large button: a radio button underneath, so the arrow keys
 // and screen readers treat the group as the single choice it is.
@@ -337,49 +329,34 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
   // ----- Step 7: what will be published, before it is.
   const previewBox = el('div', {class: 'preview'});
 
-  // Keeps Latin words in an Arabic title in their own direction, as js/resource-list.js does.
-  function titleContent(title, language) {
-    if (language !== 'ar') return title;
-    const parts = [];
-    let start = 0;
-    for (const match of title.matchAll(/[A-Za-z][A-Za-z0-9+#]*/g)) {
-      if (match.index > start) parts.push(title.slice(start, match.index));
-      parts.push(el('bdi', {dir: 'ltr'}, match[0]));
-      start = match.index + match[0].length;
-    }
-    if (start < title.length) parts.push(title.slice(start));
-    return parts;
-  }
-
-  // The document's row as the module page will draw it, in French or in Arabic, with the site's
-  // own classes and labels. It is a picture of the row: nothing in it can be clicked.
-  function previewRow(language) {
-    const say = (key, placeholders = {}) => everyLanguage(key, placeholders)[language === 'ar' ? 1 : 0];
+  // The document's row as the module page will draw it, with the site's own classes and labels.
+  // It is a picture of the row: nothing in it can be clicked.
+  function previewRow() {
     const type = values.type;
     const number = type === 'cours' ? values.chapter : values.number;
-    const marker = type === 'examen' ? null : say(`marker.${type}`, {n: isWhole(number, type === 'cours' ? 0 : 1) ? Number(number) : '…'});
-    const title = (language === 'ar' ? values.titleAr : values.titleFr).trim();
+    const marker = type === 'examen' ? null : t(`marker.${type}`, {n: isWhole(number, type === 'cours' ? 0 : 1) ? Number(number) : '…'});
+    const title = values.titleFr.trim();
     const facts = [];
     if (type === 'examen') {
-      if (values.examKind && values.examKind !== 'rattrapage') facts.push(say(`kind.${values.examKind}`));
-      if (values.session) facts.push(say(`session.${values.session}`));
+      if (values.examKind && values.examKind !== 'rattrapage') facts.push(t(`kind.${values.examKind}`));
+      if (values.session) facts.push(t(`session.${values.session}`));
     } else if (values.academicYear) {
-      facts.push(el('bdi', {}, values.academicYear));
+      facts.push(values.academicYear);
     }
     if (type !== 'cours') {
-      facts.push(values.hasCorrection ? el('span', {class: 'fact__badge'}, say(type === 'tp' ? 'correction.tp.yes' : 'correction.yes')) : say('correction.no'));
+      facts.push(values.hasCorrection ? el('span', {class: 'fact__badge'}, t(type === 'tp' ? 'correction.tp.yes' : 'correction.yes')) : t('correction.no'));
     }
     const size = values.file?.size ?? (editing ? app.snapshot.files.get(resource.pdfPath)?.size : null);
-    facts.push(size ? [el('bdi', {}, 'PDF'), say('list.separator'), el('bdi', {}, sizeText(size, language))] : el('bdi', {}, 'PDF'));
-    return el('div', {class: 'preview__page', lang: language, dir: language === 'ar' ? 'rtl' : 'ltr'},
-      type === 'examen' && el('p', {class: 'year-group__title'}, el('bdi', {}, values.academicYear || '…')),
+    facts.push(size ? sizeLabel(size) : 'PDF');
+    return el('div', {class: 'preview__page'},
+      type === 'examen' && el('p', {class: 'year-group__title'}, values.academicYear || '…'),
       el('div', {class: marker ? 'resource resource--marked' : 'resource'},
         el('div', {class: 'resource__link'},
-          marker && el('bdi', {class: 'resource__marker'}, marker),
+          marker && el('span', {class: 'resource__marker'}, marker),
           marker && ' ',
-          el('span', {class: 'resource__title'}, title ? titleContent(title, language) : (language === 'ar' ? '(العنوان بالعربية)' : '(titre en français)'))
+          el('span', {class: 'resource__title'}, title || '(titre en français)')
         ),
-        el('span', {class: 'button resource__download', 'aria-hidden': 'true'}, say('action.download')),
+        el('span', {class: 'button resource__download', 'aria-hidden': 'true'}, t('action.download')),
         el('ul', {class: 'facts', role: 'list'}, facts.map(fact => el('li', {class: 'fact'}, fact)))
       )
     );
@@ -399,9 +376,8 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
         el('dd', {}, draft ? el('code', {}, draft.pdfPath) : '—')
       ),
       renamedIf && renamedIf.id !== resource.id && el('p', {class: 'hint'}, `Ce document garde son identifiant et son nom de fichier d'origine. Pour qu'ils suivent le nouveau numéro ou la nouvelle année, supprimez-le, puis ajoutez-le de nouveau.`),
-      values.type && module && el('p', {class: 'preview__caption'}, `Sur la page du module ${module.abbr}, onglet ${TYPE_GROUP_LABELS[values.type]}, en français puis en arabe :`),
-      values.type && module && previewRow('fr'),
-      values.type && module && previewRow('ar')
+      values.type && module && el('p', {class: 'preview__caption'}, `Sur la page du module ${module.abbr}, onglet ${TYPE_GROUP_LABELS[values.type]} :`),
+      values.type && module && previewRow()
     ].filter(Boolean));
   }
 

@@ -1,7 +1,6 @@
 /*
-  L2 resource library. One stylesheet serves French (LTR) and Arabic (RTL):
-  use logical properties (inline/block, start/end), never left/right.
-  The token values are explained in docs/design-system.md.
+  L2 resource library. The token values are explained in docs/design-system.md.
+  The rules are written with logical properties (inline/block, start/end); keep to them.
 */
 
 /* ---------- Tokens ---------- */
@@ -78,13 +77,6 @@
     --color-error-bg: #3d1a1a;
     --color-error-text: #ffb1b1;
   }
-}
-
-/* Arabic needs its own font order and more room between lines. */
-:root:lang(ar) {
-  --font-sans: system-ui, "Segoe UI", "Noto Sans Arabic", "Geeza Pro", Tahoma, Arial, sans-serif;
-  --line: 1.8;
-  --line-tight: 1.45;
 }
 
 /* ---------- Base ---------- */
@@ -228,17 +220,11 @@ main:focus {
 
 /* ---------- Site header ---------- */
 
-/* Two rows on a phone: the site name with the language switch, then the search field.
-   One row on a wide screen. */
+/* Two rows on a phone: the site name, then the search field. One row on a wide screen. */
 .site-header {
-  /* Holds the space before js/layout.js fills it, so the page does not jump.
-     Arabic lines are taller, so the Arabic header reserves a little more at each width. */
+  /* Holds the space before js/layout.js fills it, so the page does not jump. */
   min-block-size: 6.8125rem;
   border-block-end: 1px solid var(--color-border);
-}
-
-:root:lang(ar) .site-header {
-  min-block-size: 6.9625rem;
 }
 
 .site-header__inner {
@@ -251,7 +237,7 @@ main:focus {
 
 .site-brand {
   display: grid;
-  /* Takes the room the language switch leaves, so both share the first row. */
+  /* Takes the first row on a phone, and the room the search field leaves on a wide screen. */
   flex: 1 1 0;
   align-content: center;
   min-inline-size: 0;
@@ -288,10 +274,6 @@ main:focus {
     min-block-size: 7.3125rem;
   }
 
-  :root:lang(ar) .site-header {
-    min-block-size: 7.77rem;
-  }
-
   .site-header__inner {
     column-gap: var(--space-5);
     padding-block: var(--space-3);
@@ -304,35 +286,6 @@ main:focus {
   .site-brand__org {
     display: block;
   }
-}
-
-.lang-switch ul {
-  display: flex;
-  gap: var(--space-1);
-}
-
-.lang-switch a {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: var(--tap);
-  padding-inline: var(--space-3);
-  border-block-end: 2px solid transparent;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.lang-switch a:hover {
-  background: var(--color-surface);
-}
-
-/* The current language is marked by a fill and an underline, not by colour alone. */
-.lang-switch a[aria-current="true"] {
-  border-block-end-color: var(--color-link);
-  border-end-start-radius: 0;
-  border-end-end-radius: 0;
-  background: var(--color-accent-surface);
-  color: var(--color-text);
 }
 
 /* The search field has its own row on a phone and joins the first row on a wide screen. */
@@ -365,10 +318,6 @@ main:focus {
 @media (min-width: 60rem) {
   .site-header {
     min-block-size: 4.3125rem;
-  }
-
-  :root:lang(ar) .site-header {
-    min-block-size: 4.77rem;
   }
 
   .site-search {
@@ -465,8 +414,7 @@ main {
 
 /* The abbreviation students use (ASD3, AO, POO1), set like a shelf mark: a solid block in the
    text colour. It is the only solid dark shape on the page, and it has no outline, because
-   outlines are kept for things that can be tapped.
-   It stays in Latin letters, left to right, in the Arabic view. */
+   outlines are kept for things that can be tapped. */
 .module-code {
   display: inline-block;
   min-inline-size: var(--code-column);
@@ -770,8 +718,7 @@ main {
 .tab:active,
 .module__link:active,
 .module__shortcut:active,
-a.resource__link:active,
-.lang-switch a:active {
+a.resource__link:active {
   background: var(--color-accent-surface);
 }
 
@@ -925,13 +872,9 @@ a.resource__link:visited .resource__title {
 }
 
 /* The file size is filled in after the page is drawn. Its place is wide enough from the start
-   for "PDF, 99,9 Mo" (in Arabic, "PDF، 999 كيلوبايت"), so filling it in never moves the row. */
+   for "PDF, 99,9 Mo", so filling it in never moves the row. */
 .fact--size {
   min-inline-size: calc(var(--fact-gap) + 5.75em);
-}
-
-:lang(ar) .fact--size {
-  min-inline-size: calc(var(--fact-gap) + 7.75em);
 }
 
 /* A document whose PDF is not on the server: the title is not a link, and this message
@@ -1128,7 +1071,7 @@ a.resource__link:visited .resource__title {
   padding: var(--space-4) var(--gutter);
 }
 
-/* For a browser too old to run the page scripts. js/lang.js marks it; every page carries the message. */
+/* For a browser too old to run the page scripts. js/old-browser.js marks it; every page carries the message. */
 .old-browser-note {
   display: none;
 }
@@ -1139,15 +1082,11 @@ a.resource__link:visited .resource__title {
 
 /* ---------- High-contrast mode ---------- */
 
-/* Windows high contrast removes fills and shadows and draws every border, so the open tab and
-   the current language need a mark of their own there. */
+/* Windows high contrast removes fills and shadows and draws every border, so the open tab
+   needs a mark of its own there. */
 @media (forced-colors: active) {
   .tab[aria-selected="true"] {
     border-block-end: 4px solid Highlight;
-  }
-
-  .lang-switch a:not([aria-current]) {
-    border-block-end-color: Canvas;
   }
 }
 

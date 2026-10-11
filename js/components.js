@@ -1,19 +1,18 @@
 // Small pieces of interface shared by several pages.
 import {el} from './dom.js';
-import {t, tCount, localized, pageUrl} from './i18n.js';
+import {t, tCount, typeset, pageUrl} from './i18n.js';
 import {resourcesOf} from './catalogue.js';
 
 // The module abbreviation (ASD3, AO...), shown next to the module name everywhere.
-// <bdi> keeps it left-to-right inside Arabic text.
 export function moduleCode(module, {large = false} = {}) {
-  return el('bdi', {class: large ? 'module-code module-code--lg' : 'module-code'}, module.abbr);
+  return el('span', {class: large ? 'module-code module-code--lg' : 'module-code'}, module.abbr);
 }
 
 // One line of a module list. The abbreviation and the name are one link to the module page.
 // After them come the number of documents and, when the module has exams, a shortcut that
 // opens the module page on its Examens tab.
 export function moduleRow(catalogue, module) {
-  const name = localized(module.title);
+  const name = typeset(module.title.fr);
   const hasExams = resourcesOf(catalogue, module.id, 'examen').length > 0;
   return el('li', {class: 'module'},
     el('a', {class: 'module__link', href: pageUrl('module.html', {id: module.id})},

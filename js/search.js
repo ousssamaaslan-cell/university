@@ -2,12 +2,11 @@
 //
 // Every word typed must appear somewhere in a module or a document: the module's abbreviation
 // or name, the type, the title, the year, the session... A sheet or chapter number typed after
-// its word ("td 3", "chapitre 2") must be the document's own number.
-// Both languages are searched whatever the page language, and accents are ignored.
+// its word ("td 3", "chapitre 2") must be the document's own number. Accents are ignored.
 import {el} from './dom.js';
-import {t, tCount, localized, pageUrl, everyLanguage} from './i18n.js';
+import {t, tCount, typeset, pageUrl} from './i18n.js';
 import {RESOURCE_TYPES, loadCatalogue, semestersOf, modulesOf, sortedResources} from './catalogue.js';
-import {renderLayout, renderCatalogueFacts, renderFooter, homeCrumb, updateLanguageLinks} from './layout.js';
+import {renderLayout, renderCatalogueFacts, renderFooter, homeCrumb} from './layout.js';
 import {moduleCode, moduleRow, loadingState, loadErrorState, emptyState, actionLink} from './components.js';
 import {resourceList} from './resource-list.js';
 
@@ -18,40 +17,30 @@ const TYPING_PAUSE = 200;
 
 const main = document.getElementById('main');
 
-// Makes two spellings comparable: "Données" and "donnees", "أنظمة" and "انظمه".
+// Makes two spellings comparable: "Données" and "donnees".
 function normalize(text) {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/\p{M}/gu, '') // accents, and Arabic vowel marks and hamza on a carrier letter
-    .replace(/\p{Cf}/gu, '') // invisible direction marks, which come along when text is pasted from a chat
-    .replace(/[٠-٩]/g, digit => String(digit.charCodeAt(0) - 0x0660)) // Arabic-Indic digits -> 0-9
-    .replace(/[۰-۹]/g, digit => String(digit.charCodeAt(0) - 0x06f0)) // Persian digits -> 0-9
-    .replace(/ـ/g, '') // tatweel, the stretching stroke
-    .replace(/ٱ/g, 'ا') // alef wasla -> alef
-    .replace(/ى/g, 'ي') // alef maqsura -> ya
-    .replace(/ة/g, 'ه') // ta marbuta -> ha
+    .replace(/\p{M}/gu, '') // accents
+    .replace(/\p{Cf}/gu, '') // invisible characters, which come along when text is pasted from a chat
     .replace(/œ/g, 'oe')
     .replace(/[’ʼ]/g, "'");
 }
 
 // Everything a reader might type to find this document.
 function documentWords(module, resource) {
-  const words = [
-    module.abbr, module.title.fr, module.title.ar,
-    resource.title.fr, resource.title.ar,
-    ...everyLanguage(`type.${resource.type}`)
-  ];
-  if (resource.type === 'cours') words.push(...everyLanguage('marker.cours', {n: resource.chapter}));
+  const words = [module.abbr, module.title.fr, resource.title.fr, t(`type.${resource.type}`)];
+  if (resource.type === 'cours') words.push(t('marker.cours', {n: resource.chapter}));
   if (resource.type === 'td' || resource.type === 'tp') {
-    words.push(...everyLanguage(`marker.${resource.type}`, {n: resource.number}), ...everyLanguage(`type.${resource.type}.name`));
+    words.push(t(`marker.${resource.type}`, {n: resource.number}), t(`type.${resource.type}.name`));
   }
   if (resource.type === 'examen') {
-    words.push(...everyLanguage('marker.examen'), ...everyLanguage(`session.${resource.session}`));
-    if (resource.examKind !== 'rattrapage') words.push(...everyLanguage(`kind.${resource.examKind}`));
+    words.push(t('marker.examen'), t(`session.${resource.session}`));
+    if (resource.examKind !== 'rattrapage') words.push(t(`kind.${resource.examKind}`));
   }
   if (resource.academicYear) words.push(resource.academicYear);
-  if (resource.hasCorrection) words.push(...everyLanguage(resource.type === 'tp' ? 'correction.tp.yes' : 'correction.yes'));
+  if (resource.hasCorrection) words.push(t(resource.type === 'tp' ? 'correction.tp.yes' : 'correction.yes'));
   return words;
 }
 
@@ -63,7 +52,7 @@ function buildIndex(catalogue) {
   return {
     modules: modules.map(({semester, module}) => ({
       module,
-      text: normalize([module.abbr, module.title.fr, module.title.ar, semester.id, semester.label.fr, semester.label.ar].join(' '))
+      text: normalize([module.abbr, module.title.fr, semester.id, semester.label.fr].join(' '))
     })),
     documents: modules.flatMap(({module}) =>
       RESOURCE_TYPES.flatMap(type =>
@@ -77,10 +66,10 @@ function buildIndex(catalogue) {
   };
 }
 
-// "td 3", "tp2", "chapitre 4", "الفصل 4": a sheet or a chapter asked for by its number.
+// "td 3", "tp2", "chapitre 4": a sheet or a chapter asked for by its number.
 // That number must then be the document's own. Left to the rule below, "3" would also match
 // the 3 of "ASD3", and "asd3 td 3" would list every TD of the module.
-const NUMBERED = /(?:^|\s)(td|tp|chapitre|الفصل)\s*(\d{1,2})(?=\s|$)/g;
+const NUMBERED = /(?:^|\s)(td|tp|chapitre)\s*(\d{1,2})(?=\s|$)/g;
 
 function find(index, query) {
   const wanted = normalize(query).trim();
@@ -127,7 +116,7 @@ function documentResults(documents, listedModules) {
         !alreadyNamed && el('h3', {},
           el('a', {class: 'module__link', href: pageUrl('module.html', {id: module.id})},
             moduleCode(module),
-            el('span', {class: 'module__title'}, localized(module.title))
+            el('span', {class: 'module__title'}, typeset(module.title.fr))
           )
         ),
         // Two modules often hold an exam with the same title; `context` adds the module's code to
@@ -148,14 +137,11 @@ function results(catalogue, index, query) {
     return {summary: '', content: [emptyState({title: t('search.short.title'), text: t('search.prompt.text')})]};
   }
 
-  // The typed words are shown back inside a sentence. These two invisible characters keep them in
-  // the order they were typed: without them an Arabic line would show "2024-2025" as "2025-2024".
-  const typed = `⁨${query}⁩`;
   const {modules, documents} = find(index, query);
   if (modules.length === 0 && documents.length === 0) {
     // The line under the heading says there is no result; what follows is only what to try next.
     return {
-      summary: t('search.none.title', {query: typed}),
+      summary: t('search.none.title', {query}),
       content: [
         el('p', {class: 'status'}, t('search.none.text')),
         el('p', {}, actionLink({href: pageUrl('index.html'), label: t('search.none.action')}))
@@ -168,7 +154,7 @@ function results(catalogue, index, query) {
     documents.length > 0 && tCount('count.documents', documents.length)
   ].filter(Boolean).join(t('list.separator'));
   return {
-    summary: t('search.status', {summary: counts, query: typed}),
+    summary: t('search.status', {summary: counts, query}),
     content: [
       modules.length > 0 && moduleResults(catalogue, modules),
       documents.length > 0 && documentResults(documents, modules)
@@ -217,7 +203,6 @@ async function start() {
       // Safari refuses this call when it is made very often; the results are drawn all the same.
       try {
         history.replaceState(null, '', url);
-        updateLanguageLinks();
       } catch (error) {
         // The address stays one step behind until the next search.
       }

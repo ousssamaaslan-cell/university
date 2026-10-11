@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" dir="ltr">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,7 +21,7 @@
     <meta name="twitter:image" content="/assets/social-preview.png" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/styles.css" />
-    <script src="js/lang.js"></script>
+    <script src="js/old-browser.js"></script>
     <script type="module" src="js/module.js"></script>
   </head>
   <body>
@@ -29,18 +29,12 @@
     <header class="site-header" data-site-header></header>
     <main id="main" tabindex="-1">
       <noscript>
-        <p class="noscript" lang="fr">
-          Ce site a besoin de JavaScript pour afficher la liste des modules et des documents.
-        </p>
-        <p class="noscript" lang="ar" dir="rtl">يحتاج هذا الموقع إلى JavaScript لعرض قائمة المقاييس والوثائق.</p>
+        <p class="noscript">Ce site a besoin de JavaScript pour afficher la liste des modules et des documents.</p>
       </noscript>
-      <!-- Shown only in a browser too old to run the page scripts: js/lang.js marks it, css/styles.css reveals this. -->
-      <p class="noscript old-browser-note" lang="fr">
+      <!-- Shown only in a browser too old to run the page scripts: js/old-browser.js marks it, css/styles.css reveals this. -->
+      <p class="noscript old-browser-note">
         Votre navigateur est trop ancien pour afficher ce site. Mettez-le à jour, ou ouvrez le site avec un navigateur
         récent.
-      </p>
-      <p class="noscript old-browser-note" lang="ar" dir="rtl">
-        متصفحك قديم ولا يستطيع عرض هذا الموقع. حدّثه، أو افتح الموقع بمتصفح حديث.
       </p>
     </main>
     <footer class="site-footer" data-site-footer></footer>

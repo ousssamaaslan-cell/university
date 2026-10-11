@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" dir="ltr">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,7 +19,7 @@
     <base href="/" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/styles.css" />
-    <script src="js/lang.js"></script>
+    <script src="js/old-browser.js"></script>
     <script type="module" src="js/not-found.js"></script>
   </head>
   <body>
@@ -27,16 +27,12 @@
     <header class="site-header" data-site-header></header>
     <main id="main" tabindex="-1">
       <noscript>
-        <p class="noscript" lang="fr">Page introuvable. Cette adresse ne correspond à aucune page du site.</p>
-        <p class="noscript" lang="ar" dir="rtl">الصفحة غير موجودة. هذا العنوان لا يطابق أي صفحة في الموقع.</p>
+        <p class="noscript">Page introuvable. Cette adresse ne correspond à aucune page du site.</p>
       </noscript>
-      <!-- Shown only in a browser too old to run the page scripts: js/lang.js marks it, css/styles.css reveals this. -->
-      <p class="noscript old-browser-note" lang="fr">
+      <!-- Shown only in a browser too old to run the page scripts: js/old-browser.js marks it, css/styles.css reveals this. -->
+      <p class="noscript old-browser-note">
         Page introuvable. Votre navigateur est trop ancien pour afficher ce site. Mettez-le à jour, ou ouvrez le site
         avec un navigateur récent.
-      </p>
-      <p class="noscript old-browser-note" lang="ar" dir="rtl">
-        الصفحة غير موجودة. متصفحك قديم ولا يستطيع عرض هذا الموقع. حدّثه، أو افتح الموقع بمتصفح حديث.
       </p>
     </main>
     <footer class="site-footer" data-site-footer></footer>

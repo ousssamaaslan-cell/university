@@ -1,8 +1,8 @@
 // Home page: every semester with its modules.
 import {el} from './dom.js';
-import {t, tCount, localized} from './i18n.js';
+import {t, tCount, typeset} from './i18n.js';
 import {loadCatalogue, semestersOf, modulesOf, semesterAnchor} from './catalogue.js';
-import {renderLayout, renderCatalogueFacts, renderFooter, setDescription} from './layout.js';
+import {renderLayout, renderCatalogueFacts, renderFooter} from './layout.js';
 import {moduleRow, loadingState, loadErrorState, emptyState} from './components.js';
 
 const main = document.getElementById('main');
@@ -19,7 +19,7 @@ function semesterSection(catalogue, semester) {
   const modules = modulesOf(catalogue, semester.id);
   return el('section', {class: 'section', id: anchor, 'aria-labelledby': `${anchor}-title`},
     el('div', {class: 'section__head'},
-      el('h2', {id: `${anchor}-title`}, localized(semester.label)),
+      el('h2', {id: `${anchor}-title`}, typeset(semester.label.fr)),
       modules.length > 0 && el('p', {class: 'section__count'}, tCount('count.modules', modules.length))
     ),
     modules.length > 0
@@ -29,8 +29,6 @@ function semesterSection(catalogue, semester) {
 }
 
 async function start() {
-  document.title = t('home.docTitle');
-  setDescription(t('home.description'));
   renderLayout({breadcrumb: []});
 
   const content = el('div', {class: 'page-width'}, pageHeader(), loadingState());

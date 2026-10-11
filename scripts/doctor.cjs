@@ -200,19 +200,6 @@ function checkCatalogue() {
   return {semesters: data.semesters.length, modules: data.modules.length, resources: data.resources.length, samples, status: 'checked'};
 }
 
-// js/i18n.js asks for the same keys in French and in Arabic. A key missing from one language
-// shows the other language's text, or the bare key, to students.
-function checkLabels() {
-  if (!exists('js/i18n.js')) return;
-  const text = fs.readFileSync(path.join(root, 'js/i18n.js'), 'utf8');
-  const start = text.search(/^ {2}fr: \{$/m), middle = text.search(/^ {2}ar: \{$/m), end = text.search(/^const pluralRules/m);
-  if (start === -1 || middle === -1 || end === -1) { fail('js/i18n.js: could not find the fr and ar blocks to compare their keys'); return; }
-  const keysOf = block => new Set([...block.matchAll(/^ {4}'([^']+)':/gm)].map(match => match[1]));
-  const fr = keysOf(text.slice(start, middle)), ar = keysOf(text.slice(middle, end));
-  for (const key of fr) if (!ar.has(key)) fail(`js/i18n.js: label "${key}" has no Arabic text`);
-  for (const key of ar) if (!fr.has(key)) fail(`js/i18n.js: label "${key}" has no French text`);
-}
-
 // Netlify publishes the allowlisted copy made by scripts/publish.cjs, never the repository root,
 // which also holds project documents and instructions. The admin form logs in through Netlify,
 // which keeps the GitHub OAuth secret; a secret or token pasted into a published file would be public.
@@ -253,7 +240,6 @@ function checkPublication() {
 }
 
 const catalogue = checkCatalogue();
-checkLabels();
 checkPublication();
 const result = {ok: errors.length === 0, active_skills: skills.length, agents: agents.length, verified_vendor_files: verifiedVendorFiles, catalogue, errors};
 if (require.main === module) {

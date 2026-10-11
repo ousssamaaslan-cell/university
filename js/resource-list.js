@@ -2,7 +2,7 @@
 // and a quiet line under the title gives the facts.
 // What a row shows depends on the resource type; see docs/content-model.md.
 import {el} from './dom.js';
-import {lang, t, localized, formatFileSize} from './i18n.js';
+import {t, typeset, formatFileSize} from './i18n.js';
 import {isSample} from './catalogue.js';
 import {checkFile} from './files.js';
 import {reportLink} from './components.js';
@@ -28,7 +28,7 @@ function facts(resource) {
     if (resource.examKind !== 'rattrapage') items.push(fact(t(`kind.${resource.examKind}`)));
     items.push(fact(t(`session.${resource.session}`)));
   } else if (resource.academicYear) {
-    items.push(fact(el('bdi', {}, resource.academicYear)));
+    items.push(fact(resource.academicYear));
   }
   if ('hasCorrection' in resource) {
     items.push(resource.hasCorrection
@@ -41,31 +41,15 @@ function facts(resource) {
 
 // The file type and size: "PDF, 14 ko". It is in the row from the start and keeps a fixed
 // minimum width (css/styles.css), so the row does not change height when the server answers with the size.
-// "PDF" and the size are isolated from each other: in Arabic the number must stay beside its unit.
 function sizeFact() {
   const size = el('span', {});
-  return {size, node: fact([el('bdi', {}, t('file.type')), size], 'size')};
-}
-
-// Keep Latin terms in an Arabic title in their own direction without changing the catalogue text.
-function titleContent(title) {
-  if (lang !== 'ar') return title;
-  const parts = [];
-  let start = 0;
-  for (const match of title.matchAll(/[A-Za-z][A-Za-z0-9+#]*/g)) {
-    if (match.index > start) parts.push(title.slice(start, match.index));
-    parts.push(el('bdi', {dir: 'ltr'}, match[0]));
-    start = match.index + match[0].length;
-  }
-  if (start < title.length) parts.push(title.slice(start));
-  return parts;
+  return {size, node: fact([t('file.type'), size], 'size')};
 }
 
 function resourceItem(resource, mixed, context) {
   const mark = markerText(resource, mixed);
-  const title = localized(resource.title);
-  // TD and TP keep their Latin abbreviation in Arabic, so the marker is isolated from right-to-left text.
-  const heading = () => [mark && el('bdi', {class: 'resource__marker'}, mark), mark && ' ', el('span', {class: 'resource__title'}, titleContent(title))];
+  const title = typeset(resource.title.fr);
+  const heading = () => [mark && el('span', {class: 'resource__marker'}, mark), mark && ' ', el('span', {class: 'resource__title'}, title)];
 
   // The title is the link that opens the PDF in the browser's own viewer. The number is inside the
   // link too: a bigger target to tap, and a link that names its document in full.
@@ -102,7 +86,7 @@ function resourceItem(resource, mixed, context) {
         reportLink({module: resource.module.toUpperCase(), document: `${documentName} (${resource.id})`, name: documentName})
       ));
     } else if (size) {
-      fileSize.size.replaceChildren(t('list.separator'), el('bdi', {}, formatFileSize(size)));
+      fileSize.size.textContent = `${t('list.separator')}${formatFileSize(size)}`;
     }
   });
 

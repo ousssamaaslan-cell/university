@@ -615,15 +615,6 @@ main code {
   background: var(--color-bg);
 }
 
-.preview__page + .preview__page {
-  margin-block-start: var(--space-2);
-}
-
-.preview__page[lang="ar"] {
-  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", "Geeza Pro", Tahoma, Arial, sans-serif;
-  line-height: 1.8;
-}
-
 .preview__page .resource {
   border-block-end: 0;
 }

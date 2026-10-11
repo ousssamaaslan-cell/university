@@ -1,8 +1,8 @@
-// The parts every page shares: skip link, header, language switch, search field, sample-data notice,
+// The parts every page shares: skip link, header, search field, sample-data notice,
 // breadcrumb and footer. Each page has an empty <header data-site-header> and
 // <footer data-site-footer>; this file fills them, so the markup lives in one place.
 import {el} from './dom.js';
-import {t, lang, languages, pageUrl, languageUrl, formatDate, DEFAULT_LANG} from './i18n.js';
+import {t, pageUrl, formatDate} from './i18n.js';
 import {isSample} from './catalogue.js';
 import {reportLink} from './components.js';
 
@@ -27,7 +27,6 @@ export function renderLayout({breadcrumb}) {
         el('span', {class: 'site-brand__name'}, t('site.name')),
         el('span', {class: 'site-brand__org'}, t('site.university'))
       ),
-      languageSwitch(),
       searchForm()
     )
   );
@@ -54,29 +53,6 @@ export function renderFooter(catalogue = null) {
   );
 }
 
-function languageSwitch() {
-  return el('nav', {class: 'lang-switch', 'aria-label': t('lang.label')},
-    el('ul', {role: 'list'},
-      languages.map(language => {
-        const link = el('a', {
-            href: languageUrl(language.code),
-            lang: language.code,
-            hreflang: language.code,
-            'aria-current': language.code === lang ? 'true' : null
-          }, language.name);
-        link.addEventListener('click', () => {
-          try {
-            localStorage.setItem('l2-resources-lang', language.code);
-          } catch (error) {
-            // The URL still carries this choice when storage is unavailable.
-          }
-        });
-        return el('li', {}, link);
-      })
-    )
-  );
-}
-
 // The search field, on every page. It is a plain form that opens search.html?q=..., so it works
 // with the Enter key and needs no script of its own. On search.html, js/search.js makes it live.
 function searchForm() {
@@ -92,16 +68,8 @@ function searchForm() {
       // Long enough for any real search, short enough for an address every host accepts.
       maxlength: '100'
     }),
-    // Keeps the results in the reader's language.
-    lang !== DEFAULT_LANG && el('input', {type: 'hidden', name: 'lang', value: lang}),
     el('button', {class: 'button', type: 'submit'}, t('search.submit'))
   );
-}
-
-// Call after the address changes without a reload (a tab or filter was chosen),
-// so that switching language keeps the reader on the same view.
-export function updateLanguageLinks() {
-  for (const link of document.querySelectorAll('.lang-switch a')) link.href = languageUrl(link.lang);
 }
 
 // Draws the breadcrumb under the header, replacing any earlier one.
@@ -145,7 +113,7 @@ function renderSampleNotice(catalogue) {
   );
 }
 
-// The page's description for search engines, in the page language.
+// The page's description for search engines.
 export function setDescription(text) {
   let meta = document.querySelector('meta[name="description"]');
   if (!meta) {

@@ -5,7 +5,6 @@ import {t, pageUrl} from './i18n.js';
 import {renderLayout, renderFooter, homeCrumb} from './layout.js';
 import {actionLink} from './components.js';
 
-document.title = t('notFound.docTitle');
 renderLayout({breadcrumb: [homeCrumb()]});
 // Nothing is loaded on this page, so the footer can be drawn at once.
 renderFooter();

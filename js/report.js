@@ -1,22 +1,10 @@
-// Static HTML lets Netlify detect the form at deploy time; this script adds translation,
-// prefilled document details, and an inline result after submission.
+// Static HTML lets Netlify detect the form at deploy time; this script adds the shared header
+// and footer, prefilled document details, and an inline result after submission.
 import {t} from './i18n.js';
-import {renderLayout, renderFooter, homeCrumb, setDescription} from './layout.js';
+import {renderLayout, renderFooter, homeCrumb} from './layout.js';
 
-document.title = t('report.docTitle');
-setDescription(t('report.description'));
 renderLayout({breadcrumb: [homeCrumb()]});
 renderFooter();
-
-for (const [selector, key] of Object.entries({
-  '[data-report-title]': 'report.title',
-  '[data-report-intro]': 'report.intro',
-  '[data-report-module]': 'report.module',
-  '[data-report-document]': 'report.document',
-  '[data-report-problem]': 'report.problem',
-  '[data-report-email]': 'report.email',
-  '[data-report-submit]': 'report.submit'
-})) document.querySelector(selector).textContent = t(key);
 
 const query = new URLSearchParams(location.search);
 for (const field of ['module', 'document']) {
@@ -26,6 +14,7 @@ for (const field of ['module', 'document']) {
 
 const form = document.querySelector('.report-form');
 const submit = form.querySelector('[type="submit"]');
+const submitLabel = submit.textContent;
 const result = document.querySelector('.report-result');
 
 form.addEventListener('submit', async event => {
@@ -50,6 +39,6 @@ form.addEventListener('submit', async event => {
     result.textContent = t('report.error');
     result.hidden = false;
     submit.disabled = false;
-    submit.textContent = t('report.submit');
+    submit.textContent = submitLabel;
   }
 });
