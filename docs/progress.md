@@ -8,6 +8,38 @@ State on 2026-10-10.
 - Phase 5 repository setup: Netlify configuration, a restricted publish copy, documentation, and an exact file manifest. The maintainer has since connected the repository; Netlify deploys `main` at `https://admirable-concha-bbf7df.netlify.app`.
 - Phase 6: an admin form at `/admin` (Decap CMS, GitHub login through Netlify). Built, tested locally, and pushed. The maintainer made the first real save on 2026-10-09 (commit `1f9efb9`); see "Phase 6" below.
 - Phase 7: a custom admin dashboard at `/admin`, in plain HTML, CSS, and JavaScript, with the Decap form moved to `/admin/decap` as a temporary backup. Built and tested on this computer, in seven commits. The GitHub login and a real save on the published site are the maintainer's test; see "Phase 7" below.
+- French only: the Arabic version was removed on 2026-10-10 at the maintainer's request, from the student pages, the catalogue, both admin forms, the checks, and the documents. See "French only" below. The sections after it are records of their day and still mention Arabic where it existed then.
+
+## French only — 2026-10-10
+
+Maintainer decision: the site is in French only. The students study in French, every document is in French, and the Arabic version made the site and every upload more complex.
+
+Before any change, the Git tag `before-french-only` was put on commit `327a825` and pushed. To see or restore the Arabic version: `git checkout before-french-only`.
+
+What changed:
+
+- **Student pages.** The language switch is gone from the header; on a phone the site name has the first row and the search field the second, at the same height as before. Every page is `<html lang="fr">`. `?lang=` is no longer read or added to links, and nothing is kept in the browser to remember a language. `js/i18n.js` holds the French labels only.
+- **Direction.** Removed: the Arabic font order and line heights, the taller Arabic header, the wider place for an Arabic file size, the mirrored arrow keys of the tabs, and the `<bdi>` elements and invisible Unicode marks that kept Latin text in order inside Arabic text. The module code and the row marker are now `<span>` elements with the same classes. The stylesheets keep their logical properties.
+- **Search.** It matches French text; the normalisation of Arabic letters and digits and the Arabic word for "chapitre" are removed. Accents are still ignored.
+- **`js/lang.js` is now `js/old-browser.js`.** Choosing the language was most of that file. What is left marks a browser too old to run the page scripts.
+- **Text written once.** The report form's labels, and the titles and descriptions of the home, report, and 404 pages, are in their HTML only; the scripts no longer write the same French text over them. The Arabic copies of the "JavaScript needed" and "old browser" messages are removed.
+- **Catalogue.** A semester label, a module name, and a document title are each one plain string. `data/resources.json` is the former file with every `{ "fr", "ar" }` pair replaced by its French text, and nothing else changed (checked by rebuilding it from the old file).
+- **Admin dashboard.** One title field, "Titre du document", in place of two; the link to the Arabic terms is gone. The preview shows the row once. "Mes documents", its search box, the confirmation, and the messages show the one title.
+- **Decap backup.** One "Titre" field in place of the two.
+- **Rules, doctor, tests.** `admin/catalogue-rules.js` refuses an empty title and the former pair. The doctor requires a label, a name, and a title to be non-empty text, and no longer compares the labels of two languages. `node scripts/test-admin.cjs` has the same 42 tests on the new format.
+- **Documents.** `docs/project-brief.md`, `docs/content-model.md` (the Arabic terminology section removed), `docs/design-system.md` (the direction rules removed), `README.md`, the `add-resource` skill, `.claude/CLAUDE.md`, five rules, three project skills, the design reviewer, the three templates, and `docs/published-files.md`. `docs/arabic-review.md` is deleted; it reviewed text that no longer exists.
+
+Not changed: the layout, the colours, the type sizes, the pages' addresses, the PDFs, the link previews (they were already in French), and `assets/social-preview.png`.
+
+Choices made while removing. Say so if you prefer otherwise.
+
+- **Titles are plain strings,** not an object with only `fr` in it. It is the simplest form, and the catalogue reads the same in a text editor.
+- **The label in the form is "Titre du document",** under the step "5. Titre".
+- **A `?lang=ar` link now opens the French page.** Nothing redirects or removes the parameter; the site's own links no longer carry it.
+- **The stylesheets keep logical properties** (`margin-inline` and the like). Rewriting them as left and right would change every rule for no visible difference.
+- **The maintainer's document keeps its French title as typed,** "programmation oriente objet"; only its Arabic title was removed.
+
+Checks are in `docs/qa-report.md`, "French only".
 
 ## Phase 7 — admin dashboard — 2026-10-10
 
@@ -71,7 +103,7 @@ What a student sees now: six modules say "Aucun document", POO1 has one TP, and 
 
 Left in place on purpose: the sample notice and the "Exemple" mark in the scripts, the doctor's sample count, and `scripts/make-sample-pdfs.cjs`. They do nothing without a `sample-` record. The rules and `docs/content-model.md` still describe the sample exception; they can be shortened once the maintainer says samples will not come back.
 
-To decide: the kept document has the French title "programmation oriente objet" and the Arabic title "سيبلاتنم", which is not a word. If it was a test, remove it in the admin form; if it is real, correct both titles there.
+To decide: the kept document has the title "programmation oriente objet". If it was a test, remove it in the admin; if it is real, correct its title there. (Its Arabic title, which was not a word, went with the Arabic version on 2026-10-10.)
 
 ## Phase 6 — admin form
 
@@ -243,4 +275,4 @@ For the maintainer:
 3. Add the real documents through `/admin/`.
 4. When the dashboard has been used for a while, ask for the Decap backup at `/admin/decap/` to be removed.
 
-Still open: form detection and email notifications for "Signaler une erreur" on Netlify, the review of the Arabic drafts, the S4 modules, and the final public address. Do not announce the site to students before real documents are in it.
+Still open: form detection and email notifications for "Signaler une erreur" on Netlify, the S4 modules, and the final public address. Do not announce the site to students before real documents are in it.

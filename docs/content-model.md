@@ -2,9 +2,11 @@
 
 `data/resources.json` is the single catalogue. It holds one top-level object with three arrays: `semesters`, `modules`, and `resources`. Only L2, S3, and S4 are in scope; the `level` field lets a future project extend the model without building other levels now.
 
+The site is in French only (`docs/project-brief.md`). A semester's `label`, a module's `title`, and a document's `title` are each one plain string of French text.
+
 Adding a document means two things only: drop the PDF in `pdfs/<semester>/<module-id>/` and add one record to `resources`. The pages render from the catalogue, so no HTML is edited.
 
-The admin dashboard at `/admin` does those two things for the maintainer. It asks for the semester, the module, the type, the fields of the type, both titles, and the PDF; on save it fills in `id`, `level`, `order`, and `pdfPath`, and commits the record and the file together. It also changes a document, replaces its PDF at the same path, and deletes a document with its PDF. Its rules are `admin/catalogue-rules.js`, which follows this document: when the model changes here, change that file, `scripts/doctor.cjs`, and `scripts/test-admin.cjs` with it. Semesters and modules are not in the dashboard.
+The admin dashboard at `/admin` does those two things for the maintainer. It asks for the semester, the module, the type, the fields of the type, the title, and the PDF; on save it fills in `id`, `level`, `order`, and `pdfPath`, and commits the record and the file together. It also changes a document, replaces its PDF at the same path, and deletes a document with its PDF. Its rules are `admin/catalogue-rules.js`, which follows this document: when the model changes here, change that file, `scripts/doctor.cjs`, and `scripts/test-admin.cjs` with it. Semesters and modules are not in the dashboard.
 
 An ID assigned by the dashboard is `<module>-cours-ch<NN>`, `<module>-td-<NN>`, `<module>-tp-<NN>`, or `<module>-examen-<academicYear>-<examKind>`, with two digits for the number. A Cours, TD, or TP that has an `academicYear` gets `-<academicYear>` at the end, and a second document with the same facts gets `-2`, then `-3`. `order` is the chapter or sheet number, and for an exam 1 for a contrôle, 2 for an EMD, 3 for an examen final, and 4 for a rattrapage. An edit keeps the `id` and the `pdfPath` even when the number or the year changes; `order` follows the new number unless it had been set by hand.
 
@@ -18,8 +20,10 @@ Before adding a document, the dashboard looks for one already at the same place:
 | `level` | Always `"L2"`. |
 | `semester` | `"S3"` or `"S4"`. |
 | `abbr` | The abbreviation students use, in capitals, for example `"ASD3"`. It is shown next to the name everywhere and is searchable. `id` is `abbr` in lowercase. |
-| `title` | `{ "fr": "...", "ar": "..." }`, the full module name. |
+| `title` | The full module name, a string. |
 | `order` | Integer position inside the semester. |
+
+A semester record has `id` (`"S3"` or `"S4"`), `level`, `label` (a string, for example `"Semestre 3"`), and `order`.
 
 ## Resources
 
@@ -41,7 +45,7 @@ Every resource has the same base fields:
 | `semester` | Same as the module's semester. |
 | `module` | The module `id`. |
 | `type` | `cours`, `td`, `tp`, or `examen`. |
-| `title` | `{ "fr": "...", "ar": "..." }`. The topic of the chapter or sheet, or a short name for the exam. Do not repeat "TD 3" or "Chapitre 2" in it; the page adds that from the number. |
+| `title` | A string: the topic of the chapter or sheet, or a short name for the exam. Do not repeat "TD 3" or "Chapitre 2" in it; the page adds that from the number. |
 | `pdfPath` | Relative path `pdfs/<semester>/<module-id>/<file>.pdf`, with no leading slash. |
 | `order` | Integer tie-breaker inside the same module and type. |
 
@@ -58,27 +62,7 @@ Each type then adds its own fields. A field that does not belong to the type is 
 
 `academicYear` is optional on Cours, TD, and TP so that two versions of the same sheet from different years can be told apart. Leave it out when there is only one version.
 
-## Arabic terminology
-
-Use these preferred terms when drafting future Arabic module and resource titles. Keep Arabic titles subject to the maintainer's review as described in `docs/project-brief.md`.
-
-| French term | Preferred Arabic term |
-| --- | --- |
-| graphes | الرسوم البيانية |
-| données | البيانات |
-| parcours | الاجتياز |
-| constructeurs | المنشئات |
-| interpolation | الاستيفاء |
-| dénombrement | مبادئ العدّ |
-| cartes de Karnaugh | خرائط كارنو |
-| modèle entité-relation | نموذج الكيان-العلاقة |
-| conceptuel | مفاهيمي |
-| implémentation | تنفيذ |
-| contrôle | اختبار |
-
-For a rattrapage exam title, use `امتحان استدراكي – جوان YYYY`, replacing `YYYY` with the exam year.
-
-### Display order and filters
+## Display order and filters
 
 | Type | Order | Filters on the module page |
 | --- | --- | --- |
@@ -100,15 +84,7 @@ The schema describes the catalogue format. It does not verify that a module ID i
   "required": ["semesters", "modules", "resources"],
   "additionalProperties": false,
   "$defs": {
-    "localizedText": {
-      "type": "object",
-      "required": ["fr", "ar"],
-      "additionalProperties": false,
-      "properties": {
-        "fr": { "type": "string", "minLength": 1 },
-        "ar": { "type": "string", "minLength": 1 }
-      }
-    },
+    "text": { "type": "string", "minLength": 1 },
     "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
   },
   "properties": {
@@ -121,7 +97,7 @@ The schema describes the catalogue format. It does not verify that a module ID i
         "properties": {
           "id": { "enum": ["S3", "S4"] },
           "level": { "const": "L2" },
-          "label": { "$ref": "#/$defs/localizedText" },
+          "label": { "$ref": "#/$defs/text" },
           "order": { "type": "integer", "minimum": 0 }
         }
       }
@@ -137,7 +113,7 @@ The schema describes the catalogue format. It does not verify that a module ID i
           "level": { "const": "L2" },
           "semester": { "enum": ["S3", "S4"] },
           "abbr": { "type": "string", "pattern": "^[A-Z][A-Z0-9]*$" },
-          "title": { "$ref": "#/$defs/localizedText" },
+          "title": { "$ref": "#/$defs/text" },
           "order": { "type": "integer", "minimum": 0 }
         }
       }
@@ -154,7 +130,7 @@ The schema describes the catalogue format. It does not verify that a module ID i
           "semester": { "enum": ["S3", "S4"] },
           "module": { "$ref": "#/$defs/slug" },
           "type": { "enum": ["cours", "td", "tp", "examen"] },
-          "title": { "$ref": "#/$defs/localizedText" },
+          "title": { "$ref": "#/$defs/text" },
           "pdfPath": { "type": "string", "pattern": "^pdfs/(S3|S4)/[a-z0-9-]+/[a-z0-9-]+\\.pdf$" },
           "order": { "type": "integer", "minimum": 0 },
           "chapter": { "type": "integer", "minimum": 0 },
@@ -200,7 +176,7 @@ These four records show the shape of each type. The titles and files are example
     "module": "asd3",
     "type": "cours",
     "chapter": 2,
-    "title": { "fr": "Titre du chapitre", "ar": "عنوان الفصل" },
+    "title": "Titre du chapitre",
     "pdfPath": "pdfs/S3/asd3/asd3-cours-ch02.pdf",
     "order": 2
   },
@@ -211,7 +187,7 @@ These four records show the shape of each type. The titles and files are example
     "module": "asd3",
     "type": "td",
     "number": 3,
-    "title": { "fr": "Sujet de la série", "ar": "موضوع السلسلة" },
+    "title": "Sujet de la série",
     "hasCorrection": true,
     "pdfPath": "pdfs/S3/asd3/asd3-td-03.pdf",
     "order": 3
@@ -223,7 +199,7 @@ These four records show the shape of each type. The titles and files are example
     "module": "asd3",
     "type": "tp",
     "number": 2,
-    "title": { "fr": "Sujet du TP", "ar": "موضوع العمل التطبيقي" },
+    "title": "Sujet du TP",
     "hasCorrection": false,
     "pdfPath": "pdfs/S3/asd3/asd3-tp-02.pdf",
     "order": 2
@@ -237,7 +213,7 @@ These four records show the shape of each type. The titles and files are example
     "academicYear": "2024-2025",
     "session": "normal",
     "examKind": "emd",
-    "title": { "fr": "Examen de janvier 2025", "ar": "امتحان جانفي 2025" },
+    "title": "Examen de janvier 2025",
     "hasCorrection": true,
     "pdfPath": "pdfs/S3/asd3/asd3-examen-2024-2025-emd.pdf",
     "order": 1
@@ -249,7 +225,7 @@ These four records show the shape of each type. The titles and files are example
 
 - `id` values are stable and unique within their array. Never derive links from display titles.
 - Name each PDF after its resource `id` (`asd3-td-03` → `asd3-td-03.pdf`). The downloaded file then tells the student what it is.
-- Keep both `fr` and `ar` text for every semester label, module title, and resource title. Arabic text drafted by Claude is allowed; it is listed in `docs/project-brief.md` as awaiting the maintainer's review.
+- Write every semester label, module title, and resource title as one non-empty string of French text. The former pair `{ "fr": "...", "ar": "..." }` is no longer valid: the doctor and the admin refuse it.
 - Every module's `semester` refers to one listed semester. Every resource's `module` refers to one listed module, and its `level` and `semester` match that module.
 - An exam whose `examKind` is `rattrapage` belongs to the `rattrapage` session. Do not guess a session or an exam kind.
 - `pdfPath` is a relative, case-sensitive site path. Its semester and module directory must match the record, and the file must exist before the record is published. Do not start it with `/`, so links resolve from the site's pages.

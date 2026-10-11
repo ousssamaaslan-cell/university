@@ -10,7 +10,7 @@
 
 ## Search, filters, PDF View and Download
 
-## French/Arabic content, RTL, mobile layout, and accessibility
+## French content, mobile layout, and accessibility
 
 ## Content maintenance with `/add-resource`
 

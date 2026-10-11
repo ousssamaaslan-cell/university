@@ -11,11 +11,11 @@ The one distinctive element is the **module code**: the abbreviation students al
 - Design mobile-first. Use one readable content column on narrow screens and expand only when the content benefits from it.
 - The homepage should make S3 and S4 easy to scan. Module pages should expose the module code and title, semester, breadcrumb back to the semester, search/filter controls, and the four resource groups.
 - Keep navigation and PDF actions visible, clearly labeled, and reachable by keyboard. Avoid horizontal scrolling at 320 CSS pixels and test at 200% zoom.
-- Align content to the start edge (left in French, right in Arabic). Do not centre body content.
+- Align content to the start edge, the left. Do not centre body content.
 - Separate list rows with a rule, not with boxes and shadows. Use a filled surface only for notices and status messages.
 - **An outline means "you can tap this".** Only the search field, the selects, the buttons, and the tabs have an outlined box. Facts about a document are plain text, the module code is a solid block, and messages are marked by a fill or by a rule above and below.
-- **The first phone screen shows a document.** On a 375 by 812 screen the first row of a module page starts at about 450px in French and 480px in Arabic, and two whole exam rows fit under it (before the design critique the first row started below the screen). Keep it there: anything added above the list on a phone must take its height from something else. A document row with a one-line title is about 105px tall on that phone, and 126px for an exam while the sample mark is shown; rows were 166 to 215px. `docs/progress.md` has the measurements.
-- **Header.** Site name, language switch, and search field. On a phone they make two rows: the name beside the language switch, then the search field. From 60rem they share one row. The university name sits under the site name from 40rem; on a phone it is in the footer only.
+- **The first phone screen shows a document.** On a 375 by 812 screen the first row of a module page starts at about 450px, and two whole exam rows fit under it (before the design critique the first row started below the screen). Keep it there: anything added above the list on a phone must take its height from something else. A document row with a one-line title is about 105px tall on that phone, and 126px for an exam while the sample mark is shown; rows were 166 to 215px. `docs/progress.md` has the measurements.
+- **Header.** Site name and search field. On a phone they make two rows: the name, then the search field. From 60rem they share one row. The university name sits under the site name from 40rem; on a phone it is in the footer only.
 - **Breadcrumb.** It lists the pages above the current one, each as a link ("Accueil / Semestre 3"). The current page is not repeated, because its name is the title just below. The home page has no breadcrumb.
 - **Footer.** It answers who runs the site and whether it can be trusted: the site name, one sentence saying it is run by students and is not an official site of the university, the date of the last update, and "Signaler une erreur" after the question "Un fichier manquant ou incorrect ?". The date is the day, in Algeria, on which the server says `data/resources.json` last changed; nobody types it, and the line is left out when the server gives no date (and on the 404 page, which does not load the catalogue). "Signaler une erreur" opens the report form. Beside a missing PDF, the link fills in its module and document.
 - Semester navigation is the home page itself plus the breadcrumb.
@@ -48,10 +48,7 @@ Never rely on color alone to distinguish Cours, TD, TP, Examens, or correction a
 
 ### Typography
 
-System fonts only, so nothing is downloaded and Arabic renders with the device's own Arabic face.
-
-- French: `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif`
-- Arabic: `system-ui, "Segoe UI", "Noto Sans Arabic", "Geeza Pro", Tahoma, Arial, sans-serif`
+System fonts only, so nothing is downloaded: `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif`.
 
 | Token | Size | Use |
 | --- | --- | --- |
@@ -61,7 +58,7 @@ System fonts only, so nothing is downloaded and Arabic renders with the device's
 | `--text-lg` | 1.375rem | Section headings (h2) |
 | `--text-xl` | 1.5rem to 2.25rem, fluid | Page heading (h1) |
 
-Body line height is 1.55 in French and 1.8 in Arabic; headings use 1.2 and 1.45. Row titles (module names, document titles) use 1.35 and tabs 1.3 in both languages. Weight 700 is for headings, the module code, the chapter or sheet number of a row, the site name, and the title of an error message; everything else is 400 or 600. The year headings of the exam list are h2 elements set at `--text-md`, the size of the row titles under them, so a year does not outweigh the documents. Text lines stay under about 65 characters. Use sentence case; no all-capitals labels.
+Body line height is 1.55; headings use 1.2. Row titles (module names, document titles) use 1.35 and tabs 1.3. Weight 700 is for headings, the module code, the chapter or sheet number of a row, the site name, and the title of an error message; everything else is 400 or 600. The year headings of the exam list are h2 elements set at `--text-md`, the size of the row titles under them, so a year does not outweigh the documents. Text lines stay under about 65 characters. Use sentence case; no all-capitals labels.
 
 French puts a space before `?`, `!`, `:`, `;` and `»`, and after `«` and `n°`. Type an ordinary space in `js/i18n.js` and in the catalogue; the page turns it into a no-break space, so a narrow screen never leaves the mark alone at the start of a line.
 
@@ -73,13 +70,13 @@ French puts a space before `?`, `!`, `:`, `;` and `»`, and after `«` and `n°`
 - Tap targets: at least 44 by 44 CSS pixels for links in lists, tabs, and buttons.
 - Focus: a 3px ring in `--color-link`, offset 2px, on every focusable element. On a document title and on a module row the ring is drawn inside the link, so it does not run over the button or the document count beside it.
 - Press: buttons, tabs, and the links of module and document rows (the "Examens" shortcut included) fill with `--color-accent-surface` while pressed, so a tap on a phone gets an answer at once.
-- High contrast (Windows forced colours): fills disappear there, so the open tab gets a thick lower edge and only the current language keeps its underline.
+- High contrast (Windows forced colours): fills disappear there, so the open tab gets a thick lower edge.
 - Selected text and the typing cursor use `--color-link`.
 - Motion: none on load. Transitions are limited to colour changes under 150ms and are removed under `prefers-reduced-motion`.
 
 ## Components and states
 
-- Site header with language switch; site footer; breadcrumb; sample-data notice.
+- Site header; site footer; breadcrumb; sample-data notice.
 - Module code; module row; semester section with its empty state.
 - **Module row.** The code and the full name are one link to the module page. After them come the number of documents and an "Examens" link that opens the module page directly on its exams. A module with no exam has no such link, so nobody taps through to an empty tab. On a phone the count and the link share the line under the name; from 40rem the row is one line and the counts line up. The same row lists modules in search results.
 - Resource list and item; type label; chapter or sheet number; year, session, exam-kind, and correction facts; the title link that opens the PDF and the "Télécharger" button.
@@ -88,53 +85,50 @@ French puts a space before `?`, `!`, `:`, `;` and `»`, and after `«` and `n°`
 - **Loading.** The header is drawn at once at its final height. The footer is drawn together with the page content, never before: on a still-empty page it would sit in view and jump away when the list arrives. Measured layout shift on a phone is under 0.05 on the home and module pages with the sample notice, and about 0 without it.
 - **Load error.** One message with a link that loads the page again. Every page keeps one h1 in this state; the module page, whose name is then unknown, is headed "Chargement impossible".
 - **Sample notice.** A labelled region just under the header, so screen readers list it. It disappears with the sample data.
-- **Old browsers.** Each page carries a short message in French and Arabic, shown only where the browser is too old to run the page scripts (before about 2020), in place of a blank page.
+- **Old browsers.** Each page carries a short message, shown only where the browser is too old to run the page scripts (before about 2020), in place of a blank page.
 - Use text labels with icons where icons help. Do not use icons as the only identifier for an action.
 - Show a visible focus indicator and clear hover/active states.
 
 ### Module page
 
 - **Title.** The module code and the module name share one heading. The code stays on the first line and the name runs on after it. Nothing sits under the title: the semester is in the breadcrumb and each tab shows its own count.
-- **Tabs.** Cours, TD, TP, Examens in one row at every width: on a phone each tab is as wide as its label needs, from 40rem they are four equal columns. Each shows its document count. The Arabic tabs keep "TD" and "TP", which students say aloud and which fit. The open tab is marked by a fill, a heavier edge, and a bar. A tab whose type has no document yet keeps the normal edge and has a grey label and regular weight until it is chosen; it still opens and says that nothing is there yet. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs and follow the reading direction; with Alt, Ctrl, Shift or the Windows key held they are left to the browser. From the tabs, Tab goes straight to the first control of the list. Only an empty list is itself a Tab stop.
+- **Tabs.** Cours, TD, TP, Examens in one row at every width: on a phone each tab is as wide as its label needs, from 40rem they are four equal columns. Each shows its document count. The open tab is marked by a fill, a heavier edge, and a bar. A tab whose type has no document yet keeps the normal edge and has a grey label and regular weight until it is chosen; it still opens and says that nothing is there yet. The page opens on the tab named in the address, otherwise on the first type that has documents. The arrow keys move between tabs; with Alt, Ctrl, Shift or the Windows key held they are left to the browser. From the tabs, Tab goes straight to the first control of the list. Only an empty list is itself a Tab stop.
 - **Resource rows.** One row per PDF. The chapter or sheet number ("Chapitre 2", "TD 3") and the title are one link that opens the PDF in the browser's own viewer. On a phone the number runs on before the title; from 36rem it has its own column (`--marker-column`, wide enough for "Chapitre 10", which never breaks in two). Under the title, the facts about the document make one quiet line of plain text with a dot between two facts: exam kind, session, year, "Sans corrigé", then the file type and size. "Avec corrigé" is the only fact drawn as a badge, filled green, so it is the one a student spots first. A line of facts never starts or ends with a dot. The title of a document the reader has already opened in this browser turns from blue to purple (`--color-link-visited`).
 - **Exams.** Listed under one heading per academic year, newest first. Two native selects filter by year and session, side by side even on a phone. The label above each says what it filters, so the choices are short ("Toutes", "Normale", "Rattrapage"). Each filter lists only the years or sessions the module's exams really have, and a filter with nothing to choose between is not shown. While a filter is set, the number of exams shown and the reset button share one line under the filters, so the list starts as high as it can; with no filter the tab already shows that number, so it is only announced to screen readers.
-- **Actions.** Two per document. The title opens the PDF, and one outlined "Télécharger" button saves it. On a phone the button shares the second line with the facts; from 36rem it sits at the end of the row. Screen readers hear what each one does and which document it acts on. The file size is the last fact ("PDF, 1,4 Mo"). Its place is in the row from the start, at a width that fits the longest size, so the row does not move when the size arrives. In Arabic, "PDF" and the size are isolated from each other so the number stays beside its unit.
+- **Actions.** Two per document. The title opens the PDF, and one outlined "Télécharger" button saves it. On a phone the button shares the second line with the facts; from 36rem it sits at the end of the row. Screen readers hear what each one does and which document it acts on. The file size is the last fact ("PDF, 1,4 Mo"). Its place is in the row from the start, at a width that fits the longest size, so the row does not move when the size arrives.
 - **Sample and missing files.** A sample record carries the fact "Exemple". A document whose PDF is not on the server keeps its title, which is then plain text and not a link, and shows "Fichier indisponible" in place of the facts and the button. "Signaler une erreur" sits beside that message; its email also names the missing file.
 - **Empty states.** An empty tab says which type has nothing yet. A module with no documents at all shows one message and no tabs. Filters with no match explain how to widen them. Each state says its message once.
 
 ### Search
 
-- **Header field.** On every page, after the language switch: its own row on a phone, the end of the first row from 60rem. It is a plain form with a "Rechercher" button, so Enter works and the result address can be shared.
+- **Header field.** On every page: its own row on a phone, the end of the first row from 60rem. It is a plain form with a "Rechercher" button, so Enter works and the result address can be shared.
 - **Results page.** A line under the heading states the outcome ("1 module, 22 documents pour « asd3 »") and is announced to screen readers. Modules come first, in the same rows as the home page. Documents follow, grouped under a link to their module that looks like the link of a module row and starts at the same edge as the titles under it, in the same rows as the module page; an exam is marked with its academic year ("2024-2025") where a TD has "TD 3", since it is no longer under a year heading. When a search finds one module and only that module's documents, as typing "asd3" does, the module is named once: its row under Modules, then its documents with no second heading.
-- **Matching.** Every word typed must appear in the module's or the document's text. A sheet or chapter number typed after its word ("td 3", "tp2", "chapitre 4", "الفصل 4") must be that document's own number, so "asd3 td 3" finds one sheet and not every TD of ASD3. Arabic-Indic digits and invisible direction marks from pasted text are accepted. Screen readers hear the module's code with each document, because two modules often hold an exam with the same title.
-- **While typing.** On the results page the list updates after a short pause in typing. The words typed are shown back in the order they were typed, also inside an Arabic sentence.
+- **Matching.** Every word typed must appear in the module's or the document's text. A sheet or chapter number typed after its word ("td 3", "tp2", "chapitre 4") must be that document's own number, so "asd3 td 3" finds one sheet and not every TD of ASD3. Invisible characters that come along with pasted text are ignored. Screen readers hear the module's code with each document, because two modules often hold an exam with the same title.
+- **While typing.** On the results page the list updates after a short pause in typing.
 - **States.** Nothing typed, fewer than two characters, no match (with ways to widen the search and a link to all modules), and a load error are four different messages. At most 30 documents are listed; beyond that the page asks for one more word.
 
 ## The admin dashboard
 
-The maintainer's page at `/admin` uses the same tokens, type, spacing, buttons, tabs, and module code as the student pages (`css/styles.css`), and adds its own components in `admin/admin.css`. Its interface is in French only. It is built for a 375px phone and a 1280px window, and holds at 320px.
+The maintainer's page at `/admin` uses the same tokens, type, spacing, buttons, tabs, and module code as the student pages (`css/styles.css`), and adds its own components in `admin/admin.css`. Its interface is in French. It is built for a 375px phone and a 1280px window, and holds at 320px.
 
 - **Marked as the admin.** The header is the page's colours reversed: a band in the text colour, with the site name, the word "Administration" as a light label, the logged-in account, "Voir le site", and "Se déconnecter". The student header is the page colour, so the two sides of the site are never mistaken for each other. On the band the focus ring takes the light colour.
 - **Two tabs,** drawn as the module page's tabs: "Ajouter un document" and "Mes documents", the second with its count. Both panels stay in the page, so what was typed in the form survives a look at the list.
 - **A choice is a large button.** Semester, module, type, and session are radio buttons drawn as outlined buttons at least 44px tall; the chosen one is marked like the open tab, by a fill, a heavier edge, and a bar. A module's button shows its code, its name, and its number of documents. The four types share one row, and two rows of two under 340px. A semester without modules is disabled, with a note beside it.
 - **Fixed values are never typed.** Numbers are number fields, years and exam kinds are lists, the correction is a switch whose knob changes side.
-- **The Arabic title** is typed right to left in a field marked `lang="ar"`. In the list it sits under the French title, smaller and muted, aligned to the same edge.
 - **The PDF zone** has a dashed edge, the one place a dashed line is used: it means "put something here". A refused file is explained in an error message under it; a large file gets a notice and can still be published.
-- **The preview** is a quiet panel (`--color-surface`) holding the ID, the PDF path, and the row drawn with the student pages' own classes, in French and in Arabic. It is a picture: nothing in it can be pressed.
+- **The preview** is a quiet panel (`--color-surface`) holding the ID, the PDF path, and the row drawn with the student pages' own classes. It is a picture: nothing in it can be pressed.
 - **What is missing** is listed above "Publier", which stays disabled until the list is empty. Each line leads to its field.
 - **Two filled buttons** exist only here: the main action of a screen in `--color-link` ("Se connecter", "Publier"), and an irreversible deletion in `--color-error-text` ("Supprimer définitivement"). "Supprimer" on a row is an ordinary outlined button with red text.
 - **Messages** are filled boxes in the notice, ok, error, and accent colours. Each says what happened and what to do, and an error offers its remedy as a button ("Se reconnecter", "Réessayer"). After a save, one sentence follows the deployment: "Visible sur le site dans environ une minute.", then "En ligne ✓".
-- **Mes documents** groups documents by semester, then by module in a line that folds, then by type with its count. A row gives the French title, the Arabic title, the facts as on the module page, and three buttons. Ticked rows bring a bar that stays at the top of the window.
+- **Mes documents** groups documents by semester, then by module in a line that folds, then by type with its count. A row gives the title, the facts as on the module page, and three buttons. Ticked rows bring a bar that stays at the top of the window.
 - **The confirmation** before a deletion is a dialog inside the page, with the dimmed page behind it and no shadow. "Annuler" has the focus when it opens.
 - Lowest text contrast among the 27 pairs measured on the dashboard: 5.48:1 in light mode and 6.37:1 in dark mode (the document count on a chosen module button).
 
-## Language and direction
+## Language
 
-The site is complete in French and Arabic. French is the default. The language switch is in the header on every page and names each language in its own script ("Français", "العربية"). The choice is kept in the URL (`?lang=ar`). It is remembered in the browser only after the reader clicks the switch; opening a shared `?lang=` link does not change the saved choice.
+The site is in French only (maintainer decision, 2026-10-10; see `docs/project-brief.md`). Every page is `<html lang="fr">`. There is no language switch, and nothing is read from the address or kept in the browser to choose a language. The interface text is in `js/i18n.js`, and for the report form in `report.html`.
 
-The Arabic text is drafted by Claude and awaits the maintainer's review; `docs/project-brief.md` lists what is pending.
-
-Set `lang` and `dir="rtl"` on the document for Arabic. Use CSS logical properties (`margin-inline`, `padding-inline`, `inset-inline`) so one stylesheet serves both directions. Module abbreviations, file names, and academic years stay in Latin letters and Western digits in the Arabic view and are isolated so they do not reorder the surrounding text. Test breadcrumb direction, icons, search fields, numerals, filenames, and mixed French/Arabic text.
+The stylesheets are written with CSS logical properties (`margin-inline`, `padding-inline`, `inset-inline`). Keep to them, so every rule is written the same way.
 
 ## Assets
 

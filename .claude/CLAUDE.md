@@ -1,6 +1,8 @@
 # L2 study resource library — Claude Code instructions
 
-This is an academic PDF resource library for Licence 2 students. It is **not** a marketing landing page. Read `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` before planning or building. The field is Informatique, the university is Université Mohammed Seddik Benyahia – Jijel, the languages are French (default) and Arabic, and the host is Netlify. The seven confirmed modules (ASD3, AO, SI, MN, POO1, PS1, GP) belong to S3; show S4 as an empty semester until its modules are provided. Keep unknown facts explicit; never invent modules, PDFs, branding, or university claims. Two exceptions are recorded in `docs/project-brief.md`: Claude drafts the Arabic text, which stays listed there as awaiting the maintainer's review, and the build-phase `sample-` data, which stays visibly marked and is removed before publication.
+This is an academic PDF resource library for Licence 2 students. It is **not** a marketing landing page. Read `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` before planning or building. The field is Informatique, the university is Université Mohammed Seddik Benyahia – Jijel, the site is in French only, and the host is Netlify. The seven confirmed modules (ASD3, AO, SI, MN, POO1, PS1, GP) belong to S3; show S4 as an empty semester until its modules are provided. Keep unknown facts explicit; never invent modules, PDFs, branding, or university claims. One exception is recorded in `docs/project-brief.md`: the build-phase `sample-` data, which stays visibly marked and is removed before publication.
+
+French only is a maintainer decision of 2026-10-10: the Arabic version was removed, and the Git tag `before-french-only` marks the last commit that had it. Every page is `lang="fr"`, and every label, module name, and document title is one plain string of French text. Do not add another language, a language switch, `?lang=` handling, or right-to-left styling unless the maintainer asks.
 
 ## Scope and stack
 
@@ -22,7 +24,7 @@ Use `design-reviewer` and `quality-reviewer` for relevant reviews. Marketing and
 
 - Follow `docs/content-model.md` and `.claude/rules/content-structure.md` for IDs, relationships, ordering, and file paths. Validate that every published PDF path exists and that no removed PDF remains linked.
 - Use clear academic labels and navigation. Search and filters must remain keyboard-usable. Distinguish missing results from a loading or file error.
-- Test browsing S3/S4, each module, search, filters, PDF viewing and downloading, mobile layout, keyboard navigation, and language direction where applicable. Record results in `docs/qa-report.md` using `templates/qa-report.md`; mark unavailable checks as blocked.
+- Test browsing S3/S4, each module, search, filters, PDF viewing and downloading, mobile layout, and keyboard navigation. Record results in `docs/qa-report.md` using `templates/qa-report.md`; mark unavailable checks as blocked.
 - Start a local static HTTP server for browser checks; do not rely on opening pages with `file://` because browser fetch rules may differ.
 - State build, deployment, browser, and PDF results only when actually verified. The admin dashboard's GitHub login and saves on the published site count as verified only once done there; a local preview of `/admin` works on a copy in the browser tab and proves nothing about GitHub.
 

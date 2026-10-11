@@ -1,6 +1,6 @@
 # Netlify publish manifest
 
-Snapshot of the allowlisted output on 2026-10-10, after the admin dashboard of Phase 7 was added. Run `node scripts/publish.cjs` to rebuild it. The Netlify publish directory is `.netlify-publish`.
+Snapshot of the allowlisted output on 2026-10-10, after the admin dashboard of Phase 7 was added and the site became French only (`js/lang.js` became `js/old-browser.js`; the number of files is unchanged). Run `node scripts/publish.cjs` to rebuild it. The Netlify publish directory is `.netlify-publish`.
 
 These 40 files are the entire publish output. The one PDF is the document the maintainer added through the admin on 2026-10-09. No docs, templates, scripts, tests, project instructions, readme files, local paths, or maintainer email address are included.
 
@@ -34,10 +34,10 @@ The sixteen `admin/` files are the maintainer's dashboard (eleven files) and the
 - `js/files.js`
 - `js/home.js`
 - `js/i18n.js`
-- `js/lang.js`
 - `js/layout.js`
 - `js/module.js`
 - `js/not-found.js`
+- `js/old-browser.js`
 - `js/report.js`
 - `js/resource-list.js`
 - `js/search.js`

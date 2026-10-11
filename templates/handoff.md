@@ -6,7 +6,7 @@
 
 ## Catalogue and PDF maintenance with `/add-resource`
 
-## French/Arabic text and design editing locations
+## Interface text and design editing locations
 
 ## Verification evidence and public PDF links
 

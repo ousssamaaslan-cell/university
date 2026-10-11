@@ -2,6 +2,8 @@
 
 Checked: 2026-10-09. Site: https://admirable-concha-bbf7df.netlify.app/
 
+This is the record of that day. Since 2026-10-10 the site is in French only: `js/lang.js` is now `js/old-browser.js`, and the `?lang=ar` addresses below open the French page.
+
 Method: direct HTTP `GET` for pages, assets, private paths, and one complete PDF; `HEAD` for every PDF listed in the deployed `data/resources.json`. The site was public and reachable. The web preview could not render it, and no browser was available for interaction, so HTTP success does not prove that client-side content rendered or that a click worked.
 
 ## Pages

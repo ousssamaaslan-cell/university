@@ -8,11 +8,11 @@ A public resource library for Licence 2 Informatique students at Université Moh
 
 - Public student site, no login: S3/S4 → module → Cours, TD, TP, Examens.
 - Seven S3 modules: ASD3, AO, SI, MN, POO1, PS1, GP. S4 is shown empty until its modules are supplied.
-- French by default and Arabic with RTL, with a language switch on every page. The Arabic text is a draft awaiting the maintainer's review.
+- French only: the interface, the module names, and the document titles. The Arabic version built earlier was removed on 2026-10-10; the Git tag `before-french-only` marks the last commit that had it.
 - Plain HTML, CSS, and browser JavaScript for the student pages, with no framework, compilation, or npm dependencies. Netlify uses a Node copy step to make its publish folder.
 - Files: `index.html`, `module.html?id=<module-id>`, `search.html?q=<words>`, `report.html`, `404.html`, and `data/resources.json`; PDFs under `pdfs/<semester>/<module-id>/`; the admin dashboard in `admin/`.
 - One maintainer adds, changes, or removes documents, either in the admin dashboard at `/admin` or by editing the catalogue and PDFs in the repository. Both end in a commit on `main`, which Netlify republishes. There is no server of our own, no database, and no Google Drive integration: the dashboard is a static page that writes to GitHub with the maintainer's own GitHub login.
-- The site is run by students and is not an official university site; the footer says so. "Signaler une erreur" opens a French or Arabic Netlify form. The maintainer's email address is configured in Netlify notifications, outside the website source. The footer's date of the last update comes from the server, so nobody types it.
+- The site is run by students and is not an official university site; the footer says so. "Signaler une erreur" opens a Netlify form. The maintainer's email address is configured in Netlify notifications, outside the website source. The footer's date of the last update comes from the server, so nobody types it.
 - Netlify is the host. It builds the `main` branch of the GitHub repository `ousssamaaslan-cell/university`. The site uses relative page and PDF links.
 
 See `docs/project-brief.md`, `docs/content-model.md`, and `docs/design-system.md` for the full decisions.
@@ -53,7 +53,7 @@ To log in, open `/admin/` and choose **Se connecter avec GitHub**. A small GitHu
 ### Add a document in 3 steps
 
 1. In **Ajouter un document**, choose the semester, the module, and the type: Cours, TD, TP, or Examen. The last choice is remembered for the next visit.
-2. Fill in what that type asks for (chapter or sheet number; for an exam the year, the kind, and the session), the French and Arabic titles, and drop the PDF on the dashed zone or use **Choisir un fichier**. Turn on "Le PDF contient le corrigé" only when the file does.
+2. Fill in what that type asks for (chapter or sheet number; for an exam the year, the kind, and the session), the title, and drop the PDF on the dashed zone or use **Choisir un fichier**. Turn on "Le PDF contient le corrigé" only when the file does.
 3. Check the preview, which shows the ID, the PDF's path, and the row as the module page will draw it. Then choose **Publier**.
 
 The page answers "Publié. Visible sur le site dans environ une minute." and that sentence becomes "En ligne ✓" once the public site shows the document. **Ajouter un autre document dans ce module** keeps the semester, the module, and the type.
@@ -70,7 +70,7 @@ The PDF and its entry in the catalogue are removed together, in one commit. A de
 
 ### Change a document or replace its PDF
 
-In **Mes documents**, choose **Modifier** on the document's row. The same form opens, filled in. The titles, the fields of the type, the correction switch, and the PDF can change; a replaced PDF keeps its name and address. The semester, the module, and the type are locked, because the ID and the file name depend on them: to change one, delete the document and add it again. **Voir** opens the PDF as the repository holds it now, which is useful just after a replacement.
+In **Mes documents**, choose **Modifier** on the document's row. The same form opens, filled in. The title, the fields of the type, the correction switch, and the PDF can change; a replaced PDF keeps its name and address. The semester, the module, and the type are locked, because the ID and the file name depend on them: to change one, delete the document and add it again. **Voir** opens the PDF as the repository holds it now, which is useful just after a replacement.
 
 ### What a save does
 
@@ -110,7 +110,7 @@ The login asks GitHub for access to public repositories only (`SCOPE` in `admin/
 The repository route still works, and is the only one for modules and semesters.
 
 1. Put the verified PDF at `pdfs/<semester>/<module-id>/<resource-id>.pdf`. Use the confirmed S3 or S4 module ID, and a stable lowercase resource ID beginning with that module ID. Make sure the PDF itself matches the title and contains a correction only if you will mark one.
-2. Add one record to `resources` in `data/resources.json` with `id`, `level: "L2"`, `semester`, `module`, `type: "examen"`, French and Arabic `title`, `pdfPath`, `order`, `academicYear`, `session`, `examKind`, and `hasCorrection`. Use the values and relationships in `docs/content-model.md`; do not guess a year, session, or exam kind.
+2. Add one record to `resources` in `data/resources.json` with `id`, `level: "L2"`, `semester`, `module`, `type: "examen"`, `title` (one line of French text), `pdfPath`, `order`, `academicYear`, `session`, `examKind`, and `hasCorrection`. Use the values and relationships in `docs/content-model.md`; do not guess a year, session, or exam kind.
 3. Run `node scripts/doctor.cjs`, open the exam and download it through a local HTTP preview, then commit and push the JSON and PDF together. Netlify rebuilds from the push.
 
 Run `git pull` before editing by hand when the admin dashboard has been used: its saves are commits on `main` too.
@@ -125,7 +125,7 @@ After the first deploy, open **Forms**, enable form detection if needed, and ver
 
 ## Checks
 
-`node scripts/doctor.cjs` validates the setup, the catalogue records, the fields each resource type needs, and that every PDF path exists. It also fails when a file under `pdfs/` belongs to no record, when a PDF is not named after its resource ID, when a label in `js/i18n.js` exists in one language only, when a published file holds what looks like a token or an OAuth secret (every page, script, and stylesheet under `admin/` is read), when a student page mentions the admin, when `/admin` loses its `noindex`, and when `netlify.toml` publishes anything other than the allowlisted copy. It reports how many sample records remain. It installs nothing. There is no `npm install`, compilation, lint, or type-check command for the site.
+`node scripts/doctor.cjs` validates the setup, the catalogue records, the fields each resource type needs, and that every PDF path exists. It also fails when a file under `pdfs/` belongs to no record, when a PDF is not named after its resource ID, when a published file holds what looks like a token or an OAuth secret (every page, script, and stylesheet under `admin/` is read), when a student page mentions the admin, when `/admin` loses its `noindex`, and when `netlify.toml` publishes anything other than the allowlisted copy. It reports how many sample records remain. It installs nothing. There is no `npm install`, compilation, lint, or type-check command for the site.
 
 `node scripts/test-admin.cjs` checks the admin without a browser, in 42 tests: what a save writes and refuses for each of the four types, an edit, a replaced PDF, a deletion of one or several documents, the duplicate warning, files that are not PDFs or are too large, paths outside `pdfs/`, the commit against a stand-in for GitHub with its one retry, the login exchange against a stand-in for the browser window, the watch on the public site after a commit, and that the doctor accepts everything the admin commits and stops sixteen kinds of bad entry. Run it after changing a file in `admin/` or the doctor.
 
