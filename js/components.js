@@ -12,7 +12,7 @@ export function moduleCode(module, {large = false} = {}) {
 // After them come the number of documents and, when the module has exams, a shortcut that
 // opens the module page on its Examens tab.
 export function moduleRow(catalogue, module) {
-  const name = typeset(module.title.fr);
+  const name = typeset(module.title);
   const hasExams = resourcesOf(catalogue, module.id, 'examen').length > 0;
   return el('li', {class: 'module'},
     el('a', {class: 'module__link', href: pageUrl('module.html', {id: module.id})},

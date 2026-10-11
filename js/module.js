@@ -128,12 +128,12 @@ function modulePage(catalogue, module) {
   const semester = findSemester(catalogue, module.semester);
   const total = resourcesOf(catalogue, module.id).length;
 
-  const name = typeset(module.title.fr);
+  const name = typeset(module.title);
   document.title = t('module.docTitle', {abbr: module.abbr, title: name});
   setDescription(t('module.description', {abbr: module.abbr, title: name}));
   renderBreadcrumb([
     homeCrumb(),
-    {label: typeset(semester.label.fr), href: pageUrl('index.html', {}, semesterAnchor(semester.id))}
+    {label: typeset(semester.label), href: pageUrl('index.html', {}, semesterAnchor(semester.id))}
   ]);
 
   // The semester is in the breadcrumb and each tab shows its own count, so the title stands alone.

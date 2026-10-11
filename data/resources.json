@@ -3,19 +3,13 @@
     {
       "id": "S3",
       "level": "L2",
-      "label": {
-        "fr": "Semestre 3",
-        "ar": "السداسي الثالث"
-      },
+      "label": "Semestre 3",
       "order": 1
     },
     {
       "id": "S4",
       "level": "L2",
-      "label": {
-        "fr": "Semestre 4",
-        "ar": "السداسي الرابع"
-      },
+      "label": "Semestre 4",
       "order": 2
     }
   ],
@@ -25,10 +19,7 @@
       "level": "L2",
       "semester": "S3",
       "abbr": "ASD3",
-      "title": {
-        "fr": "Algorithmique et Structures de Données 3",
-        "ar": "الخوارزميات وهياكل البيانات 3"
-      },
+      "title": "Algorithmique et Structures de Données 3",
       "order": 1
     },
     {
@@ -36,10 +27,7 @@
       "level": "L2",
       "semester": "S3",
       "abbr": "AO",
-      "title": {
-        "fr": "Architecture des Ordinateurs",
-        "ar": "بنية الحواسيب"
-      },
+      "title": "Architecture des Ordinateurs",
       "order": 2
     },
     {
@@ -47,10 +35,7 @@
       "level": "L2",
       "semester": "S3",
       "abbr": "SI",
-      "title": {
-        "fr": "Systèmes d'Information",
-        "ar": "أنظمة المعلومات"
-      },
+      "title": "Systèmes d'Information",
       "order": 3
     },
     {
@@ -58,10 +43,7 @@
       "level": "L2",
       "semester": "S3",
       "abbr": "MN",
-      "title": {
-        "fr": "Méthodes Numériques",
-        "ar": "الطرق العددية"
-      },
+      "title": "Méthodes Numériques",
       "order": 4
     },
     {
@@ -69,10 +51,7 @@
       "level": "L2",
       "semester": "S3",
       "abbr": "POO1",
-      "title": {
-        "fr": "Programmation Orientée Objet 1",
-        "ar": "البرمجة كائنية التوجه 1"
-      },
+      "title": "Programmation Orientée Objet 1",
       "order": 5
     },
     {
@@ -80,10 +59,7 @@
       "level": "L2",
       "semester": "S3",
       "abbr": "PS1",
-      "title": {
-        "fr": "Probabilités et Statistique 1",
-        "ar": "الاحتمالات والإحصاء 1"
-      },
+      "title": "Probabilités et Statistique 1",
       "order": 6
     },
     {
@@ -91,10 +67,7 @@
       "level": "L2",
       "semester": "S3",
       "abbr": "GP",
-      "title": {
-        "fr": "Gestion de Projets",
-        "ar": "تسيير المشاريع"
-      },
+      "title": "Gestion de Projets",
       "order": 7
     }
   ],
@@ -107,10 +80,7 @@
       "type": "tp",
       "number": 2,
       "academicYear": "2026-2027",
-      "title": {
-        "fr": "programmation oriente objet",
-        "ar": "سيبلاتنم"
-      },
+      "title": "programmation oriente objet",
       "hasCorrection": false,
       "pdfPath": "pdfs/S3/poo1/poo1-tp-02-2026-2027.pdf",
       "order": 0

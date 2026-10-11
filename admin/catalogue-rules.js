@@ -55,14 +55,14 @@
 
   // Semesters, then each semester's modules, in the order the home page lists them.
   function modulesInOrder(catalogue) {
-    const semesters = [...catalogue.semesters].sort((a, b) => byOrder(a, b) || a.label.fr.localeCompare(b.label.fr, 'fr'));
+    const semesters = [...catalogue.semesters].sort((a, b) => byOrder(a, b) || a.label.localeCompare(b.label, 'fr'));
     return semesters.flatMap(semester => catalogue.modules
       .filter(module => module.semester === semester.id)
-      .sort((a, b) => byOrder(a, b) || a.title.fr.localeCompare(b.title.fr, 'fr')));
+      .sort((a, b) => byOrder(a, b) || a.title.localeCompare(b.title, 'fr')));
   }
 
   // The display order of each type, the same as in js/catalogue.js and docs/content-model.md.
-  const byTitle = (a, b) => a.title.fr.localeCompare(b.title.fr, 'fr');
+  const byTitle = (a, b) => a.title.localeCompare(b.title, 'fr');
   const newestYearFirst = (a, b) => (b.academicYear ?? '').localeCompare(a.academicYear ?? '');
   const bySheetNumber = (a, b) => a.number - b.number || newestYearFirst(a, b) || byOrder(a, b) || byTitle(a, b);
   const displayOrder = {
@@ -162,9 +162,9 @@
     }
 
     const fields = {type, module: module?.id, semester: module?.semester};
-    fields.title = {fr: text(source.title?.fr), ar: text(source.title?.ar)};
-    if (!fields.title.fr) problems.push('le titre en français est vide');
-    if (!fields.title.ar) problems.push('le titre en arabe est vide');
+    // The title is one line of French text. Anything else, the former {fr, ar} pair included, counts as empty.
+    fields.title = text(source.title);
+    if (!fields.title) problems.push('le titre est vide');
 
     if (type === 'cours') {
       fields.chapter = integer(source.chapter, 0);
@@ -354,7 +354,7 @@
   //   change      {action: 'add', fields, pdf, acknowledged}
   //               {action: 'edit', id, base, fields, pdf, acknowledged}
   //               {action: 'delete', documents}
-  //     fields        what the form holds: semester, module, type, title {fr, ar} and the fields of the type
+  //     fields        what the form holds: semester, module, type, title and the fields of the type
   //     pdf           {name, size, isPdf, sha} for a chosen file; null on an edit that keeps the current PDF
   //     base          the record as the form showed it when it was opened
   //     documents     the records to remove, as the list showed them

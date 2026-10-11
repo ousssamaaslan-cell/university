@@ -30,7 +30,7 @@ function normalize(text) {
 
 // Everything a reader might type to find this document.
 function documentWords(module, resource) {
-  const words = [module.abbr, module.title.fr, resource.title.fr, t(`type.${resource.type}`)];
+  const words = [module.abbr, module.title, resource.title, t(`type.${resource.type}`)];
   if (resource.type === 'cours') words.push(t('marker.cours', {n: resource.chapter}));
   if (resource.type === 'td' || resource.type === 'tp') {
     words.push(t(`marker.${resource.type}`, {n: resource.number}), t(`type.${resource.type}.name`));
@@ -52,7 +52,7 @@ function buildIndex(catalogue) {
   return {
     modules: modules.map(({semester, module}) => ({
       module,
-      text: normalize([module.abbr, module.title.fr, semester.id, semester.label.fr].join(' '))
+      text: normalize([module.abbr, module.title, semester.id, semester.label].join(' '))
     })),
     documents: modules.flatMap(({module}) =>
       RESOURCE_TYPES.flatMap(type =>
@@ -116,7 +116,7 @@ function documentResults(documents, listedModules) {
         !alreadyNamed && el('h3', {},
           el('a', {class: 'module__link', href: pageUrl('module.html', {id: module.id})},
             moduleCode(module),
-            el('span', {class: 'module__title'}, typeset(module.title.fr))
+            el('span', {class: 'module__title'}, typeset(module.title))
           )
         ),
         // Two modules often hold an exam with the same title; `context` adds the module's code to

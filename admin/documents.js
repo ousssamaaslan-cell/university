@@ -9,11 +9,11 @@ import {createForm} from './form.js';
 // Lower case and without accents, so "algebre" finds "Algèbre".
 const fold = text => String(text).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-// Everything the search box looks in: both titles, the module's code and name, the number
+// Everything the search box looks in: the title, the module's code and name, the number
 // ("td 3", "chapitre 2"), the year, the type, and the ID.
 function searchText(resource, module) {
   return fold([
-    module?.abbr, module?.title.fr, resource.title.fr, resource.title.ar, markerOf(resource), TYPE_GROUP_LABELS[resource.type],
+    module?.abbr, module?.title, resource.title, markerOf(resource), TYPE_GROUP_LABELS[resource.type],
     resource.academicYear, KIND_LABELS[resource.examKind], SESSION_LABELS[resource.session], resource.id
   ].filter(Boolean).join(' '));
 }
@@ -179,8 +179,8 @@ export function createDocumentsView(app) {
     confirmList.replaceChildren(...documents.map(resource => {
       const module = modules.get(resource.module);
       return el('li', {},
-        el('strong', {}, [markerOf(resource), resource.title.fr].filter(Boolean).join(' — ')),
-        el('span', {}, `Module : ${module ? `${module.abbr}, ${module.title.fr}` : resource.module}`),
+        el('strong', {}, [markerOf(resource), resource.title].filter(Boolean).join(' — ')),
+        el('span', {}, `Module : ${module ? `${module.abbr}, ${module.title}` : resource.module}`),
         el('span', {}, `Type : ${TYPE_LABELS[resource.type]}${resource.academicYear ? `, ${resource.academicYear}` : ''}`)
       );
     }));
@@ -280,8 +280,7 @@ export function createDocumentsView(app) {
     return el('li', {class: 'doc', 'data-id': resource.id},
       el('label', {class: 'doc__select'}, tick),
       el('div', {class: 'doc__text'},
-        el('p', {class: 'doc__title'}, marker && el('span', {class: 'resource__marker'}, marker), marker && ' ', resource.title.fr),
-        el('p', {class: 'doc__title-ar', lang: 'ar', dir: 'rtl'}, resource.title.ar),
+        el('p', {class: 'doc__title'}, marker && el('span', {class: 'resource__marker'}, marker), marker && ' ', resource.title),
         el('ul', {class: 'facts', role: 'list'}, factsOf(resource, file).map(fact => el('li', {class: 'fact'}, fact)))
       ),
       el('div', {class: 'doc__actions'}, view, edit, remove)
@@ -308,8 +307,8 @@ export function createDocumentsView(app) {
       shown += count;
       const group = el('details', {class: 'module-group', open: !folded.has(module.id)},
         el('summary', {class: 'module-group__head'},
-          el('bdi', {class: 'module-code'}, module.abbr),
-          el('span', {class: 'module-group__title'}, module.title.fr),
+          el('span', {class: 'module-code'}, module.abbr),
+          el('span', {class: 'module-group__title'}, module.title),
           el('span', {class: 'module-group__count'}, filtering ? `${count} sur ${total}` : countLabel(total))
         ),
         total === 0
@@ -335,7 +334,7 @@ export function createDocumentsView(app) {
       const visible = modules.map(moduleGroup).filter(Boolean);
       if (filtering && visible.length === 0) return null;
       return el('section', {class: 'semester-group'},
-        el('h3', {class: 'semester-group__title'}, semester.label.fr),
+        el('h3', {class: 'semester-group__title'}, semester.label),
         modules.length === 0 ? el('p', {class: 'hint'}, "Aucun module pour l'instant.") : visible
       );
     }).filter(Boolean);

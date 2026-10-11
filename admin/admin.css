@@ -1,8 +1,7 @@
 /*
   The admin dashboard at /admin. This file is loaded after css/styles.css and uses its tokens,
   buttons, tabs and module code, so the dashboard looks like the site it manages.
-  docs/design-system.md explains the tokens. Logical properties only, as in the site's stylesheet:
-  the Arabic title fields are right-to-left inside a French page.
+  docs/design-system.md explains the tokens. Logical properties only, as in the site's stylesheet.
 */
 
 /* ---------- Header ---------- */
@@ -897,16 +896,6 @@ main code {
   font-weight: 600;
   line-height: 1.35;
   text-wrap: pretty;
-}
-
-/* The Arabic title is written right to left, but stays under the French one: "end" is the left
-   side of a right-to-left line. */
-.doc__title-ar {
-  color: var(--color-text-muted);
-  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", "Geeza Pro", Tahoma, Arial, sans-serif;
-  font-size: var(--text-sm);
-  line-height: 1.8;
-  text-align: end;
 }
 
 .doc .facts {

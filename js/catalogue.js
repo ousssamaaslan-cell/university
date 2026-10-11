@@ -28,13 +28,13 @@ export async function loadCatalogue() {
 const byOrder = (a, b) => a.order - b.order;
 
 export function semestersOf(catalogue) {
-  return [...catalogue.semesters].sort((a, b) => byOrder(a, b) || a.label.fr.localeCompare(b.label.fr, 'fr'));
+  return [...catalogue.semesters].sort((a, b) => byOrder(a, b) || a.label.localeCompare(b.label, 'fr'));
 }
 
 export function modulesOf(catalogue, semesterId) {
   return catalogue.modules
     .filter(module => module.semester === semesterId)
-    .sort((a, b) => byOrder(a, b) || a.title.fr.localeCompare(b.title.fr, 'fr'));
+    .sort((a, b) => byOrder(a, b) || a.title.localeCompare(b.title, 'fr'));
 }
 
 export function findModule(catalogue, moduleId) {
@@ -50,7 +50,7 @@ export function resourcesOf(catalogue, moduleId, type = null) {
   return catalogue.resources.filter(resource => resource.module === moduleId && (type === null || resource.type === type));
 }
 
-const byTitle = (a, b) => a.title.fr.localeCompare(b.title.fr, 'fr');
+const byTitle = (a, b) => a.title.localeCompare(b.title, 'fr');
 const newestYearFirst = (a, b) => (b.academicYear ?? '').localeCompare(a.academicYear ?? '');
 const bySheetNumber = (a, b) => a.number - b.number || newestYearFirst(a, b) || byOrder(a, b) || byTitle(a, b);
 

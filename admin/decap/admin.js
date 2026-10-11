@@ -29,20 +29,14 @@
     const id = {name: 'id', widget: 'hidden'};
     const semester = {
       name: 'semester', label: 'Semestre', widget: 'select',
-      options: semesters.map(item => ({label: `${item.id} — ${item.label.fr}`, value: item.id})),
+      options: semesters.map(item => ({label: `${item.id} — ${item.label}`, value: item.id})),
       ...(withModules.length === 1 ? {default: withModules[0].id} : {})
     };
     const module = {
       name: 'module', label: 'Module', widget: 'select',
-      options: modules.map(item => ({label: `${item.abbr} — ${item.title.fr} (${item.semester})`, value: item.id}))
+      options: modules.map(item => ({label: `${item.abbr} — ${item.title} (${item.semester})`, value: item.id}))
     };
-    const title = hint => ({
-      name: 'title', label: 'Titre', widget: 'object', collapsed: false,
-      fields: [
-        {name: 'fr', label: 'Titre en français', widget: 'string', hint},
-        {name: 'ar', label: 'Titre en arabe', widget: 'string'}
-      ]
-    });
+    const title = hint => ({name: 'title', label: 'Titre', widget: 'string', hint});
     const year = required => ({
       name: 'academicYear', label: 'Année universitaire', widget: 'select', required,
       options: rules.academicYears(new Date(), catalogue.resources),
@@ -64,7 +58,7 @@
     return [
       {
         name: 'cours', label: 'Cours', widget: 'object',
-        summary: '{{fields.module | upper}} · Cours, chapitre {{fields.chapter}} · {{fields.title.fr}}',
+        summary: '{{fields.module | upper}} · Cours, chapitre {{fields.chapter}} · {{fields.title}}',
         fields: [
           id, semester, module,
           {name: 'chapter', label: 'Numéro du chapitre', widget: 'number', value_type: 'int', min: 0, step: 1},
@@ -74,17 +68,17 @@
       },
       {
         name: 'td', label: 'TD', widget: 'object',
-        summary: '{{fields.module | upper}} · TD {{fields.number}} · {{fields.title.fr}}',
+        summary: '{{fields.module | upper}} · TD {{fields.number}} · {{fields.title}}',
         fields: [id, semester, module, sheetNumber('Numéro du TD'), title(sheetHint), correction('Le PDF contient le corrigé'), year(false), pdf, order]
       },
       {
         name: 'tp', label: 'TP', widget: 'object',
-        summary: '{{fields.module | upper}} · TP {{fields.number}} · {{fields.title.fr}}',
+        summary: '{{fields.module | upper}} · TP {{fields.number}} · {{fields.title}}',
         fields: [id, semester, module, sheetNumber('Numéro du TP'), title(sheetHint), correction('Le PDF contient le corrigé ou le code'), year(false), pdf, order]
       },
       {
         name: 'examen', label: 'Examen', widget: 'object',
-        summary: '{{fields.module | upper}} · Examen {{fields.academicYear}} · {{fields.title.fr}}',
+        summary: '{{fields.module | upper}} · Examen {{fields.academicYear}} · {{fields.title}}',
         fields: [
           id, semester, module, year(true),
           {name: 'session', label: 'Session', widget: 'select', options: rules.SESSIONS.map(value => ({label: SESSION_LABELS[value], value}))},

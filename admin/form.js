@@ -33,7 +33,7 @@ function remember(choice) {
 
 const emptyValues = () => ({
   semester: '', module: '', type: '', chapter: '', number: '', academicYear: '', session: '', examKind: '',
-  hasCorrection: false, titleFr: '', titleAr: '',
+  hasCorrection: false, title: '',
   // The chosen PDF: {file, name, size, isPdf, warning}.
   file: null,
   // The maintainer agreed to publish beside the similar documents shown.
@@ -45,7 +45,7 @@ const valuesOf = resource => ({
   semester: resource.semester, module: resource.module, type: resource.type,
   chapter: String(resource.chapter ?? ''), number: String(resource.number ?? ''),
   academicYear: resource.academicYear ?? '', session: resource.session ?? '', examKind: resource.examKind ?? '',
-  hasCorrection: resource.hasCorrection === true, titleFr: resource.title.fr, titleAr: resource.title.ar
+  hasCorrection: resource.hasCorrection === true, title: resource.title
 });
 
 // A whole number of one or two digits, at least `minimum`: a chapter or a sheet number.
@@ -96,7 +96,7 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
     const empty = semesters.filter(semester => !catalogue.modules.some(module => module.semester === semester.id));
     semesterChoices.replaceChildren(...semesters.map(semester => choice({
       name: id('semester'), value: semester.id, checked: values.semester === semester.id, disabled: empty.includes(semester),
-      content: [el('strong', {}, semester.id), ' ', el('span', {class: 'choice__detail'}, semester.label.fr)],
+      content: [el('strong', {}, semester.id), ' ', el('span', {class: 'choice__detail'}, semester.label)],
       onPick: value => {
         values.semester = value;
         if (catalogue.modules.find(module => module.id === values.module)?.semester !== value) values.module = '';
@@ -105,7 +105,7 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
       }
     })));
     semesterNote.hidden = empty.length === 0;
-    semesterNote.textContent = empty.length ? `${empty.map(semester => semester.label.fr).join(', ')} : aucun module pour l'instant.` : '';
+    semesterNote.textContent = empty.length ? `${empty.map(semester => semester.label).join(', ')} : aucun module pour l'instant.` : '';
     controls.semester = semesterChoices.querySelector('input:checked') ?? semesterChoices.querySelector('input:not(:disabled)');
   }
 
@@ -119,8 +119,8 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
     moduleChoices.replaceChildren(...rules.modulesInOrder(catalogue).filter(module => module.semester === values.semester).map(module => choice({
       name: id('module'), value: module.id, checked: values.module === module.id, variant: 'module',
       content: [
-        el('bdi', {class: 'module-code'}, module.abbr),
-        el('span', {class: 'choice__name'}, module.title.fr),
+        el('span', {class: 'module-code'}, module.abbr),
+        el('span', {class: 'choice__name'}, module.title),
         el('span', {class: 'choice__detail'}, countLabel(catalogue.resources.filter(item => item.module === module.id).length))
       ],
       onPick: value => { values.module = value; changed(); }
@@ -233,17 +233,14 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
     if (type !== 'cours') parts.push(correctionSwitch());
     if (type !== 'examen') parts.push(yearField(false));
     details.replaceChildren(...parts);
-    titleFrHint.textContent = TITLE_HINTS[type];
+    titleHint.textContent = TITLE_HINTS[type];
   }
 
-  // ----- Step 5: the two titles.
-  const titleFrHint = el('p', {class: 'hint', id: id('title-fr-hint')}, 'Le sujet du document.');
-  const titleFr = el('input', {id: id('title-fr'), type: 'text', maxlength: '150', autocomplete: 'off', value: values.titleFr, 'aria-describedby': id('title-fr-hint')});
-  const titleAr = el('input', {id: id('title-ar'), type: 'text', maxlength: '150', autocomplete: 'off', lang: 'ar', dir: 'rtl', value: values.titleAr, 'aria-describedby': id('title-ar-hint')});
-  titleFr.addEventListener('input', () => { values.titleFr = titleFr.value; update(); });
-  titleAr.addEventListener('input', () => { values.titleAr = titleAr.value; update(); });
-  controls.titleFr = titleFr;
-  controls.titleAr = titleAr;
+  // ----- Step 5: the title.
+  const titleHint = el('p', {class: 'hint', id: id('title-hint')}, 'Le sujet du document.');
+  const titleInput = el('input', {id: id('title'), type: 'text', maxlength: '150', autocomplete: 'off', value: values.title, 'aria-describedby': id('title-hint')});
+  titleInput.addEventListener('input', () => { values.title = titleInput.value; update(); });
+  controls.title = titleInput;
 
   // ----- Step 6: the PDF. A zone to drop the file on, and a button that opens the file chooser.
   const fileInput = el('input', {class: 'visually-hidden', type: 'file', accept: 'application/pdf,.pdf', tabindex: '-1', 'aria-hidden': 'true'});
@@ -335,7 +332,7 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
     const type = values.type;
     const number = type === 'cours' ? values.chapter : values.number;
     const marker = type === 'examen' ? null : t(`marker.${type}`, {n: isWhole(number, type === 'cours' ? 0 : 1) ? Number(number) : '…'});
-    const title = values.titleFr.trim();
+    const title = values.title.trim();
     const facts = [];
     if (type === 'examen') {
       if (values.examKind && values.examKind !== 'rattrapage') facts.push(t(`kind.${values.examKind}`));
@@ -354,7 +351,7 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
         el('div', {class: 'resource__link'},
           marker && el('span', {class: 'resource__marker'}, marker),
           marker && ' ',
-          el('span', {class: 'resource__title'}, title || '(titre en français)')
+          el('span', {class: 'resource__title'}, title || '(titre)')
         ),
         el('span', {class: 'button resource__download', 'aria-hidden': 'true'}, t('action.download')),
         el('ul', {class: 'facts', role: 'list'}, facts.map(fact => el('li', {class: 'fact'}, fact)))
@@ -401,7 +398,7 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
     similarBox.replaceChildren(el('div', {class: 'note note--warn', role: 'status'},
       el('p', {class: 'note__title'}, similar.length > 1 ? 'Des documents semblables existent déjà.' : 'Un document semblable existe déjà.'),
       el('ul', {}, similar.map(item => el('li', {},
-        `${markerOf(item) ?? `Examen ${item.academicYear}`} : « ${item.title.fr} »`,
+        `${markerOf(item) ?? `Examen ${item.academicYear}`} : « ${item.title} »`,
         item.type !== 'examen' && item.academicYear ? `, ${item.academicYear}` : '',
         ' (', el('code', {}, item.id), ')'
       ))),
@@ -425,7 +422,7 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
       semester: values.semester, module: values.module, type: values.type,
       chapter: values.chapter, number: values.number, academicYear: values.academicYear,
       session: values.session, examKind: values.examKind, hasCorrection: values.hasCorrection,
-      title: {fr: values.titleFr, ar: values.titleAr}
+      title: values.title
     };
   }
 
@@ -455,15 +452,14 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
       if (!values.examKind) need("Choisissez la nature de l'examen", controls.kind);
       if (!values.session) need('Choisissez la session', controls.session);
     }
-    if (!values.titleFr.trim()) need('Écrivez le titre en français', titleFr);
-    if (!values.titleAr.trim()) need('Écrivez le titre en arabe', titleAr);
+    if (!values.title.trim()) need('Écrivez le titre', titleInput);
     if (!editing && !values.file) need(fileProblem ? 'Choisissez un autre fichier PDF' : 'Choisissez le fichier PDF', chooseFile);
     if (similar.length > 0 && !values.acknowledged) need('Confirmez que vous voulez publier à côté du document semblable', controls.acknowledge);
     if (list.length > 0) return list;
     // Everything looks filled in: let the save rules have the last word, on the catalogue as last read.
     const dry = rules.planChange(app.snapshot.raw, change());
     for (const error of dry.errors) need(error.replace(/\.$/, ''), null);
-    if (editing && dry.errors.length === 0 && !dry.changed) need("Aucune modification à enregistrer pour l'instant", titleFr);
+    if (editing && dry.errors.length === 0 && !dry.changed) need("Aucune modification à enregistrer pour l'instant", titleInput);
     return list;
   }
 
@@ -529,18 +525,8 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
         step('Type de document', typeChoices)
       ],
     step(editing ? 'Détails' : 'Numéro et détails', details),
-    step('Titres',
-      el('div', {class: 'field field--title'}, el('label', {for: id('title-fr')}, 'Titre en français'), titleFr, titleFrHint),
-      el('div', {class: 'field field--title'},
-        el('label', {for: id('title-ar')}, 'Titre en arabe'),
-        titleAr,
-        // The list of preferred Arabic terms is in docs/content-model.md, which GitHub shows as a page.
-        el('p', {class: 'hint', id: id('title-ar-hint')},
-          el('a', {class: 'action-link', href: `https://github.com/${app.repository}/blob/main/docs/content-model.md#arabic-terminology`, target: '_blank', rel: 'noopener'},
-            'Termes recommandés pour les titres en arabe', el('span', {class: 'visually-hidden'}, ' (nouvel onglet)')
-          )
-        )
-      )
+    step('Titre',
+      el('div', {class: 'field field--title'}, el('label', {for: id('title')}, 'Titre du document'), titleInput, titleHint)
     ),
     // On an edit the current file is named first, then the zone that replaces it.
     editing ? step('Fichier PDF (facultatif)', fileBox, dropzone) : step('Fichier PDF', dropzone, fileBox),
@@ -626,15 +612,14 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
   function another() {
     Object.assign(values, emptyValues(), {semester: values.semester, module: values.module, type: values.type});
     fileProblem = null;
-    titleFr.value = '';
-    titleAr.value = '';
+    titleInput.value = '';
     problemBox.replaceChildren();
     drawDetails();
     drawFile();
     draw();
     donePanel.hidden = true;
     body.hidden = false;
-    (controls.chapter ?? controls.number ?? controls.year ?? titleFr).focus();
+    (controls.chapter ?? controls.number ?? controls.year ?? titleInput).focus();
   }
 
   // Draws what depends on the catalogue: the semesters, the modules and their counts. Called at
@@ -656,11 +641,11 @@ export function createForm(app, {resource = null, onSaved = () => {}, onCancel =
     values.module = module.id;
     remember({semester: values.semester, module: values.module, type: values.type});
     draw();
-    (controls.type ?? titleFr).focus();
+    (controls.type ?? titleInput).focus();
   }
 
   drawDetails();
   drawFile();
   draw();
-  return {node, draw, startIn, focus: () => (editing ? titleFr : controls.semester ?? titleFr).focus()};
+  return {node, draw, startIn, focus: () => (editing ? titleInput : controls.semester ?? titleInput).focus()};
 }

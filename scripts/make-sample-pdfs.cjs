@@ -12,7 +12,7 @@ const typeLabels = {cours: 'Cours', td: 'TD', tp: 'TP', examen: 'Examen'};
 const sessionLabels = {normal: 'Session normale', rattrapage: 'Session de rattrapage'};
 const kindLabels = {emd: 'EMD', final: 'Examen final', rattrapage: 'Rattrapage', controle: 'Contrôle'};
 
-// The built-in PDF fonts cover Latin text only, so the page is written in French.
+// The built-in PDF fonts cover Latin text only.
 const toLatin1 = value => String(value)
   .replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, '-').replace(/œ/g, 'oe')
   .replace(/[^\x20-\x7e\xa0-\xff]/g, '?');
@@ -40,8 +40,8 @@ function describe(resource) {
   if ('hasCorrection' in resource) facts.push(resource.hasCorrection ? 'Avec corrigé' : 'Sans corrigé');
   return {
     heading: `${module.abbr} - ${typeLabels[resource.type]}`,
-    moduleName: module.title.fr,
-    title: resource.title.fr,
+    moduleName: module.title,
+    title: resource.title,
     facts
   };
 }

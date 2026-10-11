@@ -17,7 +17,7 @@ export function markerOf(resource) {
 
 // A document named in full, for a message or a screen reader: "ASD3, TD 3, Parcours des graphes".
 export function nameOf(resource, module) {
-  return [module?.abbr, markerOf(resource) ?? `Examen ${resource.academicYear}`, resource.title.fr].filter(Boolean).join(', ');
+  return [module?.abbr, markerOf(resource) ?? `Examen ${resource.academicYear}`, resource.title].filter(Boolean).join(', ');
 }
 
 // "PDF, 210 ko", as on the module pages.

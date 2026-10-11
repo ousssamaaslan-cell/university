@@ -111,9 +111,8 @@ function checkCatalogue() {
   let samples = 0;
   const slug = value => typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
   const ordered = value => Number.isInteger(value) && value >= 0;
+  // A semester label, a module name and a document title are each one line of French text.
   const text = value => typeof value === 'string' && value.trim().length > 0;
-  const localized = value => value && typeof value === 'object' && !Array.isArray(value) &&
-    Object.keys(value).length === 2 && text(value.fr) && text(value.ar);
   const extraKeys = (item, allowed) => Object.keys(item || {}).filter(key => !allowed.includes(key));
   // Type-specific resource fields, as tabulated in docs/content-model.md.
   const baseFields = ['id', 'level', 'semester', 'module', 'type', 'title', 'pdfPath', 'order'];
@@ -135,13 +134,13 @@ function checkCatalogue() {
     examKind: value => ['emd', 'final', 'rattrapage', 'controle'].includes(value)
   };
   for (const item of data.semesters) {
-    if (!item || !['S3', 'S4'].includes(item.id) || item.level !== 'L2' || !localized(item.label) || !ordered(item.order) || extraKeys(item, ['id', 'level', 'label', 'order']).length) fail('Invalid semester record');
+    if (!item || !['S3', 'S4'].includes(item.id) || item.level !== 'L2' || !text(item.label) || !ordered(item.order) || extraKeys(item, ['id', 'level', 'label', 'order']).length) fail('Invalid semester record');
     if (semIds.has(item?.id)) fail(`Duplicate semester: ${item.id}`);
     semIds.add(item?.id);
   }
   for (const id of ['S3', 'S4']) if (!semIds.has(id)) fail(`Missing semester: ${id}`);
   for (const item of data.modules) {
-    if (!item || !slug(item.id) || item.level !== 'L2' || !semIds.has(item.semester) || !localized(item.title) || !ordered(item.order) || extraKeys(item, ['id', 'level', 'semester', 'abbr', 'title', 'order']).length) fail(`Invalid module: ${item?.id || '<unknown>'}`);
+    if (!item || !slug(item.id) || item.level !== 'L2' || !semIds.has(item.semester) || !text(item.title) || !ordered(item.order) || extraKeys(item, ['id', 'level', 'semester', 'abbr', 'title', 'order']).length) fail(`Invalid module: ${item?.id || '<unknown>'}`);
     if (typeof item?.abbr !== 'string' || !/^[A-Z][A-Z0-9]*$/.test(item.abbr) || item.abbr.toLowerCase() !== item.id) fail(`Module abbr must be capitals and match its lowercase ID: ${item?.id || '<unknown>'}`);
     if (moduleIds.has(item?.id)) fail(`Duplicate module ID: ${item.id}`);
     moduleIds.add(item?.id);
@@ -151,7 +150,7 @@ function checkCatalogue() {
     const label = item?.id || '<unknown>';
     const module = modulesById.get(item?.module);
     const fields = typeFields[item?.type];
-    if (!item || !slug(item.id) || item.level !== 'L2' || !module || module.semester !== item.semester || !localized(item.title) || !fields || !ordered(item.order)) fail(`Invalid resource metadata: ${label}`);
+    if (!item || !slug(item.id) || item.level !== 'L2' || !module || module.semester !== item.semester || !text(item.title) || !fields || !ordered(item.order)) fail(`Invalid resource metadata: ${label}`);
     if (resourceIds.has(item?.id)) fail(`Duplicate resource ID: ${label}`);
     resourceIds.add(item?.id);
     if (fields) {

@@ -48,7 +48,7 @@ function sizeFact() {
 
 function resourceItem(resource, mixed, context) {
   const mark = markerText(resource, mixed);
-  const title = typeset(resource.title.fr);
+  const title = typeset(resource.title);
   const heading = () => [mark && el('span', {class: 'resource__marker'}, mark), mark && ' ', el('span', {class: 'resource__title'}, title)];
 
   // The title is the link that opens the PDF in the browser's own viewer. The number is inside the

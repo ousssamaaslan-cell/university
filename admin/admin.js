@@ -262,7 +262,6 @@ async function openPdf(resource, messages) {
 // What the two tabs are given to work with.
 const app = {
   local: LOCAL,
-  repository: REPOSITORY,
   rules,
   get snapshot() { return state.snapshot; },
   reload,

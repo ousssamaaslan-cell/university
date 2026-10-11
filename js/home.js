@@ -19,7 +19,7 @@ function semesterSection(catalogue, semester) {
   const modules = modulesOf(catalogue, semester.id);
   return el('section', {class: 'section', id: anchor, 'aria-labelledby': `${anchor}-title`},
     el('div', {class: 'section__head'},
-      el('h2', {id: `${anchor}-title`}, typeset(semester.label.fr)),
+      el('h2', {id: `${anchor}-title`}, typeset(semester.label)),
       modules.length > 0 && el('p', {class: 'section__count'}, tCount('count.modules', modules.length))
     ),
     modules.length > 0
